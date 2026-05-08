@@ -104,3 +104,7 @@ ETL-платформа для агрегации и анализа IT-вакан
 - `conf/platforms/` — настройки парсеров для каждой площадки.
 - `conf/secrets/` — API-токены и креды (gitignored, нужно создать самостоятельно).
 
+## Лицензия
+
+Released under the [MIT License](LICENSE).
+
