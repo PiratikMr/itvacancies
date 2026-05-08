@@ -3,12 +3,10 @@ package org.example.habrcareer.config
 import org.example.core.config.loader.FileLoader
 import org.example.core.config.loader.module.{WithCommonFileConfig, WithStandardStructures}
 
-class HabrFileLoader(confPath: String, currDate: String)
+class HabrFileLoader(confPath: String, override val saveFolder: String)
   extends FileLoader(confPath)
     with WithStandardStructures
-    with WithCommonFileConfig
-{
-  override val saveFolder: String = currDate
+    with WithCommonFileConfig {
 
   private lazy val args = rootConfig.getConfig("Arguments")
 

@@ -3,8 +3,17 @@ package org.example.core.config.database
 import java.sql.Timestamp
 
 // --- Dimension Definitions ---
-case object DimCurrencyDef extends DimDef("currency") {
+case object DimCurrencyDef extends DimDef("currency")
+
+object DimCurrencyRateHistoryDef {
+  val currencyId: String = DimCurrencyDef.entityId
+  val updateDate = "update_date"
   val rate = "rate"
+
+  val meta: TableMeta = TableMeta(
+    "dim_currency_rate_history",
+    Seq(currencyId, updateDate)
+  )
 }
 
 case object DimEmployerDef extends DimDef("employer")
