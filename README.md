@@ -11,12 +11,12 @@
 **itvacancies** ежедневно собирает вакансии с шести IT-платформ:
 
 <table>
-<tr><td width="44"><img src="docs/icons/HeadHunter.png" height="28"></td><td><a href="https://hh.ru"><b>hh.ru</b></a></td></tr>
-<tr><td width="44"><img src="docs/icons/GeekJob.png" height="28"></td><td><a href="https://geekjob.ru"><b>GeekJob</b></a></td></tr>
-<tr><td width="44"><img src="docs/icons/GetMatch.png" height="28"></td><td><a href="https://getmatch.ru"><b>GetMatch</b></a></td></tr>
-<tr><td width="44"><img src="docs/icons/Habr_career.png" height="28"></td><td><a href="https://career.habr.com"><b>Habr Career</b></a></td></tr>
-<tr><td width="44"><img src="docs/icons/Finder.png" height="28"></td><td><a href="https://finder.work"><b>Finder</b></a></td></tr>
-<tr><td width="44"><img src="docs/icons/Adzuna.png" height="28"></td><td><a href="https://www.adzuna.com"><b>Adzuna</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/HeadHunter.png" height="38"></td><td><a href="https://hh.ru"><b>hh.ru</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/GeekJob.png" height="38"></td><td><a href="https://geekjob.ru"><b>GeekJob</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/GetMatch.png" height="38"></td><td><a href="https://getmatch.ru"><b>GetMatch</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/Habr_career.png" height="38"></td><td><a href="https://career.habr.com"><b>Habr Career</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/Finder.png" height="38"></td><td><a href="https://finder.work"><b>Finder</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/Adzuna.png" height="38"></td><td><a href="https://www.adzuna.com"><b>Adzuna</b></a></td></tr>
 </table>
 
 Данные со всех источников приводятся к единому виду через алгоритмы нечёткого поиска и языковую модель. Платформа предоставляет интерактивный дашборд для анализа IT-рынка труда: зарплаты, востребованные навыки, тренды по городам и грейдам.
