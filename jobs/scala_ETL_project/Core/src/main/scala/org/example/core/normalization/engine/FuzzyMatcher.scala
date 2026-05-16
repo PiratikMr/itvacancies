@@ -12,7 +12,6 @@ import org.example.core.normalization.engine.similarity.impl.DefaultSimilaritySt
 
 class FuzzyMatcher(
                     spark: SparkSession,
-
                     similarityStrategy: SimilarityStrategy,
                     minScore: Double
                   ) {
@@ -131,141 +130,129 @@ class FuzzyMatcher(
   }
 
   private def selfMatching(candidatesDf: DataFrame): DataFrame = {
-    val rawValue = RAW_VALUE
-    val normValue = NORM_VALUE
-    val normStruct = NORM_STRUCT
-    val parentId = PARENT_ID
-    val entityId = ENTITY_ID
-
-    val aV = s"A_$rawValue"
-    val aN = s"A_$normValue"
-    val aS = s"A_$normStruct"
-    val aPid = s"A_$parentId"
-
-    val bId = s"B_$entityId"
-    val bN = s"B_$normValue"
-    val bS = s"B_$normStruct"
-    val bPid = s"B_$parentId"
-
     val uniqueNorms = candidatesDf
       .select(NORM_VALUE, NORM_STRUCT, PARENT_ID)
       .distinct()
       .localCheckpoint()
 
+    val normPairs   = buildNormPairs(uniqueNorms)
+    val entityPairs = expandToEntityPairs(normPairs, candidatesDf).localCheckpoint()
+    val ranked      = rankByAuthority(entityPairs).localCheckpoint()
+    filterAndFinalRank(ranked)
+  }
+
+  private def buildNormPairs(uniqueNorms: DataFrame): DataFrame = {
     val uA = uniqueNorms.select(
-      col(NORM_VALUE).as(aN),
-      col(NORM_STRUCT).as(aS),
-      col(PARENT_ID).as("A_pid")
+      col(NORM_VALUE).as(A_NORM),
+      col(NORM_STRUCT).as(A_STRUCT),
+      col(PARENT_ID).as(A_PID)
     )
-
     val uB = uniqueNorms.select(
-      col(NORM_VALUE).as(bN),
-      col(NORM_STRUCT).as(bS),
-      col(PARENT_ID).as("B_pid")
+      col(NORM_VALUE).as(B_NORM),
+      col(NORM_STRUCT).as(B_STRUCT),
+      col(PARENT_ID).as(B_PID)
     )
 
-    val lenA = length(col(aN))
-    val lenB = length(col(bN))
-    val lengthFilter = abs(lenA - lenB) <= (greatest(lenA, lenB) * lit(0.5))
+    val lenA = length(col(A_NORM))
+    val lenB = length(col(B_NORM))
 
     val halfPairs = uA
       .join(uB,
-        col("A_pid") === col("B_pid") &&
-          col(aN) < col(bN) &&
-          lengthFilter &&
-          arrays_overlap($"$aS.ngrams", $"$bS.ngrams")
+        col(A_PID) === col(B_PID) &&
+          col(A_NORM) < col(B_NORM) &&
+          abs(lenA - lenB) <= greatest(lenA, lenB) * lit(0.5) &&
+          arrays_overlap($"$A_STRUCT.ngrams", $"$B_STRUCT.ngrams")
       )
-      .withColumn("score", similarityStrategy.calculateScore(col(aS), col(bS)))
+      .withColumn("score", similarityStrategy.calculateScore(col(A_STRUCT), col(B_STRUCT)))
       .filter($"score" >= minScore)
-      .select(col(aN), col(bN), $"A_pid".as(aPid), $"score")
+      .select(col(A_NORM), col(B_NORM), col(A_PID), $"score")
 
     val flippedPairs = halfPairs.select(
-      col(bN).as(aN),
-      col(aN).as(bN),
-      col(aPid),
+      col(B_NORM).as(A_NORM),
+      col(A_NORM).as(B_NORM),
+      col(A_PID),
       $"score"
     )
 
     val selfPairs = uniqueNorms.select(
-      col(NORM_VALUE).as(aN),
-      col(NORM_VALUE).as(bN),
-      col(PARENT_ID).as(aPid),
+      col(NORM_VALUE).as(A_NORM),
+      col(NORM_VALUE).as(B_NORM),
+      col(PARENT_ID).as(A_PID),
       lit(1.0).as("score")
     )
 
-    val allUniquePairs = halfPairs
-      .unionByName(flippedPairs)
-      .unionByName(selfPairs)
-      .cache()
+    halfPairs.unionByName(flippedPairs).unionByName(selfPairs).cache()
+  }
 
+  private def expandToEntityPairs(normPairs: DataFrame, candidatesDf: DataFrame): DataFrame = {
     val A = candidatesDf.select(
-      col(RAW_VALUE).as(aV),
+      col(RAW_VALUE).as(A_RAW),
       col(NORM_VALUE).as("u_aN"),
       col(PARENT_ID).as("u_aPid")
     )
     val B = candidatesDf.select(
-      col(ENTITY_ID).as(bId),
+      col(ENTITY_ID).as(B_ID),
       col(NORM_VALUE).as("u_bN"),
       col(PARENT_ID).as("u_bPid")
     )
 
-    val pairs = allUniquePairs
-      .join(A, col(aN) === col("u_aN") && col(aPid) === col("u_aPid"))
-      .join(B, col(bN) === col("u_bN") && col(aPid) === col("u_bPid"))
+    normPairs
+      .join(A, col(A_NORM) === col("u_aN") && col(A_PID) === col("u_aPid"))
+      .join(B, col(B_NORM) === col("u_bN") && col(A_PID) === col("u_bPid"))
       .select(
-        col(aV), col(aN), col(aPid),
-        col(bId), col(bN), col("u_bPid").as(bPid),
+        col(A_RAW), col(A_NORM), col(A_PID),
+        col(B_ID), col(B_NORM), col("u_bPid").as(B_PID),
         col("score")
       )
-      .localCheckpoint()
+  }
 
+  private def rankByAuthority(pairs: DataFrame): DataFrame = {
     val authority = pairs
-      .dropDuplicates(aN, bN)
-      .groupBy(col(aN).as("auth_norm"), col(aPid).as("auth_parent"))
+      .dropDuplicates(A_NORM, B_NORM)
+      .groupBy(col(A_NORM).as("auth_norm"), col(A_PID).as("auth_parent"))
       .agg(sum("score").as("auth_score"))
 
-    val rankedCandidates = pairs
-      .join(
-        authority,
-        col(aN) === col("auth_norm") &&
-          col(aPid) === col("auth_parent")
+    pairs
+      .join(authority,
+        col(A_NORM) === col("auth_norm") &&
+          col(A_PID) === col("auth_parent")
       )
       .withColumn("rank1",
         row_number().over(
-          partitionBy(bN, aPid)
-            .orderBy(col("auth_score").desc, length(col(aV)).asc, col(aN).asc)
+          partitionBy(B_NORM, A_PID)
+            .orderBy(col("auth_score").desc, length(col(A_RAW)).asc, col(A_NORM).asc)
         )
       )
-      .localCheckpoint()
+  }
 
+  private def filterAndFinalRank(rankedCandidates: DataFrame): DataFrame = {
     val activeHubs = rankedCandidates
       .filter(col("rank1") === 1)
-      .filter(col(aN) =!= col(bN))
-      .select(col(aN).as("hub"), col(aPid).as("hub_pid"))
+      .filter(col(A_NORM) =!= col(B_NORM))
+      .select(col(A_NORM).as("hub"), col(A_PID).as("hub_pid"))
       .distinct()
 
     rankedCandidates
-      .join(
-        activeHubs,
-        col("hub") === col(bN) &&
-          col(aN) =!= col(bN) &&
-          col(aPid) === col("hub_pid"),
+      .join(activeHubs,
+        col("hub") === col(B_NORM) &&
+          col(A_NORM) =!= col(B_NORM) &&
+          col(A_PID) === col("hub_pid"),
         "left_anti"
       )
       .withColumn("rank2",
         row_number().over(
-          partitionBy(bId, bN, aPid)
+          partitionBy(B_ID, B_NORM, A_PID)
             .orderBy(col("rank1").asc)
         )
       )
       .filter(col("rank2") === 1)
-      .withColumn(IS_CANONICAL, col(aN) === col(bN))
+      .withColumn(IS_CANONICAL, col(A_NORM) === col(B_NORM))
       .select(
-        col(aV).as(RAW_VALUE),
-        col(bN).as(NORM_VALUE),
+        col(A_RAW).as(RAW_VALUE),
+        col(B_NORM).as(NORM_VALUE),
         col(IS_CANONICAL),
-        col(bId).as(ENTITY_ID),
-        col(aPid).as(PARENT_ID)
+        col(B_ID).as(ENTITY_ID),
+        col(A_PID).as(PARENT_ID)
       ).distinct()
   }
 
@@ -281,6 +268,16 @@ class FuzzyMatcher(
 
 object FuzzyMatcher {
   private val NORM_STRUCT = "normStruct"
+
+  import org.example.core.normalization.engine.model.FuzzyColumns._
+  private val A_RAW    = s"A_$RAW_VALUE"
+  private val A_NORM   = s"A_$NORM_VALUE"
+  private val A_STRUCT = s"A_$NORM_STRUCT"
+  private val A_PID    = s"A_$PARENT_ID"
+  private val B_ID     = s"B_$ENTITY_ID"
+  private val B_NORM   = s"B_$NORM_VALUE"
+  private val B_STRUCT = s"B_$NORM_STRUCT"
+  private val B_PID    = s"B_$PARENT_ID"
 
   def apply(spark: SparkSession, settings: FuzzyMatchSettings): FuzzyMatcher = {
     new FuzzyMatcher(spark, new DefaultSimilarityStrategy(settings), settings.minScoreThreshold)

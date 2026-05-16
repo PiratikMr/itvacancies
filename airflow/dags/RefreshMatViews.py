@@ -13,7 +13,7 @@ schemas = [
 @dag(
     dag_id="Refresh_Materialized_views",
     default_args=DEFAULT_ARGS,
-    tags=["python, postgresql"],
+    tags=["python", "postgresql"],
     schedule=dag_schedule or None,
     catchup=False
 )

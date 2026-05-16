@@ -120,11 +120,12 @@ lazy val Adzuna = (project in file(s"${platformFolder}Adzuna"))
 
 addCommandAlias("buildAllPlatforms",
   "; clean" +
-    "; Currency/assembly" +
-    "; Finder/assembly" +
-    "; GeekJob/assembly" +
-    "; GetMatch/assembly" +
-    "; HeadHunter/assembly" +
-    "; HabrCareer/assembly" +
-    "; Adzuna/assembly"
+    "; all" +
+    " Currency/assembly" +
+    " Finder/assembly" +
+    " GeekJob/assembly" +
+    " GetMatch/assembly" +
+    " HeadHunter/assembly" +
+    " HabrCareer/assembly" +
+    " Adzuna/assembly"
 )

@@ -1,8 +1,9 @@
 from config_ETL import DEFAULT_ARGS, Platform
 from utils import build_spark_etl_task, get_config, parse_args
 from airflow.decorators import dag
+from airflow.models.baseoperator import chain
 
-config = Platform("currency", "Currency", u=False, module_path="Currency")
+config = Platform("currency", "Currency", with_update=False, module_path="Currency")
 
 confTree = get_config(config.fileName)
 
@@ -21,7 +22,6 @@ def create_dag():
         for part in config.parts
     ]
 
-    for i in range(len(tasks) - 1):
-        tasks[i] >> tasks[i + 1]
+    chain(*tasks)
 
 create_dag()
