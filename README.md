@@ -2,11 +2,7 @@
 
 Агрегатор IT-вакансий с автоматическим сбором, NLP-нормализацией и интерактивным дашбордом.
 
-<p align="center">
-  <a href="https://docs.docker.com/compose/"><img src="https://img.shields.io/badge/Docker-Compose-blue?logo=docker" alt="Docker" style="vertical-align: middle"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT" style="vertical-align: middle"></a>
-  &nbsp;🌐 <strong>Live:</strong> <a href="https://itvacancies.tech">itvacancies.tech</a>
-</p>
+<p align="center">🌐 <strong>Live:</strong> <a href="https://itvacancies.tech">itvacancies.tech</a></p>
 
 ---
 
@@ -15,12 +11,12 @@
 **itvacancies** ежедневно собирает вакансии с шести IT-платформ:
 
 <table>
-<tr><td width="30"><img src="docs/icons/HeadHunter.png" height="20"></td><td><a href="https://hh.ru"><b>hh.ru</b></a></td></tr>
-<tr><td width="30"><img src="docs/icons/GeekJob.png" height="20"></td><td><a href="https://geekjob.ru"><b>GeekJob</b></a></td></tr>
-<tr><td width="30"><img src="docs/icons/GetMatch.png" height="20"></td><td><a href="https://getmatch.ru"><b>GetMatch</b></a></td></tr>
-<tr><td width="30"><img src="docs/icons/Habr_career.png" height="20"></td><td><a href="https://career.habr.com"><b>Habr Career</b></a></td></tr>
-<tr><td width="30"><img src="docs/icons/Finder.png" height="20"></td><td><a href="https://finder.work"><b>Finder</b></a></td></tr>
-<tr><td width="30"><img src="docs/icons/Adzuna.png" height="20"></td><td><a href="https://www.adzuna.com"><b>Adzuna</b></a></td></tr>
+<tr><td width="44"><img src="docs/icons/HeadHunter.png" height="28"></td><td><a href="https://hh.ru"><b>hh.ru</b></a></td></tr>
+<tr><td width="44"><img src="docs/icons/GeekJob.png" height="28"></td><td><a href="https://geekjob.ru"><b>GeekJob</b></a></td></tr>
+<tr><td width="44"><img src="docs/icons/GetMatch.png" height="28"></td><td><a href="https://getmatch.ru"><b>GetMatch</b></a></td></tr>
+<tr><td width="44"><img src="docs/icons/Habr_career.png" height="28"></td><td><a href="https://career.habr.com"><b>Habr Career</b></a></td></tr>
+<tr><td width="44"><img src="docs/icons/Finder.png" height="28"></td><td><a href="https://finder.work"><b>Finder</b></a></td></tr>
+<tr><td width="44"><img src="docs/icons/Adzuna.png" height="28"></td><td><a href="https://www.adzuna.com"><b>Adzuna</b></a></td></tr>
 </table>
 
 Данные со всех источников приводятся к единому виду через алгоритмы нечёткого поиска и языковую модель. Платформа предоставляет интерактивный дашборд для анализа IT-рынка труда: зарплаты, востребованные навыки, тренды по городам и грейдам.
