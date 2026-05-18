@@ -5,12 +5,11 @@ import org.example.core.config.loader.module.{WithCommonFileConfig, WithStandard
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class HHFileLoader(confPath: String, currDate: String)
+class HHFileLoader(confPath: String, override val saveFolder: String)
   extends FileLoader(confPath)
     with WithStandardStructures
     with WithCommonFileConfig
 {
-  override val saveFolder: String = currDate
 
   private val args = rootConfig.getConfig("Arguments")
 

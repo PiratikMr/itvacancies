@@ -1,4 +1,5 @@
 import pendulum
+from dataclasses import dataclass
 from pathlib import Path
 from pyhocon import ConfigFactory
 
@@ -13,35 +14,51 @@ DEFAULT_ARGS = {
     'email_on_failure': True
 }
 
+
+@dataclass
+class ArgDef:
+    name: str
+    value: str
+    is_static: bool = False
+
+
 class Platform:
-    def __init__(self, 
+    def __init__(self,
                  fileName: str,
                  name: str,
-                 args: list[tuple[str, str, bool]] = None,
-                 u: bool = True,
-                 module_path: str = None
+                 args: list[ArgDef] = None,
+                 with_update: bool = True,
+                 module_path: str = None,
+                 batch_extra_args: list[list[str]] = None,
+                 inter_batch_wait_secs: int = 0
                  ):
-        
+
         if args is None:
             args = []
-            
+
         self.fileName = f"{CONFIG_DIR_PATH}/platforms/{fileName}.conf"
         self.name = name
         self.moduleName = module_path if module_path else f"platforms/{name}"
-        
+
         self.args = [
-            ("savefolder", "Dags.ETL.fileName", False),
-            ("conffile", self.fileName, True)
-        ] + args 
-        
-        self.parts = ["update"] if u else []
+            ArgDef("savefolder", "Dags.ETL.fileName"),
+            ArgDef("conffile", self.fileName, is_static=True),
+        ] + args
+
+        self.parts = ["update"] if with_update else []
         self.parts.extend(["extract", "transform-load"])
-        
+
+        self.batch_extra_args = batch_extra_args
+        self.inter_batch_wait_secs = inter_batch_wait_secs
+
 
 PLATFORMS = [
     Platform("fn", "Finder"),
     Platform("gm", "GetMatch"),
     Platform("gj", "GeekJob"),
     Platform("hc", "HabrCareer"),
-    Platform("hh", "HeadHunter", args=[("datefrom", "Dags.ETL.dateFrom", False)])
+    Platform("hh", "HeadHunter", args=[ArgDef("datefrom", "Dags.ETL.dateFrom")]),
+    Platform("az", "Adzuna", with_update=False,
+             batch_extra_args=[["--locidx", "0"], ["--locidx", "1"], ["--locidx", "2"]],
+             inter_batch_wait_secs=45),
 ]

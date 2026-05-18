@@ -1,25 +1,138 @@
 # itvacancies
 
-ETL-платформа для агрегации и анализа IT-вакансий с шести площадок: Airflow + Spark + PostgreSQL + Superset + NLP-матчер.
+Агрегатор IT-вакансий с автоматическим сбором, NLP-нормализацией и интерактивным дашбордом.
 
-🌐 **Live:** [itvacancies.tech](https://itvacancies.tech/)
+<p align="center">🌐 <strong>Live:</strong> <a href="https://itvacancies.tech">itvacancies.tech</a></p>
 
 ---
 
-## Что это
+## Что это такое
 
-`itvacancies` ежедневно собирает вакансии из шести IT-площадок (HeadHunter, GeekJob, GetMatch, Habr Career, Finder, Adzuna), нормализует и дедуплицирует данные через NLP-матчер, складывает в PostgreSQL DWH со star-схемой и отдаёт интерактивные дашборды в Apache Superset.
+**itvacancies** ежедневно собирает вакансии с шести IT-платформ:
 
-Цель — дать соискателям и аналитикам актуальную картину рынка IT-труда: зарплаты по специализациям, востребованные навыки, тренды по городам и грейдам.
+<table>
+<tr><td width="56"><img src="docs/icons/HeadHunter.png" height="38"></td><td><a href="https://hh.ru"><b>hh.ru</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/GeekJob.png" height="38"></td><td><a href="https://geekjob.ru"><b>GeekJob</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/GetMatch.png" height="38"></td><td><a href="https://getmatch.ru"><b>GetMatch</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/Habr_career.png" height="38"></td><td><a href="https://career.habr.com"><b>Habr Career</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/Finder.png" height="38"></td><td><a href="https://finder.work"><b>Finder</b></a></td></tr>
+<tr><td width="56"><img src="docs/icons/Adzuna.png" height="38"></td><td><a href="https://www.adzuna.com"><b>Adzuna</b></a></td></tr>
+</table>
 
-## Возможности
+Данные со всех источников приводятся к единому виду через алгоритмы нечёткого поиска и языковую модель. Платформа предоставляет интерактивный дашборд для анализа IT-рынка труда: зарплаты, востребованные навыки, тренды по городам и грейдам.
 
-- Ежедневный сбор вакансий по расписанию через **Apache Airflow**.
-- 6 источников: hh.ru, geekjob.ru, getmatch.ru, career.habr.com, finder.work, adzuna.com.
-- Сырые данные складываются в **HDFS** в формате Parquet, обработанные — в **PostgreSQL DWH** (star-схема: dim/fact/bridge таблицы + materialized views).
-- **NLP-матчер** для нормализации справочников (skills, employers, locations, fields и т.д.) — гибрид fuzzy-matching (rapidfuzz) и семантического поиска (sentence-transformers). Доступен как HTTP API.
-- Дашборды в **Apache Superset** для аналитики, **Grafana + Prometheus** для мониторинга инфраструктуры.
-- Production-развёртывание с **nginx** в роли reverse-proxy и SSL-терминации.
+---
+
+## Скриншоты
+
+![Superset](docs/screenshots/main_dashboard_2026_05_16.png)
+
+---
+
+## Быстрый старт
+
+**Нужно:** Docker + Docker Compose, минимум **4–6 GB** свободной RAM.
+
+```bash
+# 1. Клонировать
+git clone https://github.com/PiratikMr/itvacancies.git
+cd itvacancies
+
+# 2. Запустить
+docker compose up -d
+```
+
+Первый запуск займёт 5–10 минут: загрузятся образы, инициализируются базы данных. Superset и NLP будут готовы раньше остальных.
+
+> **Данные появятся на следующий день** — Airflow запускает сбор по расписанию. Чтобы запустить сбор вручную, откройте Airflow UI и активируйте нужный DAG.
+
+---
+
+## Основные сервисы
+
+### Superset — аналитика
+
+**http://localhost:16088** · логин: `admin` · пароль: `admin`
+
+Интерактивные графики с зарплатами, навыками и трендами рынка IT-вакансий.
+
+### NLP API — нормализация и семантический поиск
+
+**http://localhost:15000**
+
+Веб-интерфейс и HTTP API для поиска похожих навыков и должностей.
+
+---
+
+## Дополнительные сервисы
+
+| Сервис | URL | Описание |
+|---|---|---|
+| Airflow | http://localhost:11080 | Управление DAG-пайплайнами, ручной запуск сбора |
+| Grafana | http://localhost:16000 | Мониторинг инфраструктуры (Airflow, Spark, Postgres) |
+| Spark Master | http://localhost:12080 | UI кластера Spark |
+| HDFS NameNode | http://localhost:13870 | UI Hadoop — сырые данные в Parquet |
+| Prometheus | http://localhost:15090 | Метрики всех сервисов |
+| PostgreSQL | localhost:14432 | Прямое подключение к DWH |
+
+Для Airflow и Grafana логин/пароль по умолчанию: `airflow` / `airflow` и `admin` / `admin` соответственно.
+
+---
+
+## Конфигурация
+
+По умолчанию проект запускается с тестовыми значениями и без `.env` файлов. Если нужно изменить пароли или настройки — скопируйте `.env.example` и отредактируйте:
+
+```bash
+cp docker-compose/postgres/.env.example       docker-compose/postgres/.env
+cp docker-compose/airflow/.env.example        docker-compose/airflow/.env
+cp docker-compose/nlp/.env.example            docker-compose/nlp/.env
+cp docker-compose/visualisation/.env.example  docker-compose/visualisation/.env
+```
+
+### API-ключи площадок (`conf/secrets/`)
+
+Ключи хранятся в HOCON-файлах. Без них парсеры hh.ru и Adzuna не запустятся, остальные источники работают без авторизации.
+
+```bash
+# HeadHunter (OAuth-токен — https://dev.hh.ru/)
+cp conf/secrets/local_hh.conf.example conf/secrets/local_hh.conf
+
+# Adzuna (https://developer.adzuna.com/)
+cp conf/secrets/local_az.conf.example conf/secrets/local_az.conf
+
+# Курсы валют (https://exchangerate.host/, бесплатный план)
+cp conf/secrets/local_exchangerate.conf.example conf/secrets/local_exchangerate.conf
+```
+
+Дополнительно — email для Airflow-уведомлений и ресурсы Spark:
+
+```bash
+cp conf/secrets/local_airflow.conf.example        conf/secrets/local_airflow.conf
+cp conf/secrets/local_spark.conf.example          conf/secrets/local_spark.conf
+cp conf/secrets/local_infrastructure.conf.example conf/secrets/local_infrastructure.conf
+```
+
+Внутри каждого `.example`-файла есть комментарии с объяснением что и зачем.
+
+---
+
+## Production-развёртывание
+
+Для публичного деплоя с nginx + SSL нужно:
+
+1. SSL-сертификаты положить в `docker-compose/nginx/ssl/`
+2. Настроить `.env` для nginx:
+   ```bash
+   cp docker-compose/nginx/.env.example docker-compose/nginx/.env
+   # Указать DOMAIN и поддомены
+   ```
+3. Запустить с production-конфигом:
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+   ```
+
+---
 
 ## Технологический стек
 
@@ -35,76 +148,8 @@ ETL-платформа для агрегации и анализа IT-вакан
 | Reverse-proxy (prod) | nginx |
 | Контейнеризация | Docker Compose |
 
-## Quick start
-
-**Требования:** Docker, Docker Compose, ~10–12 GB свободной RAM. Для production-режима — SSL-сертификаты в `docker-compose/nginx/ssl/`.
-
-1. Клонировать репо:
-   ```bash
-   git clone git@github.com:PiratikMr/itvacancies.git
-   cd itvacancies
-   ```
-
-2. Создать `.env` файлы для каждого сервиса (см. раздел [Конфигурация](#конфигурация)):
-   ```
-   docker-compose/postgres/.env
-   docker-compose/airflow/.env
-   docker-compose/nlp/.env
-   docker-compose/visualisation/.env
-   docker-compose/nginx/.env       # только для prod
-   ```
-
-3. Положить API-ключи и креды площадок в `conf/secrets/` (HOCON-формат):
-   ```
-   conf/secrets/local_hh.conf            # OAuth-токен hh.ru
-   conf/secrets/local_az.conf            # API-ключ Adzuna
-   conf/secrets/local_exchangerate.conf  # API-ключ exchangerate.host
-   conf/secrets/local_airflow.conf       # SMTP для алертов
-   ```
-
-4. Поднять dev-стек (без nginx):
-   ```bash
-   docker-compose up -d
-   ```
-
-   Или production-стек (с nginx + SSL):
-   ```bash
-   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-   ```
-
-После запуска (dev-режим, всё проброшено только на `127.0.0.1`):
-
-| Сервис | URL |
-|---|---|
-| Airflow UI | http://localhost:11080 |
-| Superset | http://localhost:16088 |
-| Grafana | http://localhost:16000 |
-| NLP-матчер | http://localhost:15000 |
-| Spark Master UI | http://localhost:12080 |
-| HDFS NameNode | http://localhost:13870 |
-| Prometheus | http://localhost:15090 |
-| PostgreSQL | localhost:14432 |
-
-## Конфигурация
-
-### `.env` файлы
-
-Шаблонов в репозитории нет — нужно создать вручную. Минимально необходимые переменные по сервисам:
-
-- **`docker-compose/postgres/.env`** — `PG_USER`, `PG_PASS`, `PG_DB`
-- **`docker-compose/airflow/.env`** — `AIRFLOW_UID`, `AIRFLOW__CORE__FERNET_KEY`, `AIRFLOW__WEBSERVER__SECRET_KEY`, `AIRFLOW_CONN_POSTGRES_CONN`, `AIRFLOW_CONN_SPARK_CONN`, SMTP-креды, `_AIRFLOW_WWW_USER_USERNAME` / `_AIRFLOW_WWW_USER_PASSWORD`
-- **`docker-compose/nlp/.env`** — `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `WEB_HOST`, `WEB_PORT`
-- **`docker-compose/visualisation/.env`** — креды Postgres для Superset, `SUPERSET_ADMIN_*`, `GF_SECURITY_ADMIN_*`, `MAPBOX_API_KEY`
-- **`docker-compose/nginx/.env`** *(prod)* — `DOMAIN`, поддомены сервисов, апстримы
-
-### HOCON-конфиги в `conf/`
-
-- `conf/base/` — общие настройки ETL (Spark, сеть, нормализация, инфраструктура).
-- `conf/dags/` — параметры расписаний Airflow.
-- `conf/platforms/` — настройки парсеров для каждой площадки.
-- `conf/secrets/` — API-токены и креды (gitignored, нужно создать самостоятельно).
+---
 
 ## Лицензия
 
 Released under the [MIT License](LICENSE).
-
