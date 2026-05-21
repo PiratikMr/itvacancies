@@ -7,6 +7,7 @@ import org.example.core.config.model.structures.NetworkConf
 import sttp.client4.{SyncBackend, basicRequest}
 import sttp.model.Uri
 
+import java.util.concurrent.{Callable, Executors, TimeUnit, TimeoutException}
 import scala.concurrent.duration.{Duration, MILLISECONDS}
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
@@ -18,6 +19,9 @@ class STTPAdapter(
                  ) extends WebAdapter with LazyLogging {
 
   @transient private lazy val backend: SyncBackend = backendProvider()
+
+  @transient private lazy val httpPool = Executors.newCachedThreadPool()
+
 
   override def execute(url: String): Either[WebError, WebResponse] = {
     logger.info(s"Выполнение HTTP GET запроса к URL: $url")
@@ -34,7 +38,19 @@ class STTPAdapter(
         .get(uri)
         .readTimeout(Duration(conf.timeout, MILLISECONDS))
 
-      Try(request.send(backend)) match {
+      val callable: Callable[sttp.client4.Response[Either[String, String]]] =
+        () => request.send(backend)
+      val future = httpPool.submit(callable)
+
+      val triedResponse = Try(future.get(conf.timeout.toLong + 3000, TimeUnit.MILLISECONDS))
+        .recoverWith {
+          case _: TimeoutException =>
+            future.cancel(true)
+            logger.error(s"HTTP таймаут (${conf.timeout + 3000}ms) при запросе к $url")
+            Failure(new Exception(s"HTTP request timed out after ${conf.timeout + 3000}ms"))
+        }
+
+      triedResponse match {
         case Success(response) =>
           val bodyString = response.body match {
             case Right(b) => b
@@ -87,6 +103,11 @@ class STTPAdapter(
       backend.close()
     } catch {
       case NonFatal(e) => logger.error("Ошибка при закрытии STTP backend", e)
+    }
+    try {
+      httpPool.shutdownNow()
+    } catch {
+      case NonFatal(e) => logger.error("Ошибка при закрытии HTTP thread pool", e)
     }
   }
 }
