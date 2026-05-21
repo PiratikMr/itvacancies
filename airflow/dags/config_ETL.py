@@ -60,5 +60,5 @@ PLATFORMS = [
     Platform("hh", "HeadHunter", args=[ArgDef("datefrom", "Dags.ETL.dateFrom")]),
     Platform("az", "Adzuna", with_update=False,
              batch_extra_args=[["--locidx", "0"], ["--locidx", "1"], ["--locidx", "2"]],
-             inter_batch_wait_secs=45),
+             inter_batch_wait_secs=120),
 ]

@@ -7,7 +7,7 @@ import org.example.core.config.model.structures.NetworkConf
 import sttp.client4.{SyncBackend, basicRequest}
 import sttp.model.Uri
 
-import java.util.concurrent.{Callable, Executors, TimeUnit, TimeoutException}
+import java.util.concurrent.{Callable, ExecutionException, Executors, TimeUnit, TimeoutException}
 import scala.concurrent.duration.{Duration, MILLISECONDS}
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
@@ -48,6 +48,8 @@ class STTPAdapter(
             future.cancel(true)
             logger.error(s"HTTP таймаут (${conf.timeout + 3000}ms) при запросе к $url")
             Failure(new Exception(s"HTTP request timed out after ${conf.timeout + 3000}ms"))
+          case e: ExecutionException if e.getCause != null =>
+            Failure(e.getCause)
         }
 
       triedResponse match {
