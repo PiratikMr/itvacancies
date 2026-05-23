@@ -17,4 +17,4 @@ USER airflow
 RUN echo "SESSION_COOKIE_NAME = 'airflow-session'" >> $AIRFLOW_HOME/webserver_config.py
 
 COPY ./requirements.txt /
-RUN pip install -r /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt

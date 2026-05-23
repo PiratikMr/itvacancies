@@ -2,6 +2,8 @@ from config_ETL import DAGS_CONFIG_PATH, DEFAULT_ARGS
 from airflow.decorators import dag, task, task_group
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from utils import get_config
+from clickhouse_sync import sync_mv_core_vacancy, write_refresh_log
+from datetime import datetime, timezone
 
 config = get_config(DAGS_CONFIG_PATH)
 dag_schedule = config.get('Dags.RefreshMatViews.schedule')
@@ -38,11 +40,14 @@ def create_dag():
         ]
         status = 'failure' if failed else 'success'
         error = '; '.join(f"{ti.task_id}: {ti.state}" for ti in failed) if failed else None
+        finished_at = datetime.now(timezone.utc).replace(tzinfo=None)
         pg_hook = PostgresHook(postgres_conn_id="POSTGRES_CONN")
         pg_hook.run(
-            "UPDATE meta.refresh_log SET finished_at = now(), status = %s, error = %s WHERE id = %s",
-            parameters=(status, error, log_id)
+            "UPDATE meta.refresh_log SET finished_at = %s, status = %s, error = %s WHERE id = %s",
+            parameters=(finished_at, status, error, log_id)
         )
+        if status == 'success':
+            write_refresh_log(finished_at)
 
     @task
     def get_matviews_list(schema: str):
@@ -59,15 +64,16 @@ def create_dag():
         sql = f'REFRESH MATERIALIZED VIEW {schema}.{mv_name}; ANALYZE {schema}.{mv_name};'
         pg_hook.run(sql)
 
+    @task
+    def sync_to_clickhouse():
+        sync_mv_core_vacancy()
+
     log_id = start_refresh_log()
 
-    refresh_core = refresh_matview.override(task_id="refresh_internal_core_vacancy")(
-        mv_name="mv_core_vacancy",
-        schema="internal"
-    )
+    sync_ch = sync_to_clickhouse()
 
-    log_id >> refresh_core
-    prev = refresh_core
+    log_id >> sync_ch
+    prev = sync_ch
 
     for schema in schemas:
 

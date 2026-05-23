@@ -5,6 +5,7 @@ include:
   - path: ./docker-compose/prometheus/prometheus.yml
   - path: ./docker-compose/visualisation/visualisation.yml
   - path: ./docker-compose/postgres/postgres.yml
+  - path: ./docker-compose/clickhouse/clickhouse.yml
   - path: ./docker-compose/nlp/nlp.yml
 
 networks:

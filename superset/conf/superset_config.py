@@ -47,8 +47,8 @@ FEATURE_FLAGS = {
 }
 
 
-from macros import get_filtered_vacancies
+from macros_ch import get_ch_vacancy_filters
 
 JINJA_CONTEXT_ADDONS = {
-    'get_filtered_vacancies': get_filtered_vacancies
+    'get_ch_vacancy_filters':  get_ch_vacancy_filters,
 }
