@@ -18,25 +18,11 @@ def _sql_array(values):
 
 @pass_context
 def get_ch_vacancy_filters(context):
-    """
-    Собирает дополнения к WHERE из дашбордных фильтров Superset для
-    таблицы analytics.vacancies в ClickHouse.
-
-    Возвращает строку, начинающуюся с ' AND ...' — её можно дописать
-    после уже существующих условий:
-
-        SELECT ...
-        FROM analytics.vacancies
-        WHERE 1=1 {{ get_ch_vacancy_filters() }}
-
-    Если фильтров нет — возвращает пустую строку.
-    """
     get_filter_values = context.get('filter_values')
     get_filters       = context.get('get_filters')
 
     conditions = []
 
-    # Диапазон публикации (стандартный time-фильтр Superset)
     published_from = context.get('from_dttm')
     published_to   = context.get('to_dttm')
     if published_from:
@@ -44,14 +30,14 @@ def get_ch_vacancy_filters(context):
     if published_to:
         conditions.append(f"published_at <= {_quote(published_to)}")
 
-    # has_range (UInt8: 0/1)
+
     has_range_vals = get_filter_values('has_range')
     if has_range_vals:
         v = str(has_range_vals[0]).lower()
         if v in ('true', 'false'):
             conditions.append(f"has_range = {1 if v == 'true' else 0}")
 
-    # Диапазон salary через стандартные операторы Superset (>=, <=)
+
     for f in get_filters('salary') or []:
         try:
             val = int(float(f.get('val')))
@@ -63,7 +49,7 @@ def get_ch_vacancy_filters(context):
         elif op == '<=':
             conditions.append(f"salary <= {val}")
 
-    # Скалярные фильтры → column IN (...)
+
     scalar_mappings = {
         'filter_platform':   'platform',
         'filter_employer':   'employer',
@@ -75,7 +61,7 @@ def get_ch_vacancy_filters(context):
         if vals:
             conditions.append(f"{column} IN ({_sql_in_list(vals)})")
 
-    # Простые массивные фильтры → hasAny(column, [...])
+
     array_mappings = {
         'filter_skill':      'skills',
         'filter_schedule':   'schedules',
@@ -88,7 +74,7 @@ def get_ch_vacancy_filters(context):
         if vals:
             conditions.append(f"hasAny({column}, {_sql_array(vals)})")
 
-    # Tuple-массивные фильтры: locations и languages хранят пары
+
     #   locations: Array(Tuple(location, country))
     #   languages: Array(Tuple(language, level))
     tuple_mappings = {

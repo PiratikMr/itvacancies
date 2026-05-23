@@ -1,21 +1,28 @@
 #!/bin/bash
+set -euo pipefail
+
+: "${SUPERSET_ADMIN_USERNAME:?SUPERSET_ADMIN_USERNAME must be set}"
+: "${SUPERSET_ADMIN_FIRSTNAME:?SUPERSET_ADMIN_FIRSTNAME must be set}"
+: "${SUPERSET_ADMIN_LASTNAME:?SUPERSET_ADMIN_LASTNAME must be set}"
+: "${SUPERSET_ADMIN_EMAIL:?SUPERSET_ADMIN_EMAIL must be set}"
+: "${SUPERSET_ADMIN_PASSWORD:?SUPERSET_ADMIN_PASSWORD must be set}"
 
 MARKER_FILE="/app/superset_data/.superset_initialized"
 ZIP_PATH="/superset-mount/dashboards/*.zip"
 
 if [ ! -f "$MARKER_FILE" ]; then
     superset fab create-admin \
-                --username "${SUPERSET_ADMIN_USERNAME:-admin}" \
-                --firstname "${SUPERSET_ADMIN_FIRSTNAME:-Admin}" \
-                --lastname "${SUPERSET_ADMIN_LASTNAME:-User}" \
-                --email "${SUPERSET_ADMIN_EMAIL:-admin@superset.local}" \
-                --password "${SUPERSET_ADMIN_PASSWORD:-admin}"
+                --username "$SUPERSET_ADMIN_USERNAME" \
+                --firstname "$SUPERSET_ADMIN_FIRSTNAME" \
+                --lastname "$SUPERSET_ADMIN_LASTNAME" \
+                --email "$SUPERSET_ADMIN_EMAIL" \
+                --password "$SUPERSET_ADMIN_PASSWORD"
     superset db upgrade
     superset init
-    
+
     if ls $ZIP_PATH 1> /dev/null 2>&1; then
         for dash in $ZIP_PATH; do
-            superset import-dashboards -p $dash -u "${SUPERSET_ADMIN_USERNAME:-admin}";
+            superset import-dashboards -p $dash -u "$SUPERSET_ADMIN_USERNAME";
         done
     fi
 

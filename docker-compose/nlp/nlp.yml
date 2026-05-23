@@ -1,11 +1,17 @@
 services:
   nlp:
     build: ../../NLP
-    container_name: nlp
-    env_file:
-      - .env
+    container_name: ${HOST_NLP}
     ports:
-      - "127.0.0.1:15000:5000"
+      - "127.0.0.1:${PORT_NLP}:5000"
+    environment:
+      DB_HOST: ${HOST_APP_POSTGRES}
+      DB_PORT: "5432"
+      DB_USER: ${PG_USER}
+      DB_PASS: ${PG_PASS}
+      DB_NAME: ${PG_DB}
+      WEB_HOST: 0.0.0.0
+      WEB_PORT: "5000"
     volumes:
       - ../../NLP/thresholds.json:/app/thresholds.json
       - nlp-hf-cache:/cache/huggingface

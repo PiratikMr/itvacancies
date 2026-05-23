@@ -1,9 +1,8 @@
 from airflow.hooks.base import BaseHook
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-CH_DATABASE = "analytics"
-CH_TABLE    = "vacancies"
-PG_SOURCE   = "internal.mv_core_vacancy"
+CH_TABLE  = "vacancies"
+PG_SOURCE = "internal.mv_core_vacancy"
 
 COLUMNS = [
     'vacancy_id', 'platform', 'employer', 'currency', 'experience',
@@ -22,10 +21,10 @@ def _ch_client():
     conn = BaseHook.get_connection("CLICKHOUSE_CONN")
     return clickhouse_connect.get_client(
         host=conn.host,
-        port=conn.port or 18123,
-        username=conn.login or 'default',
-        password=conn.password or '',
-        database=CH_DATABASE,
+        port=conn.port,
+        username=conn.login,
+        password=conn.password,
+        database=conn.schema,
     )
 
 
@@ -34,7 +33,7 @@ def sync_mv_core_vacancy():
     rows = pg_hook.get_records(f"SELECT * FROM {PG_SOURCE}")
 
     client = _ch_client()
-    client.command(f"TRUNCATE TABLE {CH_DATABASE}.{CH_TABLE}")
+    client.command(f"TRUNCATE TABLE {CH_TABLE}")
 
     if not rows:
         return

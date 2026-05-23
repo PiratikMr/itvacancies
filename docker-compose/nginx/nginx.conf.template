@@ -84,7 +84,7 @@ http {
 
     server {
         listen 443 ssl;
-        server_name ${SUPERSET_ADMIN_SUBDOMAIN}.${DOMAIN};
+        server_name ${SUPERSET_SUBDOMAIN}.${DOMAIN};
 
         include /etc/nginx/snippets/ssl-params.conf;
         include /etc/nginx/snippets/security-headers.conf;

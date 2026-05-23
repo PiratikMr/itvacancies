@@ -9,9 +9,9 @@ x-hadoop-common: &hadoop-common
 services:
   namenode:
     <<: *hadoop-common
-    container_name: namenode
+    container_name: ${HOST_NAMENODE}
     ports:
-      - "127.0.0.1:13870:9870"
+      - "127.0.0.1:${PORT_NAMENODE}:9870"
     environment:
       <<: *hadoop-common-env
       JMX_PORT: 8001

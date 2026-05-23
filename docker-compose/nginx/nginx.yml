@@ -3,16 +3,24 @@ services:
     image: nginx:1.27-alpine
     container_name: nginx
     entrypoint: ["/bin/sh", "/etc/nginx/entrypoint.sh"]
-    env_file:
-      - .env
     ports:
-      - "80:80"
-      - "443:443"
+      - "${PORT_HTTP}:80"
+      - "${PORT_HTTPS}:443"
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
       - ./snippets:/etc/nginx/templates/snippets:ro
       - ./entrypoint.sh:/etc/nginx/entrypoint.sh:ro
       - ./ssl:/etc/nginx/ssl:ro
+    environment:
+      DOMAIN: ${DOMAIN}
+      SUPERSET_SUBDOMAIN: ${SUPERSET_SUBDOMAIN}
+      AIRFLOW_SUBDOMAIN: ${AIRFLOW_SUBDOMAIN}
+      GRAFANA_SUBDOMAIN: ${GRAFANA_SUBDOMAIN}
+      SUPERSET_DASHBOARD_PATH: ${SUPERSET_DASHBOARD_PATH}
+      
+      SUPERSET_UPSTREAM: ${HOST_SUPERSET}:8088
+      AIRFLOW_UPSTREAM: ${HOST_AIRFLOW_WEBSERVER}:8080
+      GRAFANA_UPSTREAM: ${HOST_GRAFANA}:3000
     restart: unless-stopped
     networks:
       - data_platform_net

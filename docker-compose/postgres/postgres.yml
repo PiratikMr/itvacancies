@@ -1,17 +1,17 @@
 services:
   app-postgres:
     image: postgres:17
-    container_name: app-postgres
+    container_name: ${HOST_APP_POSTGRES}
     ports:
-      - "127.0.0.1:14432:5432"
+      - "127.0.0.1:${PORT_APP_POSTGRES}:5432"
     volumes:
       - app-postgres-db-volume:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${PG_USER:-postgres}
-      POSTGRES_PASSWORD: ${PG_PASS:-1234}
-      POSTGRES_DB: ${PG_DB:-vacstorage}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_DB: ${PG_DB}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${PG_USER:-postgres}", "-d", "${PG_DB:-vacstorage}"]
+      test: ["CMD", "pg_isready", "-U", "${PG_USER}", "-d", "${PG_DB}"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -24,9 +24,9 @@ services:
     container_name: flyway
     command: -connectRetries=10 migrate
     environment:
-      FLYWAY_URL: jdbc:postgresql://app-postgres:5432/${PG_DB:-vacstorage}
-      FLYWAY_USER: ${PG_USER:-postgres}
-      FLYWAY_PASSWORD: ${PG_PASS:-1234}
+      FLYWAY_URL: jdbc:postgresql://${HOST_APP_POSTGRES}:5432/${PG_DB}
+      FLYWAY_USER: ${PG_USER}
+      FLYWAY_PASSWORD: ${PG_PASS}
     volumes:
       - ../../dataBase/DWH:/flyway/sql
     restart: on-failure
@@ -40,7 +40,7 @@ services:
     image: prometheuscommunity/postgres-exporter:v0.15.0
     container_name: postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://${PG_USER:-postgres}:${PG_PASS:-1234}@app-postgres:5432/${PG_DB:-vacstorage}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${PG_USER}:${PG_PASS}@${HOST_APP_POSTGRES}:5432/${PG_DB}?sslmode=disable"
     restart: unless-stopped
     networks:
       - data_platform_net

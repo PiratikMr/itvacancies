@@ -108,7 +108,7 @@ vacancy_languages as (
 
 select
     f.vacancy_id,
-    p.platfor                                            as platform,
+    p.platform                                           as platform,
     coalesce(e.employer, '')                             as employer,
     coalesce(c.currency, '')                             as currency,
     coalesce(exp.experience, 'Не указано')               as experience,
