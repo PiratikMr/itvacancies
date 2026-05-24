@@ -37,10 +37,13 @@ class GeekJobExtractor(apiBaseUrl: String,
       webAdapter.readBodyOrNone(GeekJobExtractor.vacURL(_apiBaseUrl, id)) match {
         case Some(body) =>
           val start: Int = body.indexOf("""<article class="row vacancy">""")
-          val bodyEnd: String = "</article>"
-          val end: Int = body.indexOf(bodyEnd, start) + bodyEnd.length
-
-          Some(id + body.substring(start, end).replace("\n", ""))
+          if (start == -1) None
+          else {
+            val bodyEnd: String = "</article>"
+            val endIdx: Int = body.indexOf(bodyEnd, start)
+            if (endIdx == -1) None
+            else Some(id + body.substring(start, endIdx + bodyEnd.length).replace("\n", ""))
+          }
         case None => None
       }
     })).repartition(rawPartitions)
