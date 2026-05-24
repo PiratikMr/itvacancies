@@ -7,6 +7,7 @@ set -euo pipefail
 : "${SUPERSET_ADMIN_EMAIL:?SUPERSET_ADMIN_EMAIL must be set}"
 : "${SUPERSET_ADMIN_PASSWORD:?SUPERSET_ADMIN_PASSWORD must be set}"
 
+
 MARKER_FILE="/app/superset_data/.superset_initialized"
 ZIP_PATH="/superset-mount/dashboards/*.zip"
 
@@ -22,11 +23,14 @@ if [ ! -f "$MARKER_FILE" ]; then
 
     if ls $ZIP_PATH 1> /dev/null 2>&1; then
         for dash in $ZIP_PATH; do
-            superset import-dashboards -p $dash -u "$SUPERSET_ADMIN_USERNAME";
+            python3 /superset-mount/conf/import_dashboard.py "$dash"
         done
     fi
 
+    python3 /superset-mount/conf/setup_roles.py
+
     touch "$MARKER_FILE"
 fi
+
 
 /usr/bin/run-server.sh

@@ -17,6 +17,12 @@ services:
       SUPERSET_ADMIN_FIRSTNAME: ${SUPERSET_ADMIN_FIRSTNAME}
       SUPERSET_ADMIN_LASTNAME: ${SUPERSET_ADMIN_LASTNAME}
       SUPERSET_ADMIN_EMAIL: admin@${DOMAIN}
+
+      CH_USER: ${CH_USER}
+      CH_PASS: ${CH_PASS}
+      CH_DB: ${CH_DB}
+      HOST_CLICKHOUSE: ${HOST_CLICKHOUSE}
+      
     command: ["/bin/bash", "/superset-mount/conf/start-superset.sh"]
     restart: unless-stopped
     networks:

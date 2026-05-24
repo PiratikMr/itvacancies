@@ -2,17 +2,14 @@ from jinja2 import pass_context
 
 
 def _quote(value):
-    """Экранирует одинарные кавычки для SQL-литерала ClickHouse."""
     return "'" + str(value).replace("'", "''") + "'"
 
 
 def _sql_in_list(values):
-    """[a, b, c] -> "'a', 'b', 'c'" — для IN (...) по скалярной колонке."""
     return ", ".join(_quote(v) for v in values)
 
 
 def _sql_array(values):
-    """[a, b, c] -> "['a', 'b', 'c']" — литерал массива ClickHouse для hasAny()."""
     return "[" + ", ".join(_quote(v) for v in values) + "]"
 
 
