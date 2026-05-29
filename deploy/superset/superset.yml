@@ -6,7 +6,7 @@ services:
       - "127.0.0.1:${PORT_SUPERSET}:8088"
     volumes:
       - superset-volume:/app/superset_data
-      - ../superset:/superset-mount
+      - .:/superset-mount
     environment:
       SUPERSET_CONFIG_PATH: /superset-mount/conf/superset_config.py
       SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
@@ -22,7 +22,7 @@ services:
       CH_PASS: ${CH_PASS}
       CH_DB: ${CH_DB}
       HOST_CLICKHOUSE: ${HOST_CLICKHOUSE}
-      
+
     command: ["/bin/bash", "/superset-mount/conf/start-superset.sh"]
     restart: unless-stopped
     networks:
@@ -59,29 +59,6 @@ services:
     networks:
       - data_platform_net
 
-  grafana:
-    image: grafana/grafana-enterprise:11.6.1
-    container_name: ${HOST_GRAFANA}
-    ports:
-      - "127.0.0.1:${PORT_GRAFANA}:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
-      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
-      GF_SERVER_ROOT_URL: https://${GRAFANA_SUBDOMAIN}.${DOMAIN}
-      GF_SERVER_DOMAIN: ${GRAFANA_SUBDOMAIN}.${DOMAIN}
-      GF_SECURITY_CSRF_TRUSTED_ORIGINS: ${GRAFANA_SUBDOMAIN}.${DOMAIN}
-    volumes:
-      - ../grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
-      - ../grafana/dashboards-json:/var/lib/grafana/dashboards
-      - grafana-volume:/var/lib/grafana
-    restart: unless-stopped
-    networks:
-      - data_platform_net
-    depends_on:
-      - prometheus
-
 volumes:
   superset-volume:
   superset-postgres-volume:
-  grafana-volume:

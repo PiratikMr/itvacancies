@@ -25,7 +25,7 @@
 
 ## Скриншоты
 
-![Superset](docs/screenshots/main_dashboard_2026_05_16.png)
+![Superset](docs/screenshots/main_dashboard.png)
 
 ---
 
@@ -38,7 +38,10 @@
 git clone https://github.com/PiratikMr/itvacancies.git
 cd itvacancies
 
-# 2. Запустить
+# 2. Создать .env из примера (тестовые значения уже заполнены)
+cp .env.example .env
+
+# 3. Запустить
 docker compose up -d
 ```
 
@@ -73,7 +76,8 @@ docker compose up -d
 | Spark Master | http://localhost:12080 | UI кластера Spark |
 | HDFS NameNode | http://localhost:13870 | UI Hadoop — сырые данные в Parquet |
 | Prometheus | http://localhost:15090 | Метрики всех сервисов |
-| PostgreSQL | localhost:14432 | Прямое подключение к DWH |
+| PostgreSQL | localhost:14432 | Основное хранилище данных (DWH) |
+| ClickHouse | localhost:18123 (HTTP) · localhost:19000 (TCP) | Аналитический слой, на котором работает Superset |
 
 Для Airflow и Grafana логин/пароль по умолчанию: `airflow` / `airflow` и `admin` / `admin` соответственно.
 
@@ -81,18 +85,17 @@ docker compose up -d
 
 ## Конфигурация
 
-По умолчанию проект запускается с тестовыми значениями и без `.env` файлов. Если нужно изменить пароли или настройки — скопируйте `.env.example` и отредактируйте:
+Вся инфраструктурная конфигурация (хосты контейнеров, порты, логины/пароли баз данных, ключи Airflow и Superset) собрана в **едином `.env`-файле** в корне проекта. Скопируйте пример и при необходимости отредактируйте значения:
 
 ```bash
-cp deploy/postgres/.env.example       deploy/postgres/.env
-cp deploy/airflow/.env.example        deploy/airflow/.env
-cp deploy/nlp/.env.example            deploy/nlp/.env
-cp deploy/visualisation/.env.example  deploy/visualisation/.env
+cp .env.example .env
 ```
+
+`.env.example` уже заполнен рабочими значениями — для локального запуска менять ничего не нужно.
 
 ### API-ключи площадок (`conf/secrets/`)
 
-Ключи хранятся в HOCON-файлах. Без них парсеры hh.ru и Adzuna не запустятся, остальные источники работают без авторизации.
+Ключи площадок и SMTP для уведомлений хранятся отдельно — в HOCON-файлах в `conf/secrets/`. Без них парсеры hh.ru и Adzuna не запустятся, остальные источники работают без авторизации.
 
 ```bash
 # HeadHunter (OAuth-токен — https://dev.hh.ru/)
@@ -103,34 +106,12 @@ cp conf/secrets/local_az.conf.example conf/secrets/local_az.conf
 
 # Курсы валют (https://exchangerate.host/, бесплатный план)
 cp conf/secrets/local_exchangerate.conf.example conf/secrets/local_exchangerate.conf
-```
 
-Дополнительно — email для Airflow-уведомлений и ресурсы Spark:
-
-```bash
-cp conf/secrets/local_airflow.conf.example        conf/secrets/local_airflow.conf
-cp conf/secrets/local_spark.conf.example          conf/secrets/local_spark.conf
-cp conf/secrets/local_infrastructure.conf.example conf/secrets/local_infrastructure.conf
+# Email для Airflow-уведомлений о падениях DAG
+cp conf/secrets/local_airflow.conf.example conf/secrets/local_airflow.conf
 ```
 
 Внутри каждого `.example`-файла есть комментарии с объяснением что и зачем.
-
----
-
-## Production-развёртывание
-
-Для публичного деплоя с nginx + SSL нужно:
-
-1. SSL-сертификаты положить в `deploy/nginx/ssl/`
-2. Настроить `.env` для nginx:
-   ```bash
-   cp deploy/nginx/.env.example deploy/nginx/.env
-   # Указать DOMAIN и поддомены
-   ```
-3. Запустить с production-конфигом:
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-   ```
 
 ---
 
@@ -141,11 +122,11 @@ cp conf/secrets/local_infrastructure.conf.example conf/secrets/local_infrastruct
 | Оркестрация | Apache Airflow 2.10 |
 | ETL | Apache Spark 3.5 + Scala 2.12 |
 | Сырое хранилище | Hadoop HDFS 3.3 |
-| DWH | PostgreSQL 17 |
+| Хранилище данных (DWH) | PostgreSQL 17 |
+| Аналитический слой | ClickHouse |
 | NLP-матчер | Python 3.11 + Flask + sentence-transformers + rapidfuzz |
-| Аналитика | Apache Superset |
+| Аналитика | Apache Superset (поверх ClickHouse) |
 | Мониторинг | Grafana 11 + Prometheus |
-| Reverse-proxy (prod) | nginx |
 | Контейнеризация | Docker Compose |
 
 ---

@@ -1,0 +1,25 @@
+services:
+  grafana:
+    image: grafana/grafana-enterprise:11.6.1
+    container_name: ${HOST_GRAFANA}
+    ports:
+      - "127.0.0.1:${PORT_GRAFANA}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+      GF_SERVER_ROOT_URL: https://${GRAFANA_SUBDOMAIN}.${DOMAIN}
+      GF_SERVER_DOMAIN: ${GRAFANA_SUBDOMAIN}.${DOMAIN}
+      GF_SECURITY_CSRF_TRUSTED_ORIGINS: ${GRAFANA_SUBDOMAIN}.${DOMAIN}
+    volumes:
+      - ./provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./dashboards-json:/var/lib/grafana/dashboards
+      - grafana-volume:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - data_platform_net
+    depends_on:
+      - prometheus
+
+volumes:
+  grafana-volume:
