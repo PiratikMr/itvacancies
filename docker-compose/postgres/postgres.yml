@@ -27,8 +27,9 @@ services:
       FLYWAY_URL: jdbc:postgresql://${HOST_APP_POSTGRES}:5432/${PG_DB}
       FLYWAY_USER: ${PG_USER}
       FLYWAY_PASSWORD: ${PG_PASS}
+      FLYWAY_LOCATIONS: filesystem:/flyway/migrations
     volumes:
-      - ../../dataBase/DWH:/flyway/sql
+      - ../../dataBase/DWH:/flyway/migrations
     restart: on-failure
     networks:
       - data_platform_net

@@ -19,6 +19,7 @@ with calculated_salary as (
             else false
         end as has_range
     from fact_vacancy as f
+    join dim_currency dc on f.currency_id = dc.currency_id and dc.is_reference = true
     join lateral (
         select rate
         from dim_currency_rate_history
@@ -89,7 +90,7 @@ vacancy_employments as (
         array_agg(distinct d.employment) as employments
     from bridge_vacancy_employment b
     join dim_employment d on b.employment_id = d.employment_id
-    -- where d.is_reference = true
+    where d.is_reference = true
     group by b.vacancy_id
 ),
 vacancy_languages as (
@@ -145,5 +146,5 @@ left join vacancy_employments v_emp on f.vacancy_id = v_emp.vacancy_id
 left join vacancy_languages v_lng on f.vacancy_id = v_lng.vacancy_id
 where (p.platform_id is null or p.is_reference = true)
 --  and (e.employer_id is null or e.is_reference = true)
---  and (c.currency_id is null or c.is_reference = true)
+  and (c.currency_id is null or c.is_reference = true)
   and (exp.experience_id is null or exp.is_reference = true);

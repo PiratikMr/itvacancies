@@ -1,8 +1,6 @@
 import os
 import sys
 
-os.environ.setdefault('SUPERSET_CONFIG_PATH')
-
 from superset.app import create_app
 
 STATIC_PERMS = [

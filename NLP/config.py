@@ -35,12 +35,19 @@ NOISE_PREFIXES = [
 ]
 
 DIMENSIONS = {
-    "skill":    {"label": "Навыки",       "relation_type": "bridge"},
-    "employer": {"label": "Работодатели", "relation_type": "fact"},
-    "schedule": {"label": "График",       "relation_type": "bridge"},
-    "location": {"label": "Локации",      "relation_type": "bridge"},
-    "platform": {"label": "Площадки",     "relation_type": "fact"},
-    "field":    {"label": "Специальности","relation_type": "bridge"},
+    "skill":           {"label": "Навыки",            "relation_type": "bridge"},
+    "employer":        {"label": "Работодатели",      "relation_type": "fact"},
+    "schedule":        {"label": "График",            "relation_type": "bridge"},
+    "location":        {"label": "Локации",           "relation_type": "bridge"},
+    "platform":        {"label": "Площадки",          "relation_type": "fact"},
+    "field":           {"label": "Специальности",     "relation_type": "bridge"},
+    "currency":        {"label": "Валюты",            "relation_type": "fact"},
+    "employment":      {"label": "Занятость",         "relation_type": "bridge"},
+    "experience":      {"label": "Опыт работы",       "relation_type": "fact"},
+    "grade":           {"label": "Грейды",            "relation_type": "bridge"},
+    "language":        {"label": "Языки",             "relation_type": "language_bridge"},
+    "language_level":  {"label": "Уровень языка",     "relation_type": "language_level_bridge"},
+    "country":         {"label": "Страны",            "relation_type": "country_dim"},
 }
 
 THRESHOLDS_PATH = Path(__file__).parent / "thresholds.json"

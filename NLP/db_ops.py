@@ -74,6 +74,38 @@ def apply_normalization_batch(dimension_name: str, relation_type: str, merges: l
                     SET {id_col} = :g_id
                     WHERE {id_col} = :c_id
                 """), {"g_id": golden_id, "c_id": candidate_id})
+
+            elif relation_type == "language_bridge":
+                conn.execute(text("""
+                    INSERT INTO bridge_vacancy_language (vacancy_id, language_id, language_level_id)
+                    SELECT vacancy_id, :g_id, language_level_id
+                    FROM bridge_vacancy_language
+                    WHERE language_id = :c_id
+                    ON CONFLICT (vacancy_id, language_id, language_level_id) DO NOTHING
+                """), {"g_id": golden_id, "c_id": candidate_id})
+
+                conn.execute(text("""
+                    DELETE FROM bridge_vacancy_language WHERE language_id = :c_id
+                """), {"c_id": candidate_id})
+
+            elif relation_type == "language_level_bridge":
+                conn.execute(text("""
+                    INSERT INTO bridge_vacancy_language (vacancy_id, language_id, language_level_id)
+                    SELECT vacancy_id, language_id, :g_id
+                    FROM bridge_vacancy_language
+                    WHERE language_level_id = :c_id
+                    ON CONFLICT (vacancy_id, language_id, language_level_id) DO NOTHING
+                """), {"g_id": golden_id, "c_id": candidate_id})
+
+                conn.execute(text("""
+                    DELETE FROM bridge_vacancy_language WHERE language_level_id = :c_id
+                """), {"c_id": candidate_id})
+
+            elif relation_type == "country_dim":
+                conn.execute(text("""
+                    UPDATE dim_location SET country_id = :g_id WHERE country_id = :c_id
+                """), {"g_id": golden_id, "c_id": candidate_id})
+
             else:
                 raise ValueError(f"Неизвестный relation_type: {relation_type}")
 
