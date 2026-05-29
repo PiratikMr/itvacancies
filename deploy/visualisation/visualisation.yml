@@ -6,7 +6,7 @@ services:
       - "127.0.0.1:${PORT_SUPERSET}:8088"
     volumes:
       - superset-volume:/app/superset_data
-      - ../../superset:/superset-mount
+      - ../superset:/superset-mount
     environment:
       SUPERSET_CONFIG_PATH: /superset-mount/conf/superset_config.py
       SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
@@ -71,9 +71,9 @@ services:
       GF_SERVER_DOMAIN: ${GRAFANA_SUBDOMAIN}.${DOMAIN}
       GF_SECURITY_CSRF_TRUSTED_ORIGINS: ${GRAFANA_SUBDOMAIN}.${DOMAIN}
     volumes:
-      - ../../grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ../../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
-      - ../../grafana/dashboards-json:/var/lib/grafana/dashboards
+      - ../grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ../grafana/dashboards-json:/var/lib/grafana/dashboards
       - grafana-volume:/var/lib/grafana
     restart: unless-stopped
     networks:

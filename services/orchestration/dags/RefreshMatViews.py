@@ -1,5 +1,5 @@
 from config_ETL import DAGS_CONFIG_PATH, DEFAULT_ARGS
-from airflow.decorators import dag, task, task_group
+from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from utils import get_config
 from clickhouse_sync import sync_mv_core_vacancy, write_refresh_log
@@ -7,10 +7,6 @@ from datetime import datetime, timezone
 
 config = get_config(DAGS_CONFIG_PATH)
 dag_schedule = config.get('Dags.RefreshMatViews.schedule')
-
-schemas = [
-    "marts"
-]
 
 @dag(
     dag_id="Refresh_Materialized_views",
@@ -50,21 +46,6 @@ def create_dag():
             write_refresh_log(finished_at)
 
     @task
-    def get_matviews_list(schema: str):
-        pg_hook = PostgresHook(postgres_conn_id="POSTGRES_CONN")
-        sql = "SELECT matviewname FROM pg_matviews WHERE schemaname = %s"
-
-        records = pg_hook.get_records(sql, parameters=(schema,))
-        mv_list = [row[0] for row in records]
-        return mv_list
-
-    @task
-    def refresh_matview(mv_name: str, schema: str):
-        pg_hook = PostgresHook(postgres_conn_id="POSTGRES_CONN")
-        sql = f'REFRESH MATERIALIZED VIEW {schema}.{mv_name}; ANALYZE {schema}.{mv_name};'
-        pg_hook.run(sql)
-
-    @task
     def sync_to_clickhouse():
         sync_mv_core_vacancy()
 
@@ -72,21 +53,6 @@ def create_dag():
 
     sync_ch = sync_to_clickhouse()
 
-    log_id >> sync_ch
-    prev = sync_ch
-
-    for schema in schemas:
-
-        @task_group(group_id=f"{schema}")
-        def refresh_schema(schema: str):
-            mv_list = get_matviews_list(schema)
-            refresh_matview.partial(schema=schema).expand(mv_name=mv_list)
-
-        curr = refresh_schema(schema)
-        if prev:
-            prev >> curr
-        prev = curr
-
-    prev >> finish_refresh_log(log_id)
+    log_id >> sync_ch >> finish_refresh_log(log_id)
 
 create_dag()

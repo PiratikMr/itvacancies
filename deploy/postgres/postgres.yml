@@ -29,7 +29,7 @@ services:
       FLYWAY_PASSWORD: ${PG_PASS}
       FLYWAY_LOCATIONS: filesystem:/flyway/migrations
     volumes:
-      - ../../dataBase/DWH:/flyway/migrations
+      - ../../db/postgres:/flyway/migrations
     restart: on-failure
     networks:
       - data_platform_net

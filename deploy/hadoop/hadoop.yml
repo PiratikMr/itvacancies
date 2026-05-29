@@ -18,8 +18,8 @@ services:
       JMX_FILE_NAME: namenode
     volumes:
       - hadoop-namenode-volume:/opt/hadoop/data/nameNode
-      - ../hadoop/hadoop-config:/opt/hadoop/etc/hadoop
-      - ../hadoop/other:/hadoop-conf
+      - ./hadoop-config:/opt/hadoop/etc/hadoop
+      - ./other:/hadoop-conf
     command: ["/bin/bash", "/hadoop-conf/init-scripts/start-hdfs.sh"]
     networks:
       - data_platform_net
@@ -34,8 +34,8 @@ services:
       JMX_FILE_NAME: datanode
     volumes:
       - hadoop-datanode1-volume:/opt/hadoop/data/dataNode
-      - ../hadoop/hadoop-config:/opt/hadoop/etc/hadoop
-      - ../hadoop/other:/hadoop-conf
+      - ./hadoop-config:/opt/hadoop/etc/hadoop
+      - ./other:/hadoop-conf
     command: ["/bin/bash", "/hadoop-conf/init-scripts/init-datanode.sh"]
     networks:
       - data_platform_net

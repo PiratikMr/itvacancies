@@ -1,6 +1,6 @@
 services:
   nlp:
-    build: ../../NLP
+    build: ../../services/nlp
     container_name: ${HOST_NLP}
     ports:
       - "127.0.0.1:${PORT_NLP}:5000"
@@ -13,7 +13,7 @@ services:
       WEB_HOST: 0.0.0.0
       WEB_PORT: "5000"
     volumes:
-      - ../../NLP/thresholds.json:/app/thresholds.json
+      - ../../services/nlp/thresholds.json:/app/thresholds.json
       - nlp-hf-cache:/cache/huggingface
     restart: unless-stopped
     networks:

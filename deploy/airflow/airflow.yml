@@ -45,8 +45,8 @@ x-airflow-common:
     PG_PASS: ${PG_PASS}
     PG_DB: ${PG_DB}
   volumes:
-    - ../../airflow/dags:/opt/airflow/dags
-    - ../../jobs/scala_ETL_project:/opt/airflow/scalaProject
+    - ../../services/orchestration/dags:/opt/airflow/dags
+    - ../../services/etl:/opt/airflow/scalaProject
     - airflow-volume:/opt/airflow/logs
     - ../../conf:/opt/airflow/conf
   user: "${AIRFLOW_UID}:0"
@@ -115,7 +115,7 @@ services:
       _PIP_ADDITIONAL_REQUIREMENTS: ""
     user: "0:0"
     volumes:
-      - ../../airflow:/sources
+      - ../../services/orchestration:/sources
 
   airflow-cli:
     <<: *airflow-common

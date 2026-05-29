@@ -4,7 +4,7 @@ on:
   push:
     branches: ["master", "develop"]
     paths:
-      - 'jobs/scala_ETL_project/**'
+      - 'services/etl/**'
       - '.github/workflows/scala-ci.yml'
     
 jobs:
@@ -13,7 +13,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./jobs/scala_ETL_project
+        working-directory: ./services/etl
 
     steps:
     - name: Checkout code
@@ -25,7 +25,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: 'sbt'
-        cache-dependency-path: ./jobs/scala_ETL_project/build.sbt
+        cache-dependency-path: ./services/etl/build.sbt
 
     - name: Install sbt
       uses: sbt/setup-sbt@v1

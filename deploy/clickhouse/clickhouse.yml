@@ -6,7 +6,7 @@ services:
       - "127.0.0.1:${PORT_CLICKHOUSE_HTTP}:8123"
       - "127.0.0.1:${PORT_CLICKHOUSE_TCP}:9000"
     volumes:
-      - ./init:/docker-entrypoint-initdb.d
+      - ../../db/clickhouse:/docker-entrypoint-initdb.d
     environment:
       CLICKHOUSE_DB: ${CH_DB}
       CLICKHOUSE_USER: ${CH_USER}

@@ -84,10 +84,10 @@ docker compose up -d
 По умолчанию проект запускается с тестовыми значениями и без `.env` файлов. Если нужно изменить пароли или настройки — скопируйте `.env.example` и отредактируйте:
 
 ```bash
-cp docker-compose/postgres/.env.example       docker-compose/postgres/.env
-cp docker-compose/airflow/.env.example        docker-compose/airflow/.env
-cp docker-compose/nlp/.env.example            docker-compose/nlp/.env
-cp docker-compose/visualisation/.env.example  docker-compose/visualisation/.env
+cp deploy/postgres/.env.example       deploy/postgres/.env
+cp deploy/airflow/.env.example        deploy/airflow/.env
+cp deploy/nlp/.env.example            deploy/nlp/.env
+cp deploy/visualisation/.env.example  deploy/visualisation/.env
 ```
 
 ### API-ключи площадок (`conf/secrets/`)
@@ -121,10 +121,10 @@ cp conf/secrets/local_infrastructure.conf.example conf/secrets/local_infrastruct
 
 Для публичного деплоя с nginx + SSL нужно:
 
-1. SSL-сертификаты положить в `docker-compose/nginx/ssl/`
+1. SSL-сертификаты положить в `deploy/nginx/ssl/`
 2. Настроить `.env` для nginx:
    ```bash
-   cp docker-compose/nginx/.env.example docker-compose/nginx/.env
+   cp deploy/nginx/.env.example deploy/nginx/.env
    # Указать DOMAIN и поддомены
    ```
 3. Запустить с production-конфигом:
