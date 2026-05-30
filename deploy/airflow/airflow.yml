@@ -1,0 +1,163 @@
+x-airflow-common:
+  &airflow-common
+  build: .
+  environment:
+    &airflow-common-env
+    
+    # Core
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "True"
+
+    # Webserver
+    AIRFLOW__WEBSERVER__BASE_URL: https://${AIRFLOW_SUBDOMAIN}.${DOMAIN}
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+    AIRFLOW__WEBSERVER__WORKERS: "1"
+
+    # Connections
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_PG_USER}:${AIRFLOW_PG_PASS}@${HOST_AIRFLOW_POSTGRES}/${AIRFLOW_PG_DB}
+    AIRFLOW_CONN_SPARK_CONN: spark://${HOST_SPARK_MASTER}:7077
+    AIRFLOW_CONN_POSTGRES_CONN: postgres://${PG_USER}:${PG_PASS}@${HOST_APP_POSTGRES}/${PG_DB}
+    AIRFLOW_CONN_CLICKHOUSE_CONN: http://${CH_USER}:${CH_PASS}@${HOST_CLICKHOUSE}:8123/${CH_DB}
+    AIRFLOW_VAR_SPARK_SUBMIT: ""
+
+    # Metrics
+    AIRFLOW__METRICS__STATSD_ON: "True"
+    AIRFLOW__METRICS__STATSD_HOST: ${HOST_STATSD}
+    AIRFLOW__METRICS__STATSD_PORT: "9125"
+    AIRFLOW__METRICS__STATSD_PREFIX: airflow
+
+    # SMTP
+    AIRFLOW__SMTP__SMTP_HOST: ${AIRFLOW__SMTP__SMTP_HOST}
+    AIRFLOW__SMTP__SMTP_STARTTLS: ${AIRFLOW__SMTP__SMTP_STARTTLS}
+    AIRFLOW__SMTP__SMTP_SSL: ${AIRFLOW__SMTP__SMTP_SSL}
+    AIRFLOW__SMTP__SMTP_USER: ${AIRFLOW__SMTP__SMTP_USER}
+    AIRFLOW__SMTP__SMTP_PASSWORD: ${AIRFLOW__SMTP__SMTP_PASSWORD}
+    AIRFLOW__SMTP__SMTP_PORT: ${AIRFLOW__SMTP__SMTP_PORT}
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: ${AIRFLOW__SMTP__SMTP_USER}
+
+    HOST_APP_POSTGRES: ${HOST_APP_POSTGRES}
+    HOST_NAMENODE: ${HOST_NAMENODE}
+    HOST_SPARK_MASTER: ${HOST_SPARK_MASTER}
+    PG_USER: ${PG_USER}
+    PG_PASS: ${PG_PASS}
+    PG_DB: ${PG_DB}
+  volumes:
+    - ../../services/orchestration/dags:/opt/airflow/dags
+    - ../../services/etl:/opt/airflow/scalaProject
+    - airflow-volume:/opt/airflow/logs
+    - ../../conf:/opt/airflow/conf
+  user: "${AIRFLOW_UID}:0"
+  networks:
+    - data_platform_net
+  depends_on:
+    &airflow-common-depends-on
+    airflow-postgres:
+      condition: service_healthy
+
+
+services:
+  airflow-webserver:
+    <<: *airflow-common
+    command: ["airflow", "webserver", "--debug", "--port", "8080"]
+    container_name: ${HOST_AIRFLOW_WEBSERVER}
+    ports:
+      - "127.0.0.1:${PORT_AIRFLOW}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-scheduler:
+        condition: service_healthy
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    container_name: airflow-scheduler
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    container_name: airflow-init
+    restart: "no"
+    command:
+      - -c
+      - |
+        mkdir -p /sources/logs /sources/dags
+        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags}
+        exec /entrypoint airflow version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD}
+      _PIP_ADDITIONAL_REQUIREMENTS: ""
+    user: "0:0"
+    volumes:
+      - ../../services/orchestration:/sources
+
+  airflow-cli:
+    <<: *airflow-common
+    profiles:
+      - debug
+    restart: "no"
+    environment:
+      <<: *airflow-common-env
+      CONNECTION_CHECK_MAX_COUNT: "0"
+    command:
+      - bash
+      - -c
+      - airflow
+
+  airflow-postgres:
+    image: postgres:15-alpine
+    container_name: ${HOST_AIRFLOW_POSTGRES}
+    environment:
+      POSTGRES_USER: ${AIRFLOW_PG_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_PG_PASS}
+      POSTGRES_DB: ${AIRFLOW_PG_DB}
+    volumes:
+      - airflow-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${AIRFLOW_PG_USER}"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - data_platform_net
+
+  statsd-exporter:
+    image: prom/statsd-exporter:v0.28.0
+    container_name: ${HOST_STATSD}
+    command: "--statsd.mapping-config=/tmp/statsd_mapping.yml"
+    volumes:
+      - ./statsd_mapping.yml:/tmp/statsd_mapping.yml
+    restart: unless-stopped
+    networks:
+      - data_platform_net
+
+volumes:
+  airflow-db-volume:
+  airflow-volume:

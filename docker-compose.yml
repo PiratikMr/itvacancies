@@ -1,11 +1,13 @@
 include:
-  - path: ./docker-compose/hadoop.yml
-  - path: ./docker-compose/spark/spark.yml
-  - path: ./docker-compose/airflow/airflow.yml
-  - path: ./docker-compose/prometheus/prometheus.yml
-  - path: ./docker-compose/visualisation/visualisation.yml
-  - path: ./docker-compose/postgres/postgres.yml
-  - path: ./docker-compose/nlp/nlp.yml
+  - path: ./deploy/hadoop/hadoop.yml
+  - path: ./deploy/spark/spark.yml
+  - path: ./deploy/airflow/airflow.yml
+  - path: ./deploy/prometheus/prometheus.yml
+  - path: ./deploy/superset/superset.yml
+  - path: ./deploy/grafana/grafana.yml
+  - path: ./deploy/postgres/postgres.yml
+  - path: ./deploy/clickhouse/clickhouse.yml
+  - path: ./deploy/nlp/nlp.yml
 
 networks:
   data_platform_net:

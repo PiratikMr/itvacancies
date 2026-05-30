@@ -1,0 +1,53 @@
+services:
+  app-postgres:
+    image: postgres:17
+    container_name: ${HOST_APP_POSTGRES}
+    ports:
+      - "127.0.0.1:${PORT_APP_POSTGRES}:5432"
+    volumes:
+      - app-postgres-db-volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_DB: ${PG_DB}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${PG_USER}", "-d", "${PG_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - data_platform_net
+
+  flyway:
+    image: flyway/flyway:10
+    container_name: flyway
+    command: -connectRetries=10 migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://${HOST_APP_POSTGRES}:5432/${PG_DB}
+      FLYWAY_USER: ${PG_USER}
+      FLYWAY_PASSWORD: ${PG_PASS}
+      FLYWAY_LOCATIONS: filesystem:/flyway/migrations
+    volumes:
+      - ../../db/postgres:/flyway/migrations
+    restart: on-failure
+    networks:
+      - data_platform_net
+    depends_on:
+      app-postgres:
+        condition: service_healthy
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${PG_USER}:${PG_PASS}@${HOST_APP_POSTGRES}:5432/${PG_DB}?sslmode=disable"
+    restart: unless-stopped
+    networks:
+      - data_platform_net
+    depends_on:
+      app-postgres:
+        condition: service_healthy
+
+volumes:
+  app-postgres-db-volume:

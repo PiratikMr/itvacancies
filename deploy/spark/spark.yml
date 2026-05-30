@@ -1,0 +1,29 @@
+x-spark-common:
+  &spark-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+
+services:
+  spark-master:
+    <<: *spark-common
+    container_name: ${HOST_SPARK_MASTER}
+    command: bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "127.0.0.1:${PORT_SPARK_MASTER}:8080"
+    networks:
+      - data_platform_net
+
+  spark-worker-1:
+    <<: *spark-common
+    container_name: spark-worker-1
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://${HOST_SPARK_MASTER}:7077
+    depends_on:
+      - spark-master
+    network_mode: "service:datanode1"
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://${HOST_SPARK_MASTER}:7077
+      SPARK_LOCAL_HOSTNAME: datanode1
+      SPARK_WORKER_WEBUI_PORT: 8081

@@ -1,0 +1,21 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:26.4.2
+    container_name: ${HOST_CLICKHOUSE}
+    ports:
+      - "127.0.0.1:${PORT_CLICKHOUSE_HTTP}:8123"
+      - "127.0.0.1:${PORT_CLICKHOUSE_TCP}:9000"
+    volumes:
+      - ../../db/clickhouse:/docker-entrypoint-initdb.d
+    environment:
+      CLICKHOUSE_DB: ${CH_DB}
+      CLICKHOUSE_USER: ${CH_USER}
+      CLICKHOUSE_PASSWORD: ${CH_PASS}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - data_platform_net

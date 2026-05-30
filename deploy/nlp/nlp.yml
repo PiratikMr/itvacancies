@@ -1,0 +1,26 @@
+services:
+  nlp:
+    build: ../../services/nlp
+    container_name: ${HOST_NLP}
+    ports:
+      - "127.0.0.1:${PORT_NLP}:5000"
+    environment:
+      DB_HOST: ${HOST_APP_POSTGRES}
+      DB_PORT: "5432"
+      DB_USER: ${PG_USER}
+      DB_PASS: ${PG_PASS}
+      DB_NAME: ${PG_DB}
+      WEB_HOST: 0.0.0.0
+      WEB_PORT: "5000"
+    volumes:
+      - ../../services/nlp/thresholds.json:/app/thresholds.json
+      - nlp-hf-cache:/cache/huggingface
+    restart: unless-stopped
+    networks:
+      - data_platform_net
+    depends_on:
+      app-postgres:
+        condition: service_healthy
+
+volumes:
+  nlp-hf-cache:
