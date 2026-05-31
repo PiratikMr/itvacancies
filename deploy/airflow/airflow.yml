@@ -105,8 +105,8 @@ services:
     command:
       - -c
       - |
-        mkdir -p /sources/logs /sources/dags
-        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags}
+        mkdir -p /sources/logs /sources/dags /opt/airflow/dumps
+        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags} /opt/airflow/dumps
         exec /entrypoint airflow version
     environment:
       <<: *airflow-common-env
@@ -118,6 +118,7 @@ services:
     user: "0:0"
     volumes:
       - ../../services/orchestration:/sources
+      - ../../db/postgres/dump:/opt/airflow/dumps
 
   airflow-cli:
     <<: *airflow-common
