@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -169,7 +169,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg_over_time(airflow_dagrun_duration{quantile=\"0.5\"}[$__interval])",
+          "expr": "avg_over_time(airflow_dagrun_duration{quantile=\"0.5\", state=\"success\"}[$__interval])",
           "format": "time_series",
           "fullMetaSearch": false,
           "hide": false,
@@ -895,7 +895,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Все метрики",
+  "title": "Мониторинг платформы",
   "uid": "cf8qpapkgsj5sa",
-  "version": 1
+  "version": 3
 }
