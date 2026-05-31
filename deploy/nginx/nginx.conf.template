@@ -48,6 +48,9 @@ http {
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_http_version 1.1;
 
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    resolver_timeout 5s;
+
     server {
         listen 80 default_server;
         server_name _;
@@ -68,13 +71,15 @@ http {
         client_max_body_size 200m;
         limit_req zone=general burst=30 nodelay;
 
+        set $superset_upstream "${SUPERSET_UPSTREAM}";
+
         location = / {
             default_type text/html;
             return 200 '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IT Vacancies Dashboard</title><style>*{margin:0;padding:0}html,body,iframe{width:100%;height:100%;border:none;overflow:hidden}</style></head><body><iframe src="${SUPERSET_DASHBOARD_PATH}" allowfullscreen></iframe></body></html>';
         }
 
         location / {
-            proxy_pass http://${SUPERSET_UPSTREAM};
+            proxy_pass http://$superset_upstream;
             proxy_set_header Upgrade    $http_upgrade;
             proxy_set_header Connection "upgrade";
             proxy_read_timeout  300s;
@@ -93,16 +98,18 @@ http {
         client_max_body_size 200m;
         limit_req zone=general burst=30 nodelay;
 
+        set $superset_upstream "${SUPERSET_UPSTREAM}";
+
         location /login {
             limit_req zone=login burst=5 nodelay;
-            proxy_pass http://${SUPERSET_UPSTREAM};
+            proxy_pass http://$superset_upstream;
             proxy_read_timeout 300s;
             proxy_send_timeout 300s;
         }
 
 
         location / {
-            proxy_pass http://${SUPERSET_UPSTREAM};
+            proxy_pass http://$superset_upstream;
             proxy_set_header Upgrade    $http_upgrade;
             proxy_set_header Connection "upgrade";
             proxy_read_timeout  300s;
@@ -120,13 +127,15 @@ http {
 
         limit_req zone=general burst=20 nodelay;
 
+        set $airflow_upstream "${AIRFLOW_UPSTREAM}";
+
         location /login {
             limit_req zone=login burst=5 nodelay;
-            proxy_pass http://${AIRFLOW_UPSTREAM};
+            proxy_pass http://$airflow_upstream;
         }
 
         location / {
-            proxy_pass http://${AIRFLOW_UPSTREAM};
+            proxy_pass http://$airflow_upstream;
             proxy_set_header Upgrade    $http_upgrade;
             proxy_set_header Connection "upgrade";
             proxy_read_timeout  300s;
@@ -144,13 +153,15 @@ http {
 
         limit_req zone=general burst=20 nodelay;
 
+        set $grafana_upstream "${GRAFANA_UPSTREAM}";
+
         location /login {
             limit_req zone=login burst=5 nodelay;
-            proxy_pass http://${GRAFANA_UPSTREAM};
+            proxy_pass http://$grafana_upstream;
         }
 
         location / {
-            proxy_pass http://${GRAFANA_UPSTREAM};
+            proxy_pass http://$grafana_upstream;
             proxy_set_header Upgrade    $http_upgrade;
             proxy_set_header Connection "upgrade";
         }
