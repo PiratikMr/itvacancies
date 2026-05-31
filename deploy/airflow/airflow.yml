@@ -1,6 +1,7 @@
 x-airflow-common:
   &airflow-common
   build: .
+  image: airflow-custom:2.11.2
   environment:
     &airflow-common-env
     
