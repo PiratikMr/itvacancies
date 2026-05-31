@@ -50,6 +50,7 @@ x-airflow-common:
     - ../../services/etl:/opt/airflow/scalaProject
     - airflow-volume:/opt/airflow/logs
     - ../../conf:/opt/airflow/conf
+    - ../../db/postgres/dump:/opt/airflow/dumps
   user: "${AIRFLOW_UID}:0"
   networks:
     - data_platform_net
