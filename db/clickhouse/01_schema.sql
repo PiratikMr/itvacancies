@@ -30,3 +30,8 @@ CREATE TABLE IF NOT EXISTS analytics.vacancies (
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(published_at)
 ORDER BY (published_at, platform);
+
+CREATE TABLE IF NOT EXISTS analytics.refresh_log (
+    finished_at DateTime
+) ENGINE = MergeTree()
+ORDER BY tuple();

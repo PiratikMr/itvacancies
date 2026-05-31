@@ -4,4 +4,6 @@ logs/
 .env
 ssl/
 
+db/postgres/dump/*.sql*
+
 .venv/
