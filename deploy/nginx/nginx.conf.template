@@ -126,17 +126,43 @@ Sitemap: https://${DOMAIN}/sitemap.xml
 <style>*{margin:0;padding:0}html,body,iframe{width:100%;height:100%;border:none;overflow:hidden}</style>
 </head>
 <body>
-<iframe src="${SUPERSET_DASHBOARD_PATH}" title="Дашборд аналитики IT-вакансий" allowfullscreen></iframe>
+<iframe id="dash" src="${SUPERSET_DASHBOARD_PATH}" title="Дашборд аналитики IT-вакансий" allowfullscreen></iframe>
+<script>
+(function(){
+  var f = document.getElementById("dash");
+  var BASE = "${SUPERSET_DASHBOARD_PATH}";
+  var keyOf = function(s){ return new URLSearchParams(s).get("native_filters_key"); };
+  var k = keyOf(location.search);
+  if (k) f.src = BASE + "&native_filters_key=" + encodeURIComponent(k);
+  var last = k || "";
+  setInterval(function(){
+    try {
+      var ik = keyOf(f.contentWindow.location.search);
+      if (ik && ik !== last) {
+        last = ik;
+        history.replaceState(null, "", "/?native_filters_key=" + encodeURIComponent(ik));
+      }
+    } catch(e){}
+  }, 800);
+})();
+</script>
 </body>
 </html>';
         }
 
         location / {
             proxy_pass http://$superset_upstream;
+            proxy_intercept_errors on;
             proxy_set_header Upgrade    $http_upgrade;
             proxy_set_header Connection "upgrade";
             proxy_read_timeout  300s;
             proxy_send_timeout  300s;
+            error_page 404 = @to_home;
+        }
+
+        location @to_home {
+            if ($http_sec_fetch_dest = "document") { return 302 https://${DOMAIN}/; }
+            return 404;
         }
     }
 
