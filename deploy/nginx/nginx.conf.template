@@ -73,9 +73,65 @@ http {
 
         set $superset_upstream "${SUPERSET_UPSTREAM}";
 
+        location = /robots.txt {
+            default_type text/plain;
+            return 200 'User-agent: *
+Allow: /
+Sitemap: https://${DOMAIN}/sitemap.xml
+';
+        }
+
+        location = /sitemap.xml {
+            default_type application/xml;
+            return 200 '<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://${DOMAIN}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+';
+        }
+
         location = / {
             default_type text/html;
-            return 200 '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IT Vacancies Dashboard</title><style>*{margin:0;padding:0}html,body,iframe{width:100%;height:100%;border:none;overflow:hidden}</style></head><body><iframe src="${SUPERSET_DASHBOARD_PATH}" allowfullscreen></iframe></body></html>';
+            charset utf-8;
+            return 200 '<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IT Vacancies — аналитика рынка IT-вакансий: зарплаты, навыки, работодатели</title>
+<meta name="description" content="Открытый дашборд аналитики IT-рынка труда: 47 000+ вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок. Медианные зарплаты, востребованные навыки, грейды, работодатели и география. Данные обновляются ежедневно.">
+<meta name="keywords" content="IT вакансии, аналитика IT рынка, зарплаты в IT, статистика вакансий, навыки разработчиков, рынок труда IT">
+<link rel="canonical" href="https://${DOMAIN}/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="IT Vacancies — аналитика рынка IT-вакансий">
+<meta property="og:description" content="Открытый дашборд: зарплаты, навыки, работодатели и география по 47 000+ IT-вакансий. Обновляется ежедневно.">
+<meta property="og:url" content="https://${DOMAIN}/">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Подтверждение прав в вебмастер-панелях: раскомментируйте и вставьте свои коды -->
+<!-- <meta name="google-site-verification" content="ВСТАВЬТЕ_КОД_GOOGLE"> -->
+<!-- <meta name="yandex-verification" content="ВСТАВЬТЕ_КОД_YANDEX"> -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{display:flex;flex-direction:column;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;color:#1a1a1a}
+header{padding:12px 24px;border-bottom:1px solid #e5e7eb;background:#fff;flex:0 0 auto}
+header h1{font-size:18px;font-weight:600;line-height:1.3}
+header p{font-size:13px;color:#555;margin-top:3px;max-width:960px}
+iframe{flex:1 1 auto;width:100%;border:none}
+</style>
+</head>
+<body>
+<header>
+<h1>IT Vacancies — аналитика рынка IT-вакансий</h1>
+<p>Открытый дашборд по рынку IT-труда: 47 000+ вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок. Медианные зарплаты, востребованные навыки и языки программирования, грейды, работодатели и география. Данные обновляются ежедневно.</p>
+</header>
+<iframe src="${SUPERSET_DASHBOARD_PATH}" title="Дашборд аналитики IT-вакансий" allowfullscreen></iframe>
+</body>
+</html>';
         }
 
         location / {
@@ -99,6 +155,13 @@ http {
         limit_req zone=general burst=30 nodelay;
 
         set $superset_upstream "${SUPERSET_UPSTREAM}";
+
+        location = /robots.txt {
+            default_type text/plain;
+            return 200 'User-agent: *
+Disallow: /
+';
+        }
 
         location /login {
             limit_req zone=login burst=5 nodelay;
@@ -129,6 +192,13 @@ http {
 
         set $airflow_upstream "${AIRFLOW_UPSTREAM}";
 
+        location = /robots.txt {
+            default_type text/plain;
+            return 200 'User-agent: *
+Disallow: /
+';
+        }
+
         location /login {
             limit_req zone=login burst=5 nodelay;
             proxy_pass http://$airflow_upstream;
@@ -154,6 +224,13 @@ http {
         limit_req zone=general burst=20 nodelay;
 
         set $grafana_upstream "${GRAFANA_UPSTREAM}";
+
+        location = /robots.txt {
+            default_type text/plain;
+            return 200 'User-agent: *
+Disallow: /
+';
+        }
 
         location /login {
             limit_req zone=login burst=5 nodelay;
