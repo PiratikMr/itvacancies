@@ -94,6 +94,12 @@ Sitemap: https://${DOMAIN}/sitemap.xml
 ';
         }
 
+        location = /nf.js {
+            alias /etc/nginx/static/nf.js;
+            default_type application/javascript;
+            add_header Cache-Control "no-cache";
+        }
+
         location = / {
             default_type text/html;
             charset utf-8;
@@ -111,9 +117,6 @@ Sitemap: https://${DOMAIN}/sitemap.xml
 <meta property="og:description" content="Открытый дашборд: зарплаты, навыки, работодатели и география по 47 000+ IT-вакансий. Обновляется ежедневно.">
 <meta property="og:url" content="https://${DOMAIN}/">
 <meta name="twitter:card" content="summary_large_image">
-<!-- Подтверждение прав в вебмастер-панелях: раскомментируйте и вставьте свои коды -->
-<!-- <meta name="google-site-verification" content="ВСТАВЬТЕ_КОД_GOOGLE"> -->
-<!-- <meta name="yandex-verification" content="ВСТАВЬТЕ_КОД_YANDEX"> -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -126,26 +129,8 @@ Sitemap: https://${DOMAIN}/sitemap.xml
 <style>*{margin:0;padding:0}html,body,iframe{width:100%;height:100%;border:none;overflow:hidden}</style>
 </head>
 <body>
-<iframe id="dash" src="${SUPERSET_DASHBOARD_PATH}" title="Дашборд аналитики IT-вакансий" allowfullscreen></iframe>
-<script>
-(function(){
-  var f = document.getElementById("dash");
-  var BASE = "${SUPERSET_DASHBOARD_PATH}";
-  var keyOf = function(s){ return new URLSearchParams(s).get("native_filters_key"); };
-  var k = keyOf(location.search);
-  if (k) f.src = BASE + "&native_filters_key=" + encodeURIComponent(k);
-  var last = k || "";
-  setInterval(function(){
-    try {
-      var ik = keyOf(f.contentWindow.location.search);
-      if (ik && ik !== last) {
-        last = ik;
-        history.replaceState(null, "", "/?native_filters_key=" + encodeURIComponent(ik));
-      }
-    } catch(e){}
-  }, 800);
-})();
-</script>
+<iframe id="dash" data-base="${SUPERSET_DASHBOARD_PATH}" title="Дашборд аналитики IT-вакансий" allowfullscreen></iframe>
+<script src="/nf.js"></script>
 </body>
 </html>';
         }

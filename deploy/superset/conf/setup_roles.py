@@ -13,6 +13,7 @@ STATIC_PERMS = [
     ('can_read',                      'Chart'),
     ('can_read',                      'Dashboard'),
     ('can_read',                      'DashboardFilterStateRestApi'),
+    ('can_write',                     'DashboardFilterStateRestApi'),
     ('can_read',                      'Database'),
     ('can_read',                      'Dataset'),
     ('can_slice',                     'Superset'),

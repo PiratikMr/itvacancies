@@ -32,5 +32,6 @@ if [ ! -f "$MARKER_FILE" ]; then
     touch "$MARKER_FILE"
 fi
 
+sh /superset-mount/conf/patch_native_filters.sh || echo "[start-superset] frontend patch failed (non-fatal)"
 
 /usr/bin/run-server.sh

@@ -49,3 +49,10 @@ from macros_ch import get_ch_vacancy_filters
 JINJA_CONTEXT_ADDONS = {
     'get_ch_vacancy_filters':  get_ch_vacancy_filters,
 }
+
+
+import superset.config as _superset_defaults
+FILTER_STATE_CACHE_CONFIG = {
+    **_superset_defaults.FILTER_STATE_CACHE_CONFIG,
+    'CACHE_DEFAULT_TIMEOUT': 60 * 60,  # 1h
+}
