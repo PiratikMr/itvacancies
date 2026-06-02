@@ -89,14 +89,15 @@
     : BASE;
 
   var dashId = null;
-  function getDashId() {
-    if (dashId) return dashId;
-    try {
-      var app = iframe.contentDocument.getElementById("app");
-      dashId = JSON.parse(app.getAttribute("data-bootstrap")).dashboardInfo.id;
-    } catch (e) {}
-    return dashId;
-  }
+  (function resolveDashId() {
+    var m = BASE.match(/\/dashboard\/([^/?]+)/);
+    if (!m) return;
+    fetch("/api/v1/dashboard/" + m[1], { credentials: "same-origin" })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { dashId = j && j.result && j.result.id; })
+      .catch(function () {});
+  })();
+
   function keyOf(search) {
     try { return new URLSearchParams(search).get("native_filters_key"); } catch (e) { return null; }
   }
@@ -108,9 +109,8 @@
     try { k = keyOf(iframe.contentWindow.location.search); } catch (e) { return; }
     if (!k || k === lastKey) return;
     lastKey = k;
-    var id = getDashId();
-    if (!id) return;
-    fetch("/api/v1/dashboard/" + id + "/filter_state/" + encodeURIComponent(k), { credentials: "same-origin" })
+    if (!dashId) return;
+    fetch("/api/v1/dashboard/" + dashId + "/filter_state/" + encodeURIComponent(k), { credentials: "same-origin" })
       .then(function (r) { return r.json(); })
       .then(function (j) {
         var raw = j && (j.value !== undefined ? j.value : (j.result && j.result.value));
