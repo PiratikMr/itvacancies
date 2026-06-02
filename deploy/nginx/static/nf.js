@@ -2,7 +2,7 @@
   "use strict";
 
   var FILTERS = {
-    date:     { id: "NATIVE_FILTER-BBuN-l3mWcSzX-b5Acnfd", type: "time" },
+    date:     { id: "NATIVE_FILTER-BBuN-l3mWcSzX-b5Acnfd", type: "time", def: "Last month" },
     status:   { id: "NATIVE_FILTER-MM7FN0iRy0tIidukPm5vj", type: "select" },
     salary:   { id: "NATIVE_FILTER-eGJjUgTQdyhpPMLQZ4aNU", type: "range" },
     skills:   { id: "NATIVE_FILTER-LvcZFurQZxeKnEWPBUJ0h", type: "select" },
@@ -50,7 +50,18 @@
       if (!e) return;
       var val = (e.filterState || {}).value;
       if (val === null || val === undefined || val === "" || (Array.isArray(val) && !val.length)) return;
-      var tok = Array.isArray(val) ? val.map(esc).join(",") : esc(val);
+      if (f.def !== undefined && JSON.stringify(val) === JSON.stringify(f.def)) return; // skip dashboard default
+      var tok;
+      if (f.type === "range") {
+        var hasNum = false;
+        tok = (Array.isArray(val) ? val : [val]).map(function (x) {
+          if (typeof x === "number" && isFinite(x)) { hasNum = true; return String(x); }
+          return "";
+        }).join(",");
+        if (!hasNum) return;
+      } else {
+        tok = Array.isArray(val) ? val.map(esc).join(",") : esc(val);
+      }
       parts.push(code + ":" + tok);
     });
     return parts.join(";");
@@ -70,7 +81,7 @@
       });
       var value;
       if (f.type === "time") value = toks.join(",");
-      else if (f.type === "range") value = toks.map(function (t) { return t === "" ? null : Number(t); });
+      else if (f.type === "range") value = toks.map(function (t) { var n = Number(t); return (t === "" || !isFinite(n)) ? null : n; });
       else value = toks;
       dm[f.id] = { id: f.id, filterState: { value: value } };
     });
@@ -102,14 +113,12 @@
     try { return new URLSearchParams(search).get("native_filters_key"); } catch (e) { return null; }
   }
 
-  var lastKey = "";
   var lastCompact = compact0;
   setInterval(function () {
+    if (!dashId) return;
     var k;
     try { k = keyOf(iframe.contentWindow.location.search); } catch (e) { return; }
-    if (!k || k === lastKey) return;
-    lastKey = k;
-    if (!dashId) return;
+    if (!k) return;
     fetch("/api/v1/dashboard/" + dashId + "/filter_state/" + encodeURIComponent(k), { credentials: "same-origin" })
       .then(function (r) { return r.json(); })
       .then(function (j) {
