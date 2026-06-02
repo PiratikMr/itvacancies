@@ -114,21 +114,18 @@ Sitemap: https://${DOMAIN}/sitemap.xml
 <!-- Подтверждение прав в вебмастер-панелях: раскомментируйте и вставьте свои коды -->
 <!-- <meta name="google-site-verification" content="ВСТАВЬТЕ_КОД_GOOGLE"> -->
 <!-- <meta name="yandex-verification" content="ВСТАВЬТЕ_КОД_YANDEX"> -->
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{display:flex;flex-direction:column;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;color:#1a1a1a}
-header{padding:12px 24px;border-bottom:1px solid #e5e7eb;background:#fff;flex:0 0 auto}
-header h1{font-size:18px;font-weight:600;line-height:1.3}
-header p{font-size:13px;color:#555;margin-top:3px;max-width:960px}
-iframe{flex:1 1 auto;width:100%;border:none}
-</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "IT Vacancies",
+  "url": "https://${DOMAIN}/",
+  "description": "Открытый дашборд аналитики IT-рынка труда: медианные зарплаты, востребованные навыки, грейды, работодатели и география по 47 000+ IT-вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок."
+}
+</script>
+<style>*{margin:0;padding:0}html,body,iframe{width:100%;height:100%;border:none;overflow:hidden}</style>
 </head>
 <body>
-<header>
-<h1>IT Vacancies — аналитика рынка IT-вакансий</h1>
-<p>Открытый дашборд по рынку IT-труда: 47 000+ вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок. Медианные зарплаты, востребованные навыки и языки программирования, грейды, работодатели и география. Данные обновляются ежедневно.</p>
-</header>
 <iframe src="${SUPERSET_DASHBOARD_PATH}" title="Дашборд аналитики IT-вакансий" allowfullscreen></iframe>
 </body>
 </html>';
