@@ -28,14 +28,14 @@ def get_ch_vacancy_filters(context):
         conditions.append(f"published_at <= {_quote(published_to)}")
 
 
-    has_range_vals = get_filter_values('has_range')
+    has_range_vals = get_filter_values('has_range', remove_filter=True)
     if has_range_vals:
         v = str(has_range_vals[0]).lower()
         if v in ('true', 'false'):
             conditions.append(f"has_range = {1 if v == 'true' else 0}")
 
 
-    for f in get_filters('salary') or []:
+    for f in get_filters('salary', remove_filter=True) or []:
         try:
             val = int(float(f.get('val')))
         except (ValueError, TypeError):
@@ -60,14 +60,14 @@ def get_ch_vacancy_filters(context):
 
 
     array_mappings = {
-        'filter_skill':      'skills',
-        'filter_schedule':   'schedules',
-        'filter_field':      'fields',
-        'filter_grade':      'grades',
-        'filter_employment': 'employments',
+        'dim_skills':      'skills',
+        'dim_schedules':   'schedules',
+        'dim_fields':      'fields',
+        'dim_grades':      'grades',
+        'dim_employments': 'employments',
     }
-    for filter_name, column in array_mappings.items():
-        vals = get_filter_values(filter_name)
+    for dim_column, column in array_mappings.items():
+        vals = get_filter_values(dim_column, remove_filter=True)
         if vals:
             conditions.append(f"hasAny({column}, {_sql_array(vals)})")
 
