@@ -32,5 +32,4 @@ if [ ! -f "$MARKER_FILE" ]; then
     touch "$MARKER_FILE"
 fi
 
-
 /usr/bin/run-server.sh
