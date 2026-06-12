@@ -18,12 +18,7 @@
 
   var iframe = document.getElementById("dash");
   if (!iframe) return;
-
-  // На узких экранах открываем отдельный мобильный дашборд.
-  // Порог 768px можно менять; data-base — десктопный путь из nginx-шаблона.
-  var MOBILE_BASE = "/superset/dashboard/mobile-ver/?standalone=2";
-  var isMobile = window.matchMedia("(max-width: 768px)").matches;
-  var BASE = isMobile ? MOBILE_BASE : iframe.getAttribute("data-base");
+  var BASE = iframe.getAttribute("data-base");
   var Q = "'";
 
   function risonString(s) {

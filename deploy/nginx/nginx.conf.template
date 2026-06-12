@@ -107,7 +107,7 @@ Sitemap: https://${DOMAIN}/sitemap.xml
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=1280">
 <title>IT Vacancies — аналитика рынка IT-вакансий: зарплаты, навыки, работодатели</title>
 <meta name="description" content="Открытый дашборд аналитики IT-рынка труда: 47 000+ вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок. Медианные зарплаты, востребованные навыки, грейды, работодатели и география. Данные обновляются ежедневно.">
 <meta name="keywords" content="IT вакансии, аналитика IT рынка, зарплаты в IT, статистика вакансий, навыки разработчиков, рынок труда IT">
