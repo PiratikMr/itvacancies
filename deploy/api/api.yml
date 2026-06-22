@@ -1,0 +1,23 @@
+services:
+  api:
+    build: ../../services/api
+    container_name: ${HOST_API}
+    ports:
+      - "127.0.0.1:${PORT_API}:8000"
+    environment:
+      CH_HOST: ${HOST_CLICKHOUSE}
+      CH_PORT: "8123"
+      CH_USER: ${CH_USER}
+      CH_PASS: ${CH_PASS}
+      CH_DB: ${CH_DB}
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - data_platform_net
+    depends_on:
+      clickhouse:
+        condition: service_healthy

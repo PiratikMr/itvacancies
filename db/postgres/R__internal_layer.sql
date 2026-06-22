@@ -121,6 +121,7 @@ select
     f.title,
     f.url,
     coalesce(f.closed_at, '1970-01-01 00:00:00'::timestamp) as closed_at,
+    (f.closed_at is null)::int                              as is_active,
 
     coalesce(v_sk.skills,       ARRAY[]::text[])  as skills,
     coalesce(v_sch.schedules,   ARRAY[]::text[])  as schedules,

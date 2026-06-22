@@ -7,6 +7,8 @@ include:
   - path: ./deploy/grafana/grafana.yml
   - path: ./deploy/postgres/postgres.yml
   - path: ./deploy/clickhouse/clickhouse.yml
+  - path: ./deploy/api/api.yml
+  - path: ./deploy/frontend/frontend.yml
   - path: ./deploy/nlp/nlp.yml
 
 networks:
