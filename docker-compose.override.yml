@@ -1,0 +1,2 @@
+include:
+  - path: ./deploy/frontend/frontend.yml

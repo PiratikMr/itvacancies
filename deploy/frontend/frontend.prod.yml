@@ -1,0 +1,10 @@
+services:
+  frontend:
+    image: itvacancies-frontend
+    build:
+      context: ../..
+      dockerfile: deploy/frontend/Dockerfile
+    container_name: ${HOST_FRONTEND}
+    restart: unless-stopped
+    networks:
+      - data_platform_net
