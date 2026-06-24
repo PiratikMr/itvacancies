@@ -9,6 +9,7 @@ import org.example.core.normalization.engine.FuzzyMatcher
 import org.example.core.normalization.engine.model.{FuzzyCandidate, FuzzyColumns, FuzzyDictionary}
 import org.example.core.normalization.model.{NormCandidate, NormMatch, NormalizationColumns}
 import org.example.core.normalization.service.NormalizeService._
+import org.example.core.util.CheckpointSupport._
 
 class NormalizeService(
                         spark: SparkSession,
@@ -138,7 +139,7 @@ class NormalizeService(
       )
 
     if (!withCreate || fuzzyRes.toCreate.isEmpty) {
-      val checkPointedRes = matchedResult.as[NormMatch].checkpoint()
+      val checkPointedRes = matchedResult.as[NormMatch].reliableCheckpoint()
       fuzzyRes.clearCache()
       fullMappingTable.unpersist(blocking = false)
       return checkPointedRes
@@ -180,7 +181,7 @@ class NormalizeService(
 
     val finalRes = matchedResult.union(createdMapping).distinct()
 
-    val checkPointedRes = finalRes.as[NormMatch].checkpoint()
+    val checkPointedRes = finalRes.as[NormMatch].reliableCheckpoint()
     fuzzyRes.clearCache()
     fullMappingTable.unpersist(blocking = false)
     reloadedDims.unpersist(blocking = false)

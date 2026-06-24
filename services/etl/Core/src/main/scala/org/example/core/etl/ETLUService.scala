@@ -9,6 +9,7 @@ import org.example.core.etl.impl.{VacancyLoader, VacancyUpdater}
 import org.example.core.etl.model.ETLParts.{Extract, TransformLoad, Update}
 import org.example.core.etl.model.{ETLParts, NormalizedVacancy, VacancyColumns}
 import org.example.core.etl.utils.DataTransformer
+import org.example.core.util.CheckpointSupport._
 
 import scala.util.{Failure, Success}
 
@@ -34,13 +35,13 @@ class ETLUService(
 
     val transformedDs = transformer.transform(spark, rawDF)
       .dropDuplicates(VacancyColumns.EXTERNAL_ID)
-      .checkpoint()
+      .reliableCheckpoint()
 
     val formattedSkillsDs = DataTransformer.normalizeSkills(transformedDs)
 
     val normalized = transformer.normalize(spark, formattedSkillsDs)
       .dropDuplicates(VacancyColumns.EXTERNAL_ID)
-      .checkpoint()
+      .reliableCheckpoint()
 
     normalized
   }
