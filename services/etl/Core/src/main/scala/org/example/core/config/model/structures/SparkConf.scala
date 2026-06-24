@@ -6,5 +6,6 @@ case class SparkConf(
                driverMemory: String,
                driverCores: String,
                executorMemory: String,
-               executorCores: String
+               executorCores: String,
+               checkpointDir: String
                )

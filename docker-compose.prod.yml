@@ -1,2 +1,3 @@
 include:
+  - path: ./deploy/frontend/frontend.prod.yml
   - path: ./deploy/nginx/nginx.yml

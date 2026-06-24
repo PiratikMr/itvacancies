@@ -2,6 +2,7 @@ services:
   grafana:
     image: grafana/grafana-enterprise:11.6.1
     container_name: ${HOST_GRAFANA}
+    mem_limit: 384m
     ports:
       - "127.0.0.1:${PORT_GRAFANA}:3000"
     environment:

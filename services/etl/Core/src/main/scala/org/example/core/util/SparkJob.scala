@@ -22,8 +22,11 @@ trait SparkJob extends LazyLogging {
       .config("spark.driver.cores", sparkConf.driverCores)
       .config("spark.executor.memory", sparkConf.executorMemory)
       .config("spark.executor.cores", sparkConf.executorCores)
+      .config("spark.cleaner.referenceTracking.cleanCheckpoints", "true")
 
       .getOrCreate()
+
+    s.sparkContext.setCheckpointDir(sparkConf.checkpointDir)
 
     sys.addShutdownHook {
       logger.info(s"Остановка Spark Session $sparkName...")

@@ -34,13 +34,13 @@ class ETLUService(
 
     val transformedDs = transformer.transform(spark, rawDF)
       .dropDuplicates(VacancyColumns.EXTERNAL_ID)
-      .localCheckpoint()
+      .checkpoint()
 
     val formattedSkillsDs = DataTransformer.normalizeSkills(transformedDs)
 
     val normalized = transformer.normalize(spark, formattedSkillsDs)
       .dropDuplicates(VacancyColumns.EXTERNAL_ID)
-      .localCheckpoint()
+      .checkpoint()
 
     normalized
   }

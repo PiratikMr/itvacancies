@@ -1,0 +1,86 @@
+:root {
+  --bg: #F4F5F8; --surface: #FFFFFF; --surface-2: #F8F9FB; --track: #F1F2F5;
+  --hover: #F6F7F9; --border: #E7E9EE;
+  --text: #111827; --text-2: #3B4250; --text-3: #6B7280; --text-4: #9CA3AF; --text-5: #CFD4DC;
+  --on-accent: #FFFFFF;
+  --accent: #4F46E5;
+  --tint-green: #ECFDF5; --tint-red: #FEF2F2; --tint-indigo: #EEF2FF; --tint-cyan: #E0F2FE;
+  --tint-amber: #FFFBEB; --tint-violet: #F5F3FF; --tint-teal: #F0FDFA;
+  color-scheme: light;
+}
+body.dark {
+  --bg: #0E1116; --surface: #171A21; --surface-2: #1D212A; --track: #242A34;
+  --hover: #21262F; --border: #2A303B;
+  --text: #EDEFF3; --text-2: #C4CBD6; --text-3: #9099A6; --text-4: #69727F; --text-5: #454C57;
+  --on-accent: #FFFFFF;
+  --accent: #818CF8;
+  --tint-green: rgba(16,185,129,.16); --tint-red: rgba(248,113,113,.17);
+  --tint-indigo: rgba(129,140,248,.18); --tint-cyan: rgba(34,211,238,.15);
+  --tint-amber: rgba(245,158,11,.16); --tint-violet: rgba(167,139,250,.17); --tint-teal: rgba(45,212,191,.15);
+  color-scheme: dark;
+}
+
+.leaflet-container { font-family: 'Onest', sans-serif; background: #EFF6FF; }
+.leaflet-popup-content { margin: 9px 12px; line-height: 1.4; }
+.leaflet-bar a { color: var(--text-2); }
+
+.leaflet-control-attribution { font-size: 9px !important; opacity: .4; background: rgba(255,255,255,.55) !important; padding: 0 4px !important; }
+.leaflet-control-attribution a { color: var(--text-4) !important; }
+body.dark .leaflet-control-attribution { background: rgba(20,24,30,.55) !important; }
+
+.vac-row { transition: background .12s ease; }
+.vac-row:hover { background: var(--hover); }
+.vac-row:hover .vac-title { color: var(--accent); }
+.vac-go { opacity: 0; transition: opacity .12s ease, transform .12s ease; transform: translateX(-2px); color: var(--text-4); }
+.vac-row:hover .vac-go { opacity: 1; transform: translateX(0); color: var(--accent); }
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg); font-family: 'Onest', sans-serif; color: var(--text);
+  overflow-x: hidden; transition: background .25s ease, color .25s ease;
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--text-5); border-radius: 4px; }
+input[type=date] { font-family: 'Onest', sans-serif; appearance: none; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+@keyframes arcGrow { from { stroke-dasharray: 0 var(--circ); } to { stroke-dasharray: var(--dash) var(--gap); } }
+@keyframes lineDraw { to { stroke-dashoffset: 0; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes growX { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes growY { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+.tt {
+  position: fixed; z-index: 9999; pointer-events: none; background: #1E293B; color: #F8FAFC;
+  padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; line-height: 1.5;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2); white-space: nowrap; opacity: 0; transition: opacity .12s;
+}
+.tt.show { opacity: 1; }
+
+@media (max-width: 768px) {
+  .mob-sidebar { transform: translateX(-244px) !important; transition: transform .28s cubic-bezier(.22,1,.36,1) !important; }
+  .mob-sidebar.open { transform: translateX(0) !important; box-shadow: 6px 0 32px rgba(0,0,0,.22) !important; }
+  .mob-main { margin-left: 0 !important; }
+  .mob-content { padding: 14px 14px 76px !important; }
+  .mob-topbar { padding: 0 14px !important; gap: 10px; }
+  .mob-kpi { grid-template-columns: repeat(2, 1fr) !important; }
+  .mob-2col { grid-template-columns: 1fr !important; }
+  .mob-hide { display: none !important; }
+  .mob-show { display: flex !important; }
+  .mob-bnav { display: flex !important; }
+  .mob-table { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; border-radius: 12px; }
+  .mob-tmin { min-width: 560px; }
+  .mob-tmin7 { min-width: 900px; }
+  .mob-kpi-val { font-size: 20px !important; letter-spacing: -.03em !important; }
+  .mob-page-sub { display: none !important; }
+  .mob-bnav span { font-size: 11px !important; }
+  .mob-bnav > div { min-height: 52px !important; padding: 6px 4px !important; }
+  .mob-map { height: 380px !important; }
+  .mob-topbar h1 { font-size: 15px !important; }
+}
+@media (min-width: 769px) {
+  .mob-bnav { display: none !important; }
+  .mob-show { display: none !important; }
+}

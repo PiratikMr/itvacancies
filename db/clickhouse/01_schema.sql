@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS analytics.vacancies (
     title           String,
     url             String,
     closed_at       DateTime,
+    is_active       UInt8,
     skills      Array(String),
     schedules   Array(LowCardinality(String)),
     locations   Array(Tuple(
@@ -31,7 +32,9 @@ CREATE TABLE IF NOT EXISTS analytics.vacancies (
 PARTITION BY toYYYYMM(published_at)
 ORDER BY (published_at, platform);
 
-CREATE TABLE IF NOT EXISTS analytics.refresh_log (
-    finished_at DateTime
+CREATE TABLE IF NOT EXISTS analytics.meta (
+    finished_at DateTime,
+    usd_rate    Float64,
+    eur_rate    Float64
 ) ENGINE = MergeTree()
 ORDER BY tuple();

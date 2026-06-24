@@ -3,10 +3,10 @@ include:
   - path: ./deploy/spark/spark.yml
   - path: ./deploy/airflow/airflow.yml
   - path: ./deploy/prometheus/prometheus.yml
-  - path: ./deploy/superset/superset.yml
   - path: ./deploy/grafana/grafana.yml
   - path: ./deploy/postgres/postgres.yml
   - path: ./deploy/clickhouse/clickhouse.yml
+  - path: ./deploy/api/api.yml
   - path: ./deploy/nlp/nlp.yml
 
 networks:

@@ -7,7 +7,7 @@ PG_SOURCE = "internal.mv_core_vacancy"
 COLUMNS = [
     'vacancy_id', 'platform', 'employer', 'currency', 'experience',
     'latitude', 'longitude', 'salary', 'has_range', 'published_at',
-    'title', 'url', 'closed_at', 'skills', 'schedules', 'locations',
+    'title', 'url', 'closed_at', 'is_active', 'skills', 'schedules', 'locations',
     'fields', 'grades', 'employments', 'languages',
 ]
 
@@ -54,11 +54,29 @@ def sync_mv_core_vacancy():
     client.insert(CH_TABLE, data, column_names=COLUMNS)
 
 
-def write_refresh_log(finished_at):
+def _latest_rub_per_unit(pg_hook, code):
+    row = pg_hook.get_first(
+        "SELECT rh.rate "
+        "FROM dim_currency c "
+        "JOIN dim_currency_rate_history rh ON rh.currency_id = c.currency_id "
+        "WHERE c.currency = %s "
+        "ORDER BY rh.update_date DESC LIMIT 1",
+        parameters=(code,),
+    )
+    if not row or not row[0]:
+        return 0.0
+    return round(1.0 / float(row[0]), 2)
+
+
+def write_meta(finished_at):
+    pg_hook = PostgresHook(postgres_conn_id="POSTGRES_CONN")
+    usd_rate = _latest_rub_per_unit(pg_hook, "USD")
+    eur_rate = _latest_rub_per_unit(pg_hook, "EUR")
+
     client = _ch_client()
-    client.command("TRUNCATE TABLE refresh_log")
+    client.command("TRUNCATE TABLE meta")
     client.insert(
-        "refresh_log",
-        [[finished_at]],
-        column_names=["finished_at"],
+        "meta",
+        [[finished_at, usd_rate, eur_rate]],
+        column_names=["finished_at", "usd_rate", "eur_rate"],
     )

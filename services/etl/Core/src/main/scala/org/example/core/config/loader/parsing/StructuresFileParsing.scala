@@ -29,14 +29,15 @@ object StructuresFileParsing {
     )
   }
 
-  def parseSparkConf(config: Config): SparkConf = {
+  def parseSparkConf(config: Config, checkpointDir: String): SparkConf = {
     SparkConf(
       name = config.getString("name"),
       master = config.getString("master"),
       driverMemory = config.getString("driverMemory"),
       driverCores = config.getString("driverCores"),
       executorMemory = config.getString("executorMemory"),
-      executorCores = config.getString("executorCores")
+      executorCores = config.getString("executorCores"),
+      checkpointDir = checkpointDir
     )
   }
 

@@ -2,7 +2,7 @@ from config_ETL import DAGS_CONFIG_PATH, DEFAULT_ARGS
 from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from utils import get_config
-from clickhouse_sync import sync_mv_core_vacancy, write_refresh_log
+from clickhouse_sync import sync_mv_core_vacancy, write_meta
 from datetime import datetime, timezone
 
 config = get_config(DAGS_CONFIG_PATH)
@@ -13,7 +13,8 @@ dag_schedule = config.get('Dags.RefreshMatViews.schedule')
     default_args=DEFAULT_ARGS,
     tags=["python", "postgresql"],
     schedule=dag_schedule or None,
-    catchup=False
+    catchup=False,
+    max_active_runs=1,
 )
 def create_dag():
     @task
@@ -43,7 +44,7 @@ def create_dag():
             parameters=(finished_at, status, error, log_id)
         )
         if status == 'success':
-            write_refresh_log(finished_at)
+            write_meta(finished_at)
 
     @task
     def sync_to_clickhouse():
