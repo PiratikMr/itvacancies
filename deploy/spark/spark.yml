@@ -9,6 +9,7 @@ services:
   spark-master:
     <<: *spark-common
     container_name: ${HOST_SPARK_MASTER}
+    mem_limit: 512m
     command: bin/spark-class org.apache.spark.deploy.master.Master
     ports:
       - "127.0.0.1:${PORT_SPARK_MASTER}:8080"
@@ -18,6 +19,7 @@ services:
   spark-worker-1:
     <<: *spark-common
     container_name: spark-worker-1
+    mem_limit: 4g
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://${HOST_SPARK_MASTER}:7077
     depends_on:
       - spark-master

@@ -4,6 +4,7 @@ services:
     profiles:
       - tools
     container_name: ${HOST_NLP}
+    mem_limit: 1g
     ports:
       - "127.0.0.1:${PORT_NLP}:5000"
     environment:

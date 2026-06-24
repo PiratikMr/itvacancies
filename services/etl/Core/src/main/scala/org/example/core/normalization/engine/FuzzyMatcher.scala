@@ -36,7 +36,7 @@ class FuzzyMatcher(
     val candidatesDf = candidatesDs.filter(col(RAW_VALUE).isNotNull)
       .withColumn(NORM_VALUE, similarityStrategy.normalize(col(RAW_VALUE)))
       .select(ENTITY_ID, RAW_VALUE, PARENT_ID, NORM_VALUE)
-      .localCheckpoint()
+      .checkpoint()
 
     val dictDf = dictionaryDs.toDF()
       .select(DICT_ID, NORM_VALUE, PARENT_ID)
@@ -48,7 +48,7 @@ class FuzzyMatcher(
 
     val candidatesForFuzzy = candidatesDf.join(exactMatches, Seq(ENTITY_ID, NORM_VALUE), "left_anti")
       .select(ENTITY_ID, RAW_VALUE, PARENT_ID, NORM_VALUE)
-      .localCheckpoint()
+      .checkpoint()
 
     if (candidatesForFuzzy.isEmpty) {
       return emptyResult(exactMatches)
@@ -59,7 +59,7 @@ class FuzzyMatcher(
     // === 2. Векторизация ===
     val fuzzyCandidatesWithFeatures = candidatesForFuzzy.withColumn(NORM_STRUCT, similarityStrategy.buildFeatures(col(NORM_VALUE)))
       .select(ENTITY_ID, RAW_VALUE, PARENT_ID, NORM_VALUE, NORM_STRUCT)
-      .localCheckpoint()
+      .checkpoint()
 
     val dictWithFeatures = dictDf.withColumn(NORM_STRUCT, similarityStrategy.buildFeatures(col(NORM_VALUE)))
       .select(DICT_ID, NORM_VALUE, PARENT_ID, NORM_STRUCT)
@@ -69,7 +69,7 @@ class FuzzyMatcher(
     // === 3. Fuzzy matching со словарями ===
     val fuzzyDictMatches = matchDictionary(fuzzyCandidatesWithFeatures, dictWithFeatures)
       .select(ENTITY_ID, DICT_ID)
-      .localCheckpoint()
+      .checkpoint()
 
     val allDictMatches = exactMatches.select(ENTITY_ID, DICT_ID)
       .unionByName(fuzzyDictMatches)
@@ -78,7 +78,7 @@ class FuzzyMatcher(
     val remainingCandidates = {
       fuzzyCandidatesWithFeatures.join(fuzzyDictMatches, Seq(ENTITY_ID), "left_anti")
         .select(ENTITY_ID, RAW_VALUE, PARENT_ID, NORM_VALUE, NORM_STRUCT)
-        .localCheckpoint()
+        .checkpoint()
     }
 
     if (remainingCandidates.isEmpty) {
@@ -90,7 +90,7 @@ class FuzzyMatcher(
     // === 4. Self fuzzy matching ===
     val selfMatches = selfMatching(remainingCandidates)
       .select(RAW_VALUE, NORM_VALUE, IS_CANONICAL, ENTITY_ID, PARENT_ID)
-      .localCheckpoint()
+      .checkpoint()
 
 
     val toCreate = selfMatches.select(ENTITY_ID, RAW_VALUE, PARENT_ID)
@@ -133,11 +133,11 @@ class FuzzyMatcher(
     val uniqueNorms = candidatesDf
       .select(NORM_VALUE, NORM_STRUCT, PARENT_ID)
       .distinct()
-      .localCheckpoint()
+      .checkpoint()
 
     val normPairs   = buildNormPairs(uniqueNorms)
-    val entityPairs = expandToEntityPairs(normPairs, candidatesDf).localCheckpoint()
-    val ranked      = rankByAuthority(entityPairs).localCheckpoint()
+    val entityPairs = expandToEntityPairs(normPairs, candidatesDf).checkpoint()
+    val ranked      = rankByAuthority(entityPairs).checkpoint()
     filterAndFinalRank(ranked)
   }
 

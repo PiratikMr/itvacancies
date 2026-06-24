@@ -11,7 +11,9 @@ _dags_config = ConfigFactory.parse_file(Path(DAGS_CONFIG_PATH))
 DEFAULT_ARGS = {
     'start_date': pendulum.datetime(2025, 10, 1, 0, 0, 0, tz="Asia/Krasnoyarsk"),
     'email': [_dags_config.get_string('Airflow.email')],
-    'email_on_failure': True
+    'email_on_failure': True,
+    'retries': 2,
+    'retry_delay': pendulum.duration(minutes=5),
 }
 
 

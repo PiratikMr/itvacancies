@@ -7,6 +7,7 @@ x-airflow-common:
     
     # Core
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__PARALLELISM: "1"
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
     AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
     AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
@@ -65,6 +66,7 @@ services:
     <<: *airflow-common
     command: ["airflow", "webserver", "--debug", "--port", "8080"]
     container_name: ${HOST_AIRFLOW_WEBSERVER}
+    mem_limit: 768m
     ports:
       - "127.0.0.1:${PORT_AIRFLOW}:8080"
     healthcheck:
@@ -85,6 +87,7 @@ services:
     <<: *airflow-common
     command: scheduler
     container_name: airflow-scheduler
+    mem_limit: 3g
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
       interval: 30s
@@ -136,6 +139,7 @@ services:
   airflow-postgres:
     image: postgres:15-alpine
     container_name: ${HOST_AIRFLOW_POSTGRES}
+    mem_limit: 256m
     environment:
       POSTGRES_USER: ${AIRFLOW_PG_USER}
       POSTGRES_PASSWORD: ${AIRFLOW_PG_PASS}

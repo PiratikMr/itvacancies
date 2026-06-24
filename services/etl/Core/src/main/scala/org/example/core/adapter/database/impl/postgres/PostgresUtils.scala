@@ -71,7 +71,7 @@ object PostgresUtils extends LazyLogging {
            |""".stripMargin
       )
 
-      val checkpointedResult = result.localCheckpoint()
+      val checkpointedResult = result.checkpoint()
       logger.info(s"Операция SAVE_WITH_RETURN успешно завершена для $targetTable")
       checkpointedResult
     }
