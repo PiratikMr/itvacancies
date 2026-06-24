@@ -110,43 +110,6 @@ Sitemap: https://${DOMAIN}/sitemap.xml
 
     server {
         listen 443 ssl;
-        server_name ${SUPERSET_SUBDOMAIN}.${DOMAIN};
-
-        include /etc/nginx/snippets/ssl-params.conf;
-        include /etc/nginx/snippets/security-headers.conf;
-        add_header X-Frame-Options "DENY" always;
-
-        client_max_body_size 200m;
-        limit_req zone=general burst=30 nodelay;
-
-        set $superset_upstream "${SUPERSET_UPSTREAM}";
-
-        location = /robots.txt {
-            default_type text/plain;
-            return 200 'User-agent: *
-Disallow: /
-';
-        }
-
-        location /login {
-            limit_req zone=login burst=5 nodelay;
-            proxy_pass http://$superset_upstream;
-            proxy_read_timeout 300s;
-            proxy_send_timeout 300s;
-        }
-
-
-        location / {
-            proxy_pass http://$superset_upstream;
-            proxy_set_header Upgrade    $http_upgrade;
-            proxy_set_header Connection "upgrade";
-            proxy_read_timeout  300s;
-            proxy_send_timeout  300s;
-        }
-    }
-
-    server {
-        listen 443 ssl;
         server_name ${AIRFLOW_SUBDOMAIN}.${DOMAIN};
 
         include /etc/nginx/snippets/ssl-params.conf;

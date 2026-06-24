@@ -14,14 +14,12 @@ services:
       - ./ssl:/etc/nginx/ssl:ro
     environment:
       DOMAIN: ${DOMAIN}
-      SUPERSET_SUBDOMAIN: ${SUPERSET_SUBDOMAIN}
       AIRFLOW_SUBDOMAIN: ${AIRFLOW_SUBDOMAIN}
       GRAFANA_SUBDOMAIN: ${GRAFANA_SUBDOMAIN}
 
       FRONTEND_UPSTREAM: ${HOST_FRONTEND}:80
       API_UPSTREAM: ${HOST_API}:8000
 
-      SUPERSET_UPSTREAM: ${HOST_SUPERSET}:8088
       AIRFLOW_UPSTREAM: ${HOST_AIRFLOW_WEBSERVER}:8080
       GRAFANA_UPSTREAM: ${HOST_GRAFANA}:3000
     restart: unless-stopped
@@ -30,6 +28,5 @@ services:
     depends_on:
       - frontend
       - api
-      - superset
       - airflow-webserver
       - grafana
