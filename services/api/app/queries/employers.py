@@ -5,18 +5,21 @@ from app.queries.common import ACTIVE, CLOSED, MEDIAN_SALARY, order_by, where_wi
 _NON_EMPTY = "employer != ''"
 
 
-def hiring_dynamics(table: str, where: str) -> str:
-    since = "toStartOfWeek(now(), 1) - toIntervalWeek(11)"
-    w = where_with(where, _NON_EMPTY, f"published_at >= {since}")
+def hiring_dynamics(table: str, where: str, bucket: str = "week") -> str:
+    if bucket == "month":
+        expr, step = "toStartOfMonth(published_at)", "toIntervalMonth(1)"
+    else:
+        expr, step = "toStartOfWeek(published_at, 1)", "toIntervalWeek(1)"
+    w = where_with(where, _NON_EMPTY)
     return f"""
         SELECT
-            toStartOfWeek(published_at, 1)            AS period,
+            {expr}                                    AS period,
             uniqExact(employer)                       AS employers,
             round(count() / uniqExact(employer), 1)   AS per_employer
         FROM {table}
         {w}
         GROUP BY period
-        ORDER BY period WITH FILL FROM {since} STEP toIntervalWeek(1)
+        ORDER BY period WITH FILL STEP {step}
     """
 
 

@@ -44,3 +44,13 @@ export const yearOf = (iso: string): string => {
   const d = new Date(iso + "T00:00:00");
   return isNaN(d.getTime()) ? "" : String(d.getFullYear());
 };
+
+// Detects whether a timeseries is bucketed by month (vs week) from the actual
+// step between consecutive points — robust even when the data spans less than
+// the selected period (e.g. a year filter over only a few months of data).
+export const isMonthlyBuckets = (periods: string[]): boolean => {
+  if (periods.length < 2) return false;
+  const a = new Date(periods[0] + "T00:00:00").getTime();
+  const b = new Date(periods[1] + "T00:00:00").getTime();
+  return b - a > 20 * 864e5;
+};

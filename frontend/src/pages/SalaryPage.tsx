@@ -1,6 +1,6 @@
 import type { SalaryResponse } from "../api/types";
 import { api } from "../api/client";
-import { usePageData } from "../lib/usePageData";
+import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
 import { Notice, Track } from "../components/shared";
 import { Card, KpiGrid, StatCard } from "../components/ui";
@@ -13,7 +13,7 @@ const GRADE_COLOR: Record<string, string> = {
 };
 
 export function SalaryPage({ filters }: { filters: Filters }) {
-  const { data, loading, error } = usePageData(() => api.salary(filters), [filters]);
+  const { data, loading, error } = usePageData(() => api.salary(filters), [filters], cacheKey("salary", filters));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
   return <SalaryBody data={data} loading={loading} />;

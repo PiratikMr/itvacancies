@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
@@ -25,11 +26,14 @@ def get_employers(
 ) -> dict[str, Any]:
     where = _builder.build(filters)
 
+    span_from = filters.get("published_at_from")
+    bucket = "month" if (span_from is None or (date.today() - span_from).days > 280) else "week"
+
     kpi = (execute_query(q.kpis(_TABLE, where)) or [{}])[0]
 
     return {
         "kpis": kpi,
-        "dynamics": execute_query(q.hiring_dynamics(_TABLE, where)),
+        "dynamics": execute_query(q.hiring_dynamics(_TABLE, where, bucket)),
         "top_active": execute_query(q.top_active(_TABLE, where)),
         "table": {
             "rows": execute_query(q.top_employers(_TABLE, where, limit, offset, sort, direction)),

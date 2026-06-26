@@ -1,0 +1,12 @@
+{
+  "name": "IT Vacancies — аналитика рынка IT-вакансий",
+  "short_name": "IT Vacancies",
+  "description": "Открытый дашборд аналитики IT-рынка труда: зарплаты, навыки, грейды, работодатели и география.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F5F8",
+  "theme_color": "#4F46E5",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" }
+  ]
+}

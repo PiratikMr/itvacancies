@@ -1,20 +1,5 @@
-import { CLEARED_FILTERS, hasActiveFilters, type Filters, type TabId } from "../state/filters";
+import { CLEARED_FILTERS, hasActiveFilters, type Filters } from "../state/filters";
 import { ChipGroup, FacetChips, FacetSelect } from "./facets";
-
-interface NavItem { id: TabId; label: string; icon: JSX.Element; }
-
-const I = (d: string) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d={d} /></svg>
-);
-
-const NAV: NavItem[] = [
-  { id: "overview", label: "Обзор рынка", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg> },
-  { id: "salary", label: "Зарплаты и грейды", icon: I("M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6") },
-  { id: "skills", label: "Навыки", icon: I("M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5") },
-  { id: "employers", label: "Работодатели", icon: I("M3 21h18M5 21V7l8-4v18M19 21V11l-6-4") },
-  { id: "geo", label: "География", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg> },
-  { id: "vacancies", label: "Вакансии", icon: I("M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8") },
-];
 
 const PERIODS = [{ id: "1w", label: "Неделя" }, { id: "1m", label: "Месяц" }, { id: "3m", label: "3 мес." }, { id: "6m", label: "6 мес." }, { id: "1y", label: "Год" }, { id: "all", label: "Всё время" }];
 const STATUSES = [{ id: "all", label: "Все" }, { id: "active", label: "Активные" }, { id: "closed", label: "Закрытые" }];
@@ -29,10 +14,8 @@ function fmtDate(iso: string | null): string {
 }
 
 export function Sidebar({
-  tab, onTab, filters, onFilters, facets, salaryMax, onSearch, dataUpdatedAt, open, onClose,
+  filters, onFilters, facets, salaryMax, onSearch, dataUpdatedAt, open,
 }: {
-  tab: TabId;
-  onTab: (t: TabId) => void;
   filters: Filters;
   onFilters: (f: Filters) => void;
   facets: Record<string, string[]>;
@@ -40,7 +23,6 @@ export function Sidebar({
   onSearch: (field: string, q: string) => Promise<string[]>;
   dataUpdatedAt: string | null;
   open: boolean;
-  onClose: () => void;
 }) {
   const clampNum = (raw: string): number | null => {
     if (raw === "") return null;
@@ -99,18 +81,7 @@ export function Sidebar({
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "10px 10px 16px" }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-4)", textTransform: "uppercase", letterSpacing: "0.08em", padding: "4px 8px 6px" }}>Разделы</div>
-        {NAV.map((n) => {
-          const on = tab === n.id;
-          return (
-            <div key={n.id} onClick={() => { onTab(n.id); onClose(); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 8, cursor: "pointer", marginBottom: 1, background: on ? "var(--tint-indigo)" : "transparent", color: on ? "var(--accent)" : "var(--text-3)" }}>
-              {n.icon}<span style={{ fontSize: 14, fontWeight: on ? 700 : 500 }}>{n.label}</span>
-            </div>
-          );
-        })}
-
-        <div style={{ height: 1, background: "var(--track)", margin: "12px 0" }} />
+      <div style={{ flex: 1, overflowY: "auto", padding: "12px 10px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 8px 10px" }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Фильтры</div>
           {hasActiveFilters(filters) && (

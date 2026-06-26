@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import type { EmployersResponse } from "../api/types";
 import { api } from "../api/client";
-import { usePageData } from "../lib/usePageData";
+import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
 import { Notice, Pager, Track, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { KpiGrid, StatCard, TableCard } from "../components/ui";
 import { ComboChart } from "../charts/ComboChart";
 import { tip } from "../lib/tooltip";
-import { nfmt, salary, weekLabel } from "../lib/format";
+import { nfmt, salary, weekLabel, monthShort, yearOf, isMonthlyBuckets } from "../lib/format";
 import { surfaceCard, panelTitle, panelSub, pad, tableTh as th, tableTd as td, capsLabel } from "../lib/tokens";
 
 const LIMIT = 14;
@@ -16,7 +16,7 @@ export function EmployersPage({ filters }: { filters: Filters }) {
   const [offset, setOffset] = useState(0);
   const [sort, setSort] = useState<Sort>(NO_SORT);
   useEffect(() => setOffset(0), [filters, sort]);
-  const { data, loading, error } = usePageData(() => api.employers(filters, LIMIT, offset, sort), [filters, offset, sort]);
+  const { data, loading, error } = usePageData(() => api.employers(filters, LIMIT, offset, sort), [filters, offset, sort], cacheKey("employers", filters, offset, sort));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
   return <EmployersBody data={data} loading={loading} offset={offset} onOffset={setOffset} sort={sort} onSort={setSort} />;
@@ -25,7 +25,13 @@ export function EmployersPage({ filters }: { filters: Filters }) {
 function EmployersBody({ data, loading, offset, onOffset, sort, onSort }: { data: EmployersResponse; loading: boolean; offset: number; onOffset: (o: number) => void; sort: Sort; onSort: (s: Sort) => void }) {
   const k = data.kpis;
   const activePct = k.unique_employers ? Math.round((k.active_employers / k.unique_employers) * 100) : 0;
-  const combo = data.dynamics.map((t) => ({ x: weekLabel(t.period), bar: t.employers, line: t.per_employer }));
+  const dyn = data.dynamics;
+  const monthly = isMonthlyBuckets(dyn.map((t) => t.period));
+  const combo = dyn.map((t) =>
+    monthly
+      ? { x: monthShort(t.period), bar: t.employers, line: t.per_employer, year: yearOf(t.period) }
+      : { x: weekLabel(t.period), bar: t.employers, line: t.per_employer }
+  );
   const maxActive = Math.max(1, ...data.top_active.map((a) => a.active));
 
   return (
@@ -70,7 +76,7 @@ function EmployersBody({ data, loading, offset, onOffset, sort, onSort }: { data
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{ ...surfaceCard, padding: pad.card }}>
             <div style={panelTitle}>Динамика найма</div>
-            <div style={panelSub}>Последние ~3 месяца</div>
+            <div style={panelSub}>{monthly ? "По месяцам" : "По неделям"}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 14, margin: "12px 0 10px", fontSize: 12, color: "var(--text-3)" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 11, height: 11, borderRadius: 2, background: "#C7D2FE" }} />Активные работодатели</span>
               <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 15, height: 3, borderRadius: 2, background: "#4F46E5" }} />Вакансий на работодателя</span>

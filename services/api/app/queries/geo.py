@@ -24,20 +24,25 @@ def by_country(table: str, where: str) -> str:
 
 
 def map_points(table: str, where: str) -> str:
+    # One representative vacancy per exact coordinate (no rounding — points are
+    # kept as-is). Among vacancies sharing a coordinate we prefer one with a
+    # stated salary, then the most recent; title/salary/url all come from that
+    # same row. Payload is intentionally minimal: only what the map shows.
     w = where_with(where, "latitude != 200 AND longitude != 200")
+    rank = "(salary > 0, published_at)"
     return f"""
-        SELECT
-            latitude                          AS lat,
-            longitude                         AS lng,
-            any(title)                        AS title,
-            any(arrayElement(locations.1, 1)) AS city,
-            count()                           AS count,
-            {MEDIAN_SALARY}                   AS median,
-            round(100 * countIf({REMOTE}) / count(), 1) AS remote_pct
-        FROM {table}
-        {w}
-        GROUP BY lat, lng
-        ORDER BY count DESC
+        SELECT lat, lng, rep.1 AS title, rep.2 AS salary, rep.3 AS url
+        FROM (
+            SELECT
+                latitude                              AS lat,
+                longitude                             AS lng,
+                argMax((title, salary, url), {rank})  AS rep,
+                count()                               AS cnt
+            FROM {table}
+            {w}
+            GROUP BY lat, lng
+        )
+        ORDER BY cnt DESC
     """
 
 

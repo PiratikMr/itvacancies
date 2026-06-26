@@ -101,11 +101,11 @@ export interface EmployersResponse {
   table: { rows: EmployerRow[]; total: number; limit: number; offset: number };
 }
 
-export interface CityPoint { title: string; city: string; lat: number; lng: number; count: number; median: number; remote_pct: number; }
+export interface MapPoint { lat: number; lng: number; title: string; salary: number; url: string; }
 export interface CountryRow { name: string; count: number; cities: number; median: number; remote_pct: number; }
 export interface GeoResponse {
   kpis: { countries: number; cities: number; outside_russia_pct: number; median_outside: number };
-  map: CityPoint[];
+  map: MapPoint[];
   countries: CountryRow[];
 }
 

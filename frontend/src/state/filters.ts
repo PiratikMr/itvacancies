@@ -1,5 +1,15 @@
 export type TabId = "overview" | "salary" | "skills" | "employers" | "geo" | "vacancies";
 
+// Each section is a real path so it can be indexed and shared as its own URL.
+export const TAB_PATHS: Record<TabId, string> = {
+  overview: "/", salary: "/salary", skills: "/skills",
+  employers: "/employers", geo: "/geo", vacancies: "/vacancies",
+};
+const PATH_TABS: Record<string, TabId> = {
+  salary: "salary", skills: "skills", employers: "employers",
+  geo: "geo", vacancies: "vacancies",
+};
+
 export const LIST_FACETS = [
   "platform", "grades", "fields", "skills", "experience",
   "format", "employments", "employer", "currency",
@@ -61,9 +71,11 @@ const csv = (p: URLSearchParams, k: string): string[] => {
   return v ? v.split(",").map((s) => s.trim()).filter(Boolean) : [];
 };
 
-export function readUrl(search: string): { tab: TabId; filters: Filters } {
+export function readUrl(pathname: string, search: string): { tab: TabId; filters: Filters } {
   const p = new URLSearchParams(search);
-  const tab = (p.get("tab") as TabId) || "overview";
+  const seg = pathname.replace(/^\/+|\/+$/g, "");
+  // Prefer the path; fall back to the legacy ?tab= param for old shared links.
+  const tab: TabId = PATH_TABS[seg] ?? ((p.get("tab") as TabId) || "overview");
 
   let salaryMin: number | null = null;
   let salaryMax: number | null = null;
@@ -89,8 +101,7 @@ export function readUrl(search: string): { tab: TabId; filters: Filters } {
 }
 
 export function writeUrl(tab: TabId, filters: Filters): void {
-  const p = filtersToParams(filters);
-  if (tab !== "overview") p.set("tab", tab);
-  const qs = p.toString();
-  window.history.replaceState(null, "", qs ? `/?${qs}` : "/");
+  const qs = filtersToParams(filters).toString();
+  const path = TAB_PATHS[tab];
+  window.history.replaceState(null, "", qs ? `${path}?${qs}` : path);
 }

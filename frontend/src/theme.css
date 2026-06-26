@@ -28,11 +28,18 @@ body.dark {
 .leaflet-control-attribution a { color: var(--text-4) !important; }
 body.dark .leaflet-control-attribution { background: rgba(20,24,30,.55) !important; }
 
+.topnav { scrollbar-width: none; }
+.topnav::-webkit-scrollbar { height: 0; display: none; }
+.topnav-item { transition: background .12s ease, color .12s ease; }
+.topnav-item:hover { background: var(--hover); }
+
 .vac-row { transition: background .12s ease; }
 .vac-row:hover { background: var(--hover); }
 .vac-row:hover .vac-title { color: var(--accent); }
 .vac-go { opacity: 0; transition: opacity .12s ease, transform .12s ease; transform: translateX(-2px); color: var(--text-4); }
 .vac-row:hover .vac-go { opacity: 1; transform: translateX(0); color: var(--accent); }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 body {

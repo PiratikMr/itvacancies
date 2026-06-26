@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { GeoResponse } from "../api/types";
 import { api } from "../api/client";
-import { usePageData } from "../lib/usePageData";
+import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
 import { Notice, Track, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { Card, KpiGrid, StatCard, TableCard } from "../components/ui";
@@ -11,7 +11,7 @@ import { nfmt, salary, salaryFull } from "../lib/format";
 import { tableTh as th, tableTd as td, capsLabel } from "../lib/tokens";
 
 export function GeoPage({ filters }: { filters: Filters }) {
-  const { data, loading, error } = usePageData(() => api.geo(filters), [filters]);
+  const { data, loading, error } = usePageData(() => api.geo(filters), [filters], cacheKey("geo", filters));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
   return <GeoBody data={data} loading={loading} />;

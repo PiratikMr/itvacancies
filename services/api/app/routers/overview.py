@@ -45,9 +45,13 @@ def get_overview(
     kpi = (execute_query(q.kpis(_TABLE, where)) or [{}])[0]
 
     spark_rows = execute_query(q.kpi_sparks(_TABLE, where))[-16:]
-    kpi["spark"] = {
-        metric: [r[metric] for r in spark_rows]
-        for metric in ("total", "active", "median_salary", "remote_pct")
+    # New dict (don't mutate the cached query result).
+    kpi = {
+        **kpi,
+        "spark": {
+            metric: [r[metric] for r in spark_rows]
+            for metric in ("total", "active", "median_salary", "remote_pct")
+        },
     }
 
     return {

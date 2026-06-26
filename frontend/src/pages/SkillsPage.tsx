@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { SkillsResponse } from "../api/types";
 import { api } from "../api/client";
-import { usePageData } from "../lib/usePageData";
+import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
 import { Notice, Track, Pager, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { Card, KpiGrid, StatCard, TableCard } from "../components/ui";
@@ -20,7 +20,7 @@ export function SkillsPage({ filters }: { filters: Filters }) {
   const [offset, setOffset] = useState(0);
   const [sort, setSort] = useState<Sort>(NO_SORT);
   useEffect(() => setOffset(0), [filters, sort]);
-  const { data, loading, error } = usePageData(() => api.skills(filters, LIMIT, offset, sort), [filters, offset, sort]);
+  const { data, loading, error } = usePageData(() => api.skills(filters, LIMIT, offset, sort), [filters, offset, sort], cacheKey("skills", filters, offset, sort));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
   return <SkillsBody data={data} loading={loading} offset={offset} onOffset={setOffset} sort={sort} onSort={setSort} />;

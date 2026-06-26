@@ -1,6 +1,6 @@
 import type { OverviewResponse } from "../api/types";
 import { api } from "../api/client";
-import { usePageData } from "../lib/usePageData";
+import { usePageData, cacheKey } from "../lib/usePageData";
 import { Notice } from "../components/shared";
 import type { Filters } from "../state/filters";
 import { Card, KpiCard, KpiGrid } from "../components/ui";
@@ -8,7 +8,7 @@ import { AreaChart } from "../charts/AreaChart";
 import { DonutChart, type DonutSlice } from "../charts/DonutChart";
 import { DirectionBars, FormatBars, PlatformBars } from "../charts/Bars";
 import { tip } from "../lib/tooltip";
-import { nfmt, salary, salaryFull, weekLabel, monthShort, yearOf } from "../lib/format";
+import { nfmt, salary, salaryFull, weekLabel, monthShort, yearOf, isMonthlyBuckets } from "../lib/format";
 
 const GRADE_COLOR: Record<string, string> = {
   "Сеньор": "#4F46E5", "Миддл": "#6366F1", "Тимлид": "#06B6D4",
@@ -16,7 +16,7 @@ const GRADE_COLOR: Record<string, string> = {
 };
 
 export function OverviewPage({ filters }: { filters: Filters }) {
-  const { data, loading, error } = usePageData(() => api.overview(filters), [filters]);
+  const { data, loading, error } = usePageData(() => api.overview(filters), [filters], cacheKey("overview", filters));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
   return <OverviewBody data={data} loading={loading} />;
@@ -25,10 +25,7 @@ export function OverviewPage({ filters }: { filters: Filters }) {
 function OverviewBody({ data, loading }: { data: OverviewResponse; loading: boolean }) {
   const k = data.kpis;
   const series = data.timeseries;
-  const monthly =
-    series.length > 1 &&
-    new Date(series[series.length - 1].period).getTime() - new Date(series[0].period).getTime() >
-      200 * 864e5;
+  const monthly = isMonthlyBuckets(series.map((t) => t.period));
   const areaData = series.map((t) =>
     monthly
       ? { x: monthShort(t.period), y: t.count, year: yearOf(t.period) }
