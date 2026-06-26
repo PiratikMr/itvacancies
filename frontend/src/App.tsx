@@ -9,7 +9,6 @@ import { SkillsPage } from "./pages/SkillsPage";
 import { EmployersPage } from "./pages/EmployersPage";
 import { VacanciesPage } from "./pages/VacanciesPage";
 
-// Geo pulls in Leaflet + glify — load it only when the tab is opened.
 const GeoPage = lazy(() => import("./pages/GeoPage").then((m) => ({ default: m.GeoPage })));
 import { api } from "./api/client";
 import {
@@ -21,8 +20,6 @@ const TITLES: Record<TabId, string> = {
   employers: "Работодатели", geo: "География", vacancies: "Вакансии",
 };
 
-// Per-section SEO metadata. `h1` is a visually-hidden heading for crawlers;
-// title/description/canonical are updated as the user navigates.
 const META: Record<TabId, { h1: string; title: string; desc: string }> = {
   overview: {
     h1: "Аналитика рынка IT-вакансий",
@@ -92,7 +89,7 @@ export default function App() {
     const m = META[tab];
     document.title = m.title;
     document.querySelector('meta[name="description"]')?.setAttribute("content", m.desc);
-    document.querySelector('link[rel="canonical"]')?.setAttribute("href", `https://itvacancies.tech${TAB_PATHS[tab]}`);
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", window.location.origin + TAB_PATHS[tab]);
   }, [tab]);
 
   useEffect(() => {

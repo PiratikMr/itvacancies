@@ -1,5 +1,7 @@
 FROM node:20-alpine AS build
 WORKDIR /app
+ARG VITE_SITE_URL=http://localhost:5173
+ENV VITE_SITE_URL=$VITE_SITE_URL
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .

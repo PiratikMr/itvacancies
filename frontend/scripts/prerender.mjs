@@ -1,20 +1,11 @@
-// One-time, evergreen per-route prerender. Runs after `vite build`, takes the
-// built dist/index.html and writes a static HTML page per section with its own
-// <title>, description, canonical, <h1> and intro paragraph. No API calls and
-// no volatile numbers — the content never goes stale, so there is nothing to
-// regenerate. React replaces #root on load, so users still get the full SPA;
-// no-JS crawlers (Yandex/Bing) get real per-route content.
-
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = join(__dirname, "..", "dist");
-const SITE = "https://itvacancies.tech";
+const SITE = process.env.VITE_SITE_URL || "http://localhost:5173";
 
-// Mirrors the per-section META in src/App.tsx (kept evergreen — descriptions
-// only, no live figures).
 const ROUTES = [
   {
     path: "/salary",
@@ -83,4 +74,26 @@ for (const r of ROUTES) {
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, "index.html"), render(base, r));
 }
-console.log(`[prerender] wrote ${ROUTES.length} section pages: ${ROUTES.map((r) => r.path).join(", ")}`);
+
+writeFileSync(
+  join(DIST, "robots.txt"),
+  `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n`,
+);
+
+const SITEMAP = [
+  { loc: "/", priority: "1.0" },
+  { loc: "/salary", priority: "0.8" },
+  { loc: "/skills", priority: "0.8" },
+  { loc: "/employers", priority: "0.8" },
+  { loc: "/geo", priority: "0.7" },
+  { loc: "/vacancies", priority: "0.7" },
+];
+const urls = SITEMAP.map((u) =>
+  `  <url>\n    <loc>${SITE}${u.loc}</loc>\n    <changefreq>daily</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`,
+).join("\n");
+writeFileSync(
+  join(DIST, "sitemap.xml"),
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
+);
+
+console.log(`[prerender] site=${SITE}; wrote ${ROUTES.length} section pages + robots.txt + sitemap.xml`);

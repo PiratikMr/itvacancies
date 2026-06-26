@@ -8,7 +8,7 @@
   <title>IT Vacancies — аналитика рынка IT-вакансий: зарплаты, навыки, работодатели</title>
   <meta name="description" content="Открытый дашборд аналитики IT-рынка труда: тысячи вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок. Медианные зарплаты, востребованные навыки, грейды, работодатели и география. Данные обновляются ежедневно." />
   <meta name="keywords" content="IT вакансии, аналитика IT рынка, зарплаты в IT, статистика вакансий, навыки разработчиков, рынок труда IT" />
-  <link rel="canonical" href="https://itvacancies.tech/" />
+  <link rel="canonical" href="%SITE_URL%/" />
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="manifest" href="/site.webmanifest" />
@@ -18,21 +18,21 @@
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:title" content="IT Vacancies — аналитика рынка IT-вакансий" />
   <meta property="og:description" content="Открытый дашборд: зарплаты, навыки, работодатели и география по IT-вакансиям. Обновляется ежедневно." />
-  <meta property="og:url" content="https://itvacancies.tech/" />
-  <meta property="og:image" content="https://itvacancies.tech/og.svg" />
+  <meta property="og:url" content="%SITE_URL%/" />
+  <meta property="og:image" content="%SITE_URL%/og.svg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="IT Vacancies — аналитика рынка IT-вакансий" />
   <meta name="twitter:description" content="Зарплаты, навыки, работодатели и география по IT-вакансиям. Обновляется ежедневно." />
-  <meta name="twitter:image" content="https://itvacancies.tech/og.svg" />
+  <meta name="twitter:image" content="%SITE_URL%/og.svg" />
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "IT Vacancies",
-    "url": "https://itvacancies.tech/",
+    "url": "%SITE_URL%/",
     "description": "Открытый дашборд аналитики IT-рынка труда: медианные зарплаты, востребованные навыки, грейды, работодатели и география по IT-вакансиям."
   }
   </script>
@@ -42,13 +42,13 @@
     "@type": "Dataset",
     "name": "Аналитика рынка IT-вакансий",
     "description": "Агрегированная статистика по тысячам IT-вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок: медианные зарплаты, востребованные навыки, грейды, работодатели и география. Обновляется ежедневно.",
-    "url": "https://itvacancies.tech/",
+    "url": "%SITE_URL%/",
     "keywords": ["IT вакансии", "зарплаты в IT", "навыки разработчиков", "грейды", "рынок труда IT", "аналитика вакансий"],
     "isAccessibleForFree": true,
     "creator": {
       "@type": "Organization",
       "name": "IT Vacancies",
-      "url": "https://itvacancies.tech/"
+      "url": "%SITE_URL%/"
     }
   }
   </script>
@@ -57,8 +57,8 @@
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "IT Vacancies",
-    "url": "https://itvacancies.tech/",
-    "logo": "https://itvacancies.tech/favicon.svg",
+    "url": "%SITE_URL%/",
+    "logo": "%SITE_URL%/favicon.svg",
     "sameAs": ["https://github.com/PiratikMr/itvacancies"]
   }
   </script>
@@ -68,8 +68,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
-    /* Boot shell: real content for crawlers and a clean splash before React
-       mounts. React (createRoot) replaces #root on load, so users get the app. */
     .boot { font-family: 'Onest', system-ui, sans-serif; max-width: 680px; margin: 0 auto;
             padding: 72px 24px; color: #111827; text-align: center; }
     .boot-logo { width: 56px; height: 56px; border-radius: 14px; background: #4F46E5;

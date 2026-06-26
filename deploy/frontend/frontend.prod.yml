@@ -4,6 +4,8 @@ services:
     build:
       context: ../..
       dockerfile: deploy/frontend/Dockerfile
+      args:
+        VITE_SITE_URL: "https://${DOMAIN}"
     container_name: ${HOST_FRONTEND}
     restart: unless-stopped
     networks:
