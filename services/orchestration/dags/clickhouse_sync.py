@@ -4,6 +4,8 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 CH_TABLE  = "vacancies"
 PG_SOURCE = "internal.mv_core_vacancy"
 
+INSERT_BATCH_SIZE = 50_000
+
 COLUMNS = [
     'vacancy_id', 'platform', 'employer', 'currency', 'experience',
     'latitude', 'longitude', 'salary', 'has_range', 'published_at',
@@ -51,7 +53,8 @@ def sync_mv_core_vacancy():
             for item in (row[LANGUAGES_IDX] or [])
         ]
 
-    client.insert(CH_TABLE, data, column_names=COLUMNS)
+    for start in range(0, len(data), INSERT_BATCH_SIZE):
+        client.insert(CH_TABLE, data[start:start + INSERT_BATCH_SIZE], column_names=COLUMNS)
 
 
 def _latest_rub_per_unit(pg_hook, code):
