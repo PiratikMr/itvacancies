@@ -9,7 +9,6 @@ services:
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
       - ./snippets:/etc/nginx/templates/snippets:ro
-      - ./static:/etc/nginx/static:ro
       - ./entrypoint.sh:/etc/nginx/entrypoint.sh:ro
       - ./ssl:/etc/nginx/ssl:ro
     environment:
