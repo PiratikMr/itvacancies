@@ -72,18 +72,25 @@ class HybridMatcher:
         self.golden_embeddings = self.model.encode(encode_texts, convert_to_tensor=True, show_progress_bar=False)
         print(f"[matcher] Готово.")
 
-    def find_best_matches(self, cand_name: str, threshold: float) -> list[dict]:
+    def encode_candidates(self, candidate_names: list[str]):
+        """Батч-кодирование всех кандидатов одним вызовом модели (на порядки быстрее, чем по одному)."""
+        c_norms = [self.normalizer.normalize(n) for n in candidate_names]
+        embeds = self.model.encode(c_norms, convert_to_tensor=True, show_progress_bar=False)
+        return c_norms, embeds
+
+    def find_best_matches(self, cand_name: str, threshold: float, c_norm: str | None = None, cand_embed=None) -> list[dict]:
         if self.golden_embeddings is None or not self.golden_names:
             return []
 
         norm = self.normalizer
 
-        c_norm = norm.normalize(cand_name)
+        c_norm = norm.normalize(cand_name) if c_norm is None else c_norm
         c_no_ver = norm.strip_version(c_norm)
         c_vis = norm.visual_normalize(c_norm)
         c_tokens = norm.tokenize(c_norm)
 
-        cand_embed = self.model.encode([c_norm], convert_to_tensor=True, show_progress_bar=False)
+        if cand_embed is None:
+            cand_embed = self.model.encode([c_norm], convert_to_tensor=True, show_progress_bar=False)
         cosine_scores = util.cos_sim(cand_embed, self.golden_embeddings)[0]
 
         matches = []

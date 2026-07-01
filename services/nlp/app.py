@@ -91,10 +91,16 @@ def api_match():
     matcher = get_matcher()
     matcher.prepare_golden(golden_records)
 
+    cand_names = [name for _, name in candidate_records]
+    c_norms, cand_embeds = matcher.encode_candidates(cand_names)
+
     grouped: dict[str, dict] = {}
     total_matches = 0
-    for cand_id, cand_name in candidate_records:
-        matches = matcher.find_best_matches(cand_name, threshold=threshold)
+    for idx, (cand_id, cand_name) in enumerate(candidate_records):
+        matches = matcher.find_best_matches(
+            cand_name, threshold=threshold,
+            c_norm=c_norms[idx], cand_embed=cand_embeds[idx:idx + 1],
+        )
         if not matches:
             continue
         best = matches[0]
