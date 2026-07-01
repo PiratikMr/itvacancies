@@ -8,6 +8,26 @@ conf_tree = get_config(DAGS_CONFIG_PATH)
 keep_dumps = conf_tree.get_int("Dags.BackupDB.keepDumps")
 
 
+CLEAN_STAGING_CMD = r"""
+set -euo pipefail
+PGPASSWORD="$PG_PASS" psql -v ON_ERROR_STOP=1 \
+  -h "$HOST_APP_POSTGRES" -U "$PG_USER" -d "$PG_DB" <<'SQL' 2>&1
+DO $$
+DECLARE
+    r record;
+BEGIN
+    FOR r IN
+        SELECT tablename FROM pg_tables
+        WHERE schemaname = 'public' AND tablename ~ '^staging_[0-9a-f]{32}$'
+    LOOP
+        EXECUTE format('DROP TABLE IF EXISTS public.%I', r.tablename);
+        RAISE NOTICE 'dropped stale staging table %', r.tablename;
+    END LOOP;
+END $$;
+SQL
+"""
+
+
 DUMP_CMD = r"""
 set -euo pipefail
 mkdir -p /opt/airflow/dumps
@@ -42,10 +62,11 @@ echo "kept newest {keep_dumps} dump(s) in /opt/airflow/dumps"
     catchup=False
 )
 def create_dag():
+    clean_staging = BashOperator(task_id="clean_staging_tables", bash_command=CLEAN_STAGING_CMD)
     dump = BashOperator(task_id="dump_database", bash_command=DUMP_CMD)
     prune = BashOperator(task_id="prune_old_dumps", bash_command=PRUNE_CMD)
 
-    dump >> prune
+    clean_staging >> dump >> prune
 
 
 create_dag()

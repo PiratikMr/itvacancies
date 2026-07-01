@@ -77,12 +77,19 @@ vacancy_fields as (
 ),
 vacancy_grades as (
     select
-        b.vacancy_id,
-        array_agg(distinct d.grade) as grades
-    from bridge_vacancy_grade b
-    join dim_grade d on b.grade_id = d.grade_id
-    where d.is_reference = true
-    group by b.vacancy_id
+        vacancy_id,
+        array_agg(grade order by sort_order)      as grades,
+        array_agg(sort_order order by sort_order) as grades_sort
+    from (
+        select distinct
+            b.vacancy_id,
+            d.grade,
+            d.sort_order
+        from bridge_vacancy_grade b
+        join dim_grade d on b.grade_id = d.grade_id
+        where d.is_reference = true
+    ) x
+    group by vacancy_id
 ),
 vacancy_employments as (
     select
@@ -97,8 +104,9 @@ vacancy_languages as (
     select
         b.vacancy_id,
         jsonb_agg(distinct jsonb_build_object(
-            'language', l.language,
-            'level',    lvl.language_level
+            'language',    l.language,
+            'level',       lvl.language_level,
+            'level_sort',  lvl.sort_order
         )) as languages
     from bridge_vacancy_language b
     join dim_language l on b.language_id = l.language_id
@@ -113,6 +121,8 @@ select
     coalesce(e.employer, '')                             as employer,
     coalesce(c.currency, '')                             as currency,
     coalesce(exp.experience, 'Не указано')               as experience,
+    coalesce(exp.min_years, 255)                         as experience_min_years,
+    coalesce(exp.max_years, 255)                         as experience_max_years,
     coalesce(f.latitude, 200)                            as latitude,
     coalesce(f.longitude, 200)                           as longitude,
     coalesce(s.salary, 0)                                as salary,
@@ -121,12 +131,14 @@ select
     f.title,
     f.url,
     coalesce(f.closed_at, '1970-01-01 00:00:00'::timestamp) as closed_at,
+    (f.closed_at is null)::int                              as is_active,
 
     coalesce(v_sk.skills,       ARRAY[]::text[])  as skills,
     coalesce(v_sch.schedules,   ARRAY[]::text[])  as schedules,
     coalesce(v_loc.locations,   '[]'::jsonb)      as locations,
     coalesce(v_fld.fields,      ARRAY[]::text[])  as fields,
     coalesce(v_grd.grades,      ARRAY[]::text[])  as grades,
+    coalesce(v_grd.grades_sort, ARRAY[]::smallint[]) as grades_sort,
     coalesce(v_emp.employments, ARRAY[]::text[])  as employments,
     coalesce(v_lng.languages,   '[]'::jsonb)      as languages
 

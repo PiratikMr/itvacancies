@@ -2,6 +2,7 @@ services:
   app-postgres:
     image: postgres:17
     container_name: ${HOST_APP_POSTGRES}
+    mem_limit: 768m
     ports:
       - "127.0.0.1:${PORT_APP_POSTGRES}:5432"
     volumes:

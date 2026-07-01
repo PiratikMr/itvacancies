@@ -19,6 +19,10 @@ const Icon = ({ name, size = 16, className = "" }) => {
     arrowRight:<><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></>,
     refresh:   <><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.4-3.9"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 7.4 3.9"/><path d="M21 4v5h-5"/><path d="M3 20v-5h5"/></>,
     database:  <><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></>,
+    pencil:    <><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></>,
+    star:      <polygon points="12 2 15 9 22 9.3 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.3 9 9"/>,
+    chevronL:  <path d="m15 18-6-6 6-6"/>,
+    chevronR:  <path d="m9 18 6-6-6-6"/>,
   };
   return <svg {...props}>{paths[name]}</svg>;
 };
@@ -38,6 +42,7 @@ async function fetchJSON(url, opts) {
 
 function App() {
   const [theme, setTheme] = React.useState(() => localStorage.getItem("nlp-theme") || "light");
+  const [mode, setMode] = React.useState(() => localStorage.getItem("nlp-mode") || "dedupe");
   const [dimensions, setDimensions] = React.useState([]);
   const [selectedDim, setSelectedDim] = React.useState(null);
   const [thresholds, setThresholds] = React.useState({});
@@ -56,6 +61,8 @@ function App() {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("nlp-theme", theme);
   }, [theme]);
+
+  React.useEffect(() => { localStorage.setItem("nlp-mode", mode); }, [mode]);
 
   const pushToast = React.useCallback((kind, msg) => {
     const id = Math.random().toString(36).slice(2);
@@ -114,6 +121,12 @@ function App() {
     setSelected(new Set());
     setHistory([]);
     setSearch("");
+  };
+
+  const switchMode = (m) => {
+    if (m === mode) return;
+    if (mode === "dedupe") resetResults();
+    setMode(m);
   };
 
   const runMatch = async () => {
@@ -237,14 +250,28 @@ function App() {
     });
   };
 
+  const allVisibleSelected = visiblePairs.length > 0 &&
+    visiblePairs.every(({ g, c }) => selected.has(matchKey(g.golden_id, c.id)));
+  const someVisibleSelected = !allVisibleSelected &&
+    visiblePairs.some(({ g, c }) => selected.has(matchKey(g.golden_id, c.id)));
+
+  const toggleSelectAll = () => {
+    const keys = visiblePairs.map(({ g, c }) => matchKey(g.golden_id, c.id));
+    setSelected((s) => {
+      const n = new Set(s);
+      keys.forEach((k) => allVisibleSelected ? n.delete(k) : n.add(k));
+      return n;
+    });
+  };
+
   const apply = async () => {
-    if (!matchData || !totalActive) return;
-    if (!confirm(`Применить ${totalActive} объединений к базе данных? Это действие нельзя отменить.`)) return;
+    if (!matchData || !selected.size) return;
+    if (!confirm(`Применить ${selected.size} объединений к базе данных? Это действие нельзя отменить.`)) return;
 
     const merges = [];
     for (const g of matchData.groups) {
       for (const c of g.candidates) {
-        if (!removed.has(matchKey(g.golden_id, c.id))) {
+        if (selected.has(matchKey(g.golden_id, c.id))) {
           merges.push({ candidate_id: c.id, golden_id: g.golden_id });
         }
       }
@@ -291,6 +318,25 @@ function App() {
 
   return (
     <div className="app">
+      <div className="mode-switch" role="tablist">
+        <button
+          role="tab"
+          aria-selected={mode === "dedupe"}
+          className={`mode-btn ${mode === "dedupe" ? "active" : ""}`}
+          onClick={() => switchMode("dedupe")}
+        >
+          <Icon name="sparkles" size={14} /> Дедупликация
+        </button>
+        <button
+          role="tab"
+          aria-selected={mode === "manage"}
+          className={`mode-btn ${mode === "manage" ? "active" : ""}`}
+          onClick={() => switchMode("manage")}
+        >
+          <Icon name="database" size={14} /> Справочник
+        </button>
+      </div>
+
       <nav className="dim-tabs" role="tablist">
         {dimensions.map((d) => (
           <button
@@ -321,6 +367,14 @@ function App() {
         ))}
       </nav>
 
+      {mode === "manage" ? (
+        <ManageView
+          dim={dim}
+          pushToast={pushToast}
+          onChanged={() => loadDimensions(false)}
+        />
+      ) : (
+      <React.Fragment>
       <div className="meta">
         <div className="meta-stats">
           <div className="meta-stat">
@@ -430,6 +484,9 @@ function App() {
               removeOne={removeOne}
               removeGroup={removeGroup}
               matchKey={matchKey}
+              allVisibleSelected={allVisibleSelected}
+              someVisibleSelected={someVisibleSelected}
+              toggleSelectAll={toggleSelectAll}
             />
           )}
         </section>
@@ -454,18 +511,20 @@ function App() {
         <div className="apply-bar">
           <div className="apply-info">
             <span className="apply-info-label">К применению</span>
-            <span className="apply-info-num num">{totalActive}</span>
+            <span className="apply-info-num num">{selected.size}/{totalActive}</span>
             <span className="apply-info-sub">
-              {totalActive === 1 ? "объединение" : "объединений"}
+              {selected.size === 1 ? "объединение" : "объединений"}
             </span>
           </div>
           <div className="apply-actions">
             <button className="btn btn-ghost" onClick={cancel}>Отмена</button>
-            <button className="btn btn-primary" onClick={apply}>
+            <button className="btn btn-primary" onClick={apply} disabled={!selected.size}>
               <Icon name="check" /> Применить
             </button>
           </div>
         </div>
+      )}
+      </React.Fragment>
       )}
 
       <div className="util-dock">
@@ -507,13 +566,23 @@ function App() {
   );
 }
 
-function ResultsTable({ groups, selected, toggleSelect, toggleSelectGroup, removeOne, removeGroup, matchKey }) {
+function ResultsTable({
+  groups, selected, toggleSelect, toggleSelectGroup, removeOne, removeGroup, matchKey,
+  allVisibleSelected, someVisibleSelected, toggleSelectAll,
+}) {
   return (
     <div className="table-wrap">
       <table className="results-table">
         <thead>
           <tr>
-            <th className="col-check"></th>
+            <th className="col-check">
+              <Checkbox
+                checked={allVisibleSelected}
+                indeterminate={someVisibleSelected}
+                onChange={toggleSelectAll}
+                title="Выбрать все"
+              />
+            </th>
             <th className="col-golden">Эталон</th>
             <th className="col-arrow"></th>
             <th className="col-cand">Кандидат</th>
@@ -537,24 +606,22 @@ function ResultsTable({ groups, selected, toggleSelect, toggleSelectGroup, remov
                       className={`row ${isSel ? "row-selected" : ""} ${i === 0 ? "row-first" : ""} ${i === candidates.length - 1 ? "row-last" : ""}`}
                     >
                       <td className="col-check">
-                        {i === 0 ? (
-                          <Checkbox
-                            checked={allSelected}
-                            indeterminate={someSelected}
-                            onChange={() => toggleSelectGroup(g.golden_id)}
-                          />
-                        ) : (
-                          <Checkbox
-                            checked={isSel}
-                            onChange={() => toggleSelect(g.golden_id, c.id)}
-                          />
-                        )}
+                        <Checkbox
+                          checked={isSel}
+                          onChange={() => toggleSelect(g.golden_id, c.id)}
+                        />
                       </td>
                       <td className="col-golden">
                         {i === 0 ? (
                           <div className="golden-cell">
                             <span className="golden-name">{g.golden_name}</span>
                             <span className="golden-meta">
+                              <Checkbox
+                                checked={allSelected}
+                                indeterminate={someSelected}
+                                onChange={() => toggleSelectGroup(g.golden_id)}
+                                title="Выбрать всю группу"
+                              />
                               <span className="badge-count">{candidates.length}</span>
                               <button
                                 className="cell-btn"
@@ -599,19 +666,308 @@ function ResultsTable({ groups, selected, toggleSelect, toggleSelectGroup, remov
   );
 }
 
-function Checkbox({ checked, indeterminate, onChange }) {
+function Checkbox({ checked, indeterminate, onChange, title }) {
   const ref = React.useRef(null);
   React.useEffect(() => {
     if (ref.current) ref.current.indeterminate = !!indeterminate;
   }, [indeterminate]);
   return (
-    <label className="cb">
+    <label className="cb" title={title}>
       <input ref={ref} type="checkbox" checked={!!checked} onChange={onChange} />
       <span className="cb-box">
         {checked && !indeterminate && <Icon name="check" size={11} />}
         {indeterminate && <span className="cb-dash" />}
       </span>
     </label>
+  );
+}
+
+function ManageView({ dim, pushToast, onChanged }) {
+  const LIMIT = 100;
+  const [rows, setRows] = React.useState([]);
+  const [total, setTotal] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const [searchInput, setSearchInput] = React.useState("");
+  const [search, setSearch] = React.useState("");
+  const [sort, setSort] = React.useState("mentions-desc");
+  const [ref, setRef] = React.useState("all");
+  const [minC, setMinC] = React.useState("");
+  const [maxC, setMaxC] = React.useState("");
+  const [page, setPage] = React.useState(0);
+  const [selected, setSelected] = React.useState(new Set());
+  const [editing, setEditing] = React.useState(null);
+  const [editValue, setEditValue] = React.useState("");
+
+  React.useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput.trim()), 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  React.useEffect(() => { setPage(0); }, [dim.name, search, sort, ref, minC, maxC]);
+  React.useEffect(() => { setSelected(new Set()); setEditing(null); }, [dim.name]);
+
+  const load = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const [sortKey, dir] = sort.split("-");
+      const params = new URLSearchParams({
+        dimension: dim.name, search, ref, sort: sortKey, dir,
+        limit: String(LIMIT), offset: String(page * LIMIT),
+      });
+      if (minC !== "") params.set("min", minC);
+      if (maxC !== "") params.set("max", maxC);
+      const data = await fetchJSON("/api/records?" + params.toString());
+      if (!data.ok) throw new Error(data.error || "unknown");
+      setRows(data.rows);
+      setTotal(data.total);
+    } catch (e) {
+      pushToast("error", "Не удалось загрузить записи: " + e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [dim.name, search, ref, sort, minC, maxC, page, pushToast]);
+
+  React.useEffect(() => { load(); }, [load]);
+
+  const post = (url, body) => fetchJSON(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const toggleSelect = (id) => setSelected((s) => {
+    const n = new Set(s);
+    if (n.has(id)) n.delete(id); else n.add(id);
+    return n;
+  });
+  const allOnPage = rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const someOnPage = !allOnPage && rows.some((r) => selected.has(r.id));
+  const toggleSelectAll = () => setSelected((s) => {
+    const n = new Set(s);
+    rows.forEach((r) => allOnPage ? n.delete(r.id) : n.add(r.id));
+    return n;
+  });
+
+  const verify = async (ids, value) => {
+    if (!ids.length) return;
+    setBusy(true);
+    try {
+      const data = await post("/api/records/verify", { dimension: dim.name, ids, value });
+      if (!data.ok) throw new Error(data.error || "unknown");
+      pushToast("success", `${value ? "Помечено эталоном" : "Снят эталон"}: ${data.updated}`);
+      setSelected(new Set());
+      await load();
+      onChanged && onChanged();
+    } catch (e) {
+      pushToast("error", "Ошибка: " + e.message);
+    } finally { setBusy(false); }
+  };
+
+  const remove = async (ids) => {
+    if (!ids.length) return;
+    if (!confirm(`Удалить ${ids.length} ${ids.length === 1 ? "запись" : "записей"} вместе со связями? Действие необратимо.`)) return;
+    setBusy(true);
+    try {
+      const data = await post("/api/records/delete", { dimension: dim.name, ids });
+      if (!data.ok) throw new Error(data.error || "unknown");
+      pushToast("success", `Удалено: ${data.deleted}`);
+      setSelected(new Set());
+      await load();
+      onChanged && onChanged();
+    } catch (e) {
+      pushToast("error", "Ошибка: " + e.message);
+    } finally { setBusy(false); }
+  };
+
+  const startEdit = (r) => { setEditing(r.id); setEditValue(r.name); };
+  const cancelEdit = () => { setEditing(null); setEditValue(""); };
+  const saveEdit = async (r) => {
+    const name = editValue.trim();
+    if (!name || name === r.name) { cancelEdit(); return; }
+    setBusy(true);
+    try {
+      const data = await post("/api/records/rename", { dimension: dim.name, id: r.id, name });
+      if (!data.ok) throw new Error(data.error || "unknown");
+      pushToast("success", "Переименовано");
+      cancelEdit();
+      await load();
+      onChanged && onChanged();
+    } catch (e) {
+      pushToast("error", "Ошибка: " + e.message);
+    } finally { setBusy(false); }
+  };
+
+  const setPreset = (lo, hi) => { setMinC(lo); setMaxC(hi); };
+
+  const from = total === 0 ? 0 : page * LIMIT + 1;
+  const to = page * LIMIT + rows.length;
+  const hasPrev = page > 0;
+  const hasNext = (page + 1) * LIMIT < total;
+
+  return (
+    <section className="manage">
+      <div className="toolbar">
+        <div className="toolbar-left">
+          <div className="search">
+            <Icon name="search" size={14} />
+            <input
+              type="text"
+              placeholder="Поиск…"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+            {searchInput && (
+              <button className="search-clear" onClick={() => setSearchInput("")}>
+                <Icon name="x" size={12} />
+              </button>
+            )}
+          </div>
+          <div className="sort">
+            <Icon name="filter" size={14} />
+            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="mentions-desc">Упоминания ↓</option>
+              <option value="mentions-asc">Упоминания ↑</option>
+              <option value="name-asc">Имя A→Я</option>
+              <option value="name-desc">Имя Я→A</option>
+              <option value="id-asc">ID</option>
+            </select>
+            <Icon name="chevron" size={14} className="sort-chev" />
+          </div>
+          <div className="sort">
+            <select value={ref} onChange={(e) => setRef(e.target.value)}>
+              <option value="all">Все</option>
+              <option value="ref">Эталоны</option>
+              <option value="cand">Кандидаты</option>
+            </select>
+            <Icon name="chevron" size={14} className="sort-chev" />
+          </div>
+          <div className="range">
+            <span className="range-label">упом.</span>
+            <input type="number" min="0" className="num range-num" placeholder="0"
+              value={minC} onChange={(e) => setMinC(e.target.value)} />
+            <span className="range-dash">–</span>
+            <input type="number" min="0" className="num range-num" placeholder="∞"
+              value={maxC} onChange={(e) => setMaxC(e.target.value)} />
+            <button className="chip" onClick={() => setPreset("0", "0")}>0</button>
+            <button className="chip" onClick={() => setPreset("0", "2")}>≤2</button>
+            {(minC !== "" || maxC !== "") && (
+              <button className="chip" onClick={() => setPreset("", "")}>сброс</button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="table-wrap">
+        <table className="records-table">
+          <thead>
+            <tr>
+              <th className="col-check">
+                <Checkbox checked={allOnPage} indeterminate={someOnPage} onChange={toggleSelectAll} />
+              </th>
+              <th className="col-name">Название</th>
+              <th className="col-ment">Упом.</th>
+              <th className="col-ref">Эталон</th>
+              <th className="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id} className={`row ${selected.has(r.id) ? "row-selected" : ""}`}>
+                <td className="col-check">
+                  <Checkbox checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} />
+                </td>
+                <td className="col-name">
+                  {editing === r.id ? (
+                    <div className="edit-cell">
+                      <input
+                        autoFocus
+                        className="edit-input"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveEdit(r);
+                          if (e.key === "Escape") cancelEdit();
+                        }}
+                      />
+                      <button className="cell-btn" onClick={() => saveEdit(r)} title="Сохранить">
+                        <Icon name="check" size={13} />
+                      </button>
+                      <button className="cell-btn" onClick={cancelEdit} title="Отмена">
+                        <Icon name="x" size={13} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="name-cell">
+                      <span className="rec-name">{r.name}</span>
+                      <button className="cell-btn rec-edit" onClick={() => startEdit(r)} title="Переименовать">
+                        <Icon name="pencil" size={12} />
+                      </button>
+                    </div>
+                  )}
+                </td>
+                <td className="col-ment num">{r.mentions.toLocaleString("ru")}</td>
+                <td className="col-ref">
+                  <button
+                    className={`ref-badge ${r.is_reference ? "on" : "off"}`}
+                    onClick={() => verify([r.id], !r.is_reference)}
+                    disabled={busy}
+                    title={r.is_reference ? "Снять эталон" : "Сделать эталоном"}
+                  >
+                    {r.is_reference && <Icon name="check" size={12} />}
+                    {r.is_reference ? "эталон" : "—"}
+                  </button>
+                </td>
+                <td className="col-actions">
+                  <button className="row-x" onClick={() => remove([r.id])} title="Удалить">
+                    <Icon name="trash" size={14} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!loading && rows.length === 0 && (
+          <div className="empty">
+            <Icon name="database" size={28} />
+            <p>Нет записей по текущим фильтрам</p>
+          </div>
+        )}
+      </div>
+
+      <div className="manage-foot">
+        <div className="pager">
+          <button className="th-btn" onClick={() => setPage((p) => p - 1)} disabled={!hasPrev}>
+            <Icon name="chevronL" size={14} />
+          </button>
+          <span className="pager-info num">{from}–{to} / {total.toLocaleString("ru")}</span>
+          <button className="th-btn" onClick={() => setPage((p) => p + 1)} disabled={!hasNext}>
+            <Icon name="chevronR" size={14} />
+          </button>
+        </div>
+        {loading && <span className="spinner" />}
+      </div>
+
+      {selected.size > 0 && (
+        <div className="apply-bar">
+          <div className="apply-info">
+            <span className="apply-info-label">Выбрано</span>
+            <span className="apply-info-num num">{selected.size}</span>
+          </div>
+          <div className="apply-actions">
+            <button className="btn btn-ghost" onClick={() => verify([...selected], false)} disabled={busy}>
+              Снять эталон
+            </button>
+            <button className="btn btn-ghost danger" onClick={() => remove([...selected])} disabled={busy}>
+              <Icon name="trash" size={14} /> Удалить
+            </button>
+            <button className="btn btn-primary" onClick={() => verify([...selected], true)} disabled={busy}>
+              <Icon name="star" size={14} /> Подтвердить эталон
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 

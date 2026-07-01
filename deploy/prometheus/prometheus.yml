@@ -2,6 +2,7 @@ services:
   prometheus:
     image: prom/prometheus:v3.5.0
     container_name: prometheus
+    mem_limit: 512m
     ports:
       - "127.0.0.1:${PORT_PROMETHEUS}:9090"
     volumes:

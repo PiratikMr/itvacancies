@@ -2,6 +2,7 @@ services:
   clickhouse:
     image: clickhouse/clickhouse-server:26.4.2
     container_name: ${HOST_CLICKHOUSE}
+    mem_limit: 2g
     ports:
       - "127.0.0.1:${PORT_CLICKHOUSE_HTTP}:8123"
       - "127.0.0.1:${PORT_CLICKHOUSE_TCP}:9000"

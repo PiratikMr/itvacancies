@@ -12,10 +12,12 @@ trait WithStandardStructures {
   val saveFolder: String
 
   lazy val structures: StructuresConfig = {
+    val fsConf = StructuresFileParsing.parseFSConf(rootConfig.getConfig("FileSystem"), saveFolder)
+
     StructuresConfig(
       StructuresFileParsing.parseDBConf(rootConfig.getConfig("DataBase")),
-      StructuresFileParsing.parseFSConf(rootConfig.getConfig("FileSystem"), saveFolder),
-      StructuresFileParsing.parseSparkConf(rootConfig.getConfig("Spark")),
+      fsConf,
+      StructuresFileParsing.parseSparkConf(rootConfig.getConfig("Spark"), fsConf.checkpointPath),
       StructuresFileParsing.parseNetworkConf(rootConfig.getConfig("Network")),
       StructuresFileParsing.parseFuzzyMatcherConf(rootConfig.getConfig("FuzzyMatcher"))
     )

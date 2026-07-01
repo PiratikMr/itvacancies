@@ -1,0 +1,12 @@
+services:
+  frontend:
+    image: itvacancies-frontend
+    build:
+      context: ../..
+      dockerfile: deploy/frontend/Dockerfile
+      args:
+        VITE_SITE_URL: "https://${DOMAIN}"
+    container_name: ${HOST_FRONTEND}
+    restart: unless-stopped
+    networks:
+      - data_platform_net

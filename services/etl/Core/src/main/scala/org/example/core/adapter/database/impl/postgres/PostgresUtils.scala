@@ -3,6 +3,7 @@ package org.example.core.adapter.database.impl.postgres
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.example.core.config.model.structures.DBConf
+import org.example.core.util.CheckpointSupport._
 
 import java.sql.{Connection, DriverManager}
 import java.util.UUID
@@ -71,7 +72,7 @@ object PostgresUtils extends LazyLogging {
            |""".stripMargin
       )
 
-      val checkpointedResult = result.localCheckpoint()
+      val checkpointedResult = result.reliableCheckpoint()
       logger.info(s"Операция SAVE_WITH_RETURN успешно завершена для $targetTable")
       checkpointedResult
     }

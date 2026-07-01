@@ -1,7 +1,10 @@
 services:
   nlp:
     build: ../../services/nlp
+    profiles:
+      - tools
     container_name: ${HOST_NLP}
+    mem_limit: 1g
     ports:
       - "127.0.0.1:${PORT_NLP}:5000"
     environment:
@@ -15,7 +18,7 @@ services:
     volumes:
       - ../../services/nlp/thresholds.json:/app/thresholds.json
       - nlp-hf-cache:/cache/huggingface
-    restart: unless-stopped
+    restart: "no"
     networks:
       - data_platform_net
     depends_on:

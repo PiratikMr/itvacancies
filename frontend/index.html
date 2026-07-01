@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#4F46E5" />
+
+  <title>IT Vacancies — аналитика рынка IT-вакансий: зарплаты, навыки, работодатели</title>
+  <meta name="description" content="Открытый дашборд аналитики IT-рынка труда: тысячи вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок. Медианные зарплаты, востребованные навыки, грейды, работодатели и география. Данные обновляются ежедневно." />
+  <meta name="keywords" content="IT вакансии, аналитика IT рынка, зарплаты в IT, статистика вакансий, навыки разработчиков, рынок труда IT" />
+  <link rel="canonical" href="%SITE_URL%/" />
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="IT Vacancies" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:title" content="IT Vacancies — аналитика рынка IT-вакансий" />
+  <meta property="og:description" content="Открытый дашборд: зарплаты, навыки, работодатели и география по IT-вакансиям. Обновляется ежедневно." />
+  <meta property="og:url" content="%SITE_URL%/" />
+  <meta property="og:image" content="%SITE_URL%/og.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="IT Vacancies — аналитика рынка IT-вакансий" />
+  <meta name="twitter:description" content="Зарплаты, навыки, работодатели и география по IT-вакансиям. Обновляется ежедневно." />
+  <meta name="twitter:image" content="%SITE_URL%/og.svg" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "IT Vacancies",
+    "url": "%SITE_URL%/",
+    "description": "Открытый дашборд аналитики IT-рынка труда: медианные зарплаты, востребованные навыки, грейды, работодатели и география по IT-вакансиям."
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Аналитика рынка IT-вакансий",
+    "description": "Агрегированная статистика по тысячам IT-вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок: медианные зарплаты, востребованные навыки, грейды, работодатели и география. Обновляется ежедневно.",
+    "url": "%SITE_URL%/",
+    "keywords": ["IT вакансии", "зарплаты в IT", "навыки разработчиков", "грейды", "рынок труда IT", "аналитика вакансий"],
+    "isAccessibleForFree": true,
+    "creator": {
+      "@type": "Organization",
+      "name": "IT Vacancies",
+      "url": "%SITE_URL%/"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "IT Vacancies",
+    "url": "%SITE_URL%/",
+    "logo": "%SITE_URL%/favicon.svg",
+    "sameAs": ["https://github.com/PiratikMr/itvacancies"]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    .boot { font-family: 'Onest', system-ui, sans-serif; max-width: 680px; margin: 0 auto;
+            padding: 72px 24px; color: #111827; text-align: center; }
+    .boot-logo { width: 56px; height: 56px; border-radius: 14px; background: #4F46E5;
+                 display: inline-flex; align-items: center; justify-content: center; margin-bottom: 22px; }
+    .boot h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 14px; line-height: 1.2; }
+    .boot p { font-size: 16px; line-height: 1.6; color: #3B4250; margin: 0 auto 22px; max-width: 600px; }
+    .boot-nav { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 26px; }
+    .boot-nav a { font-size: 14px; font-weight: 600; color: #4F46E5; background: #EEF2FF;
+                  padding: 8px 14px; border-radius: 999px; text-decoration: none; }
+    .boot-load { font-size: 13px; color: #9CA3AF; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <main class="boot">
+      <span class="boot-logo">
+        <svg width="30" height="30" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="6.5" height="6.5" rx="1.5" fill="#fff" /><rect x="11.5" y="2" width="6.5" height="6.5" rx="1.5" fill="#fff" opacity="0.55" /><rect x="2" y="11.5" width="6.5" height="6.5" rx="1.5" fill="#fff" opacity="0.55" /><rect x="11.5" y="11.5" width="6.5" height="6.5" rx="1.5" fill="#fff" opacity="0.3" /></svg>
+      </span>
+      <h1 id="seo-h1">Аналитика рынка IT-вакансий России</h1>
+      <p id="seo-intro">Открытый дашборд по тысячам IT-вакансий с HeadHunter, HabrCareer, GetMatch, GeekJob и других площадок: медианные зарплаты, востребованные навыки, грейды, работодатели и география. Данные обновляются ежедневно.</p>
+      <nav class="boot-nav" aria-label="Разделы">
+        <a href="/">Обзор рынка</a>
+        <a href="/salary">Зарплаты и грейды</a>
+        <a href="/skills">Навыки</a>
+        <a href="/employers">Работодатели</a>
+        <a href="/geo">География</a>
+        <a href="/vacancies">Вакансии</a>
+      </nav>
+      <p class="boot-load">Загрузка интерактивного дашборда…</p>
+    </main>
+  </div>
+
+  <noscript>
+    <section style="max-width:760px;margin:0 auto;padding:8px 24px 40px;font-family:'Onest',system-ui,sans-serif;color:#111827;line-height:1.6">
+      <h2>О проекте</h2>
+      <p>IT Vacancies — открытый аналитический дашборд рынка IT-вакансий России. Мы собираем тысячи вакансий с площадок HeadHunter, HabrCareer, GetMatch, GeekJob и других, очищаем и агрегируем данные и показываем рыночные срезы. Данные обновляются ежедневно.</p>
+      <h2>Что внутри</h2>
+      <ul>
+        <li><strong>Обзор рынка</strong> — динамика публикаций вакансий, медианные зарплаты, распределение по грейдам и доля удалённой работы.</li>
+        <li><strong>Зарплаты и грейды</strong> — медианные зарплаты по направлениям, опыту и грейдам от стажёра до тимлида, прозрачность зарплат и валюты.</li>
+        <li><strong>Навыки</strong> — самые востребованные технологии, частота упоминаний и медианные зарплаты по навыкам, требования к английскому языку.</li>
+        <li><strong>Работодатели</strong> — кто активнее всего нанимает, число вакансий и медианные зарплаты по компаниям, динамика найма.</li>
+        <li><strong>География</strong> — карта вакансий по городам и странам, доля удалённой работы и медианные зарплаты по регионам.</li>
+        <li><strong>Вакансии</strong> — список актуальных IT-вакансий с зарплатами, грейдами, опытом и форматом работы.</li>
+      </ul>
+      <h2>Источники данных</h2>
+      <p>HeadHunter, HabrCareer, GetMatch, GeekJob и другие площадки. Зарплаты приводятся к рублям по курсу ЦБ РФ; для медиан используются только вакансии с указанной зарплатой.</p>
+      <p>Для интерактивной версии дашборда включите JavaScript.</p>
+    </section>
+  </noscript>
+
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

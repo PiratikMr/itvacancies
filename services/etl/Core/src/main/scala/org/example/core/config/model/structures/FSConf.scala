@@ -14,4 +14,6 @@ case class FSConf(
     if (withDate) s"$base/$dateFolder"
     else base
   }
+
+  def checkpointPath: String = s"$url/checkpoints"
 }

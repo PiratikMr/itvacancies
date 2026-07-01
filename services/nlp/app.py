@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, render_template, request
+from sqlalchemy.exc import IntegrityError
 
 import config
 import db_ops
@@ -90,10 +91,16 @@ def api_match():
     matcher = get_matcher()
     matcher.prepare_golden(golden_records)
 
+    cand_names = [name for _, name in candidate_records]
+    c_norms, cand_embeds = matcher.encode_candidates(cand_names)
+
     grouped: dict[str, dict] = {}
     total_matches = 0
-    for cand_id, cand_name in candidate_records:
-        matches = matcher.find_best_matches(cand_name, threshold=threshold)
+    for idx, (cand_id, cand_name) in enumerate(candidate_records):
+        matches = matcher.find_best_matches(
+            cand_name, threshold=threshold,
+            c_norm=c_norms[idx], cand_embed=cand_embeds[idx:idx + 1],
+        )
         if not matches:
             continue
         best = matches[0]
@@ -151,6 +158,108 @@ def api_apply():
         return jsonify({"ok": False, "error": f"Ошибка при применении: {e}"}), 500
 
     return jsonify({"ok": True, "applied": len(merges)})
+
+
+def _parse_int(value, default=None):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+@app.route("/api/records", methods=["GET"])
+def api_records():
+    dim_name = request.args.get("dimension")
+    if dim_name not in config.DIMENSIONS:
+        return jsonify({"ok": False, "error": f"Неизвестное измерение: {dim_name}"}), 400
+
+    relation_type = config.DIMENSIONS[dim_name]["relation_type"]
+    limit = min(max(_parse_int(request.args.get("limit"), 100), 1), 500)
+    offset = max(_parse_int(request.args.get("offset"), 0), 0)
+
+    try:
+        rows, total = db_ops.list_records(
+            dim_name,
+            relation_type,
+            search=request.args.get("search", "").strip(),
+            ref_filter=request.args.get("ref", "all"),
+            min_cnt=max(_parse_int(request.args.get("min"), 0), 0),
+            max_cnt=_parse_int(request.args.get("max"), None),
+            sort=request.args.get("sort", "mentions"),
+            direction=request.args.get("dir", "desc"),
+            limit=limit,
+            offset=offset,
+        )
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Ошибка БД: {e}"}), 500
+
+    return jsonify({"ok": True, "rows": rows, "total": total, "limit": limit, "offset": offset})
+
+
+@app.route("/api/records/verify", methods=["POST"])
+def api_records_verify():
+    body = request.get_json(force=True)
+    dim_name = body.get("dimension")
+    ids = body.get("ids", [])
+    value = body.get("value")
+
+    if dim_name not in config.DIMENSIONS:
+        return jsonify({"ok": False, "error": f"Неизвестное измерение: {dim_name}"}), 400
+    if not ids:
+        return jsonify({"ok": False, "error": "Пустой список записей."}), 400
+    if not isinstance(value, bool):
+        return jsonify({"ok": False, "error": "Не указан value (bool)."}), 400
+
+    try:
+        updated = db_ops.set_reference(dim_name, ids, value)
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Ошибка БД: {e}"}), 500
+
+    return jsonify({"ok": True, "updated": updated})
+
+
+@app.route("/api/records/rename", methods=["POST"])
+def api_records_rename():
+    body = request.get_json(force=True)
+    dim_name = body.get("dimension")
+    record_id = body.get("id")
+    new_name = (body.get("name") or "").strip()
+
+    if dim_name not in config.DIMENSIONS:
+        return jsonify({"ok": False, "error": f"Неизвестное измерение: {dim_name}"}), 400
+    if record_id is None:
+        return jsonify({"ok": False, "error": "Не указан id."}), 400
+    if not new_name:
+        return jsonify({"ok": False, "error": "Пустое название."}), 400
+
+    try:
+        db_ops.rename_record(dim_name, record_id, new_name)
+    except IntegrityError:
+        return jsonify({"ok": False, "error": f"Запись «{new_name}» уже существует."}), 409
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Ошибка БД: {e}"}), 500
+
+    return jsonify({"ok": True})
+
+
+@app.route("/api/records/delete", methods=["POST"])
+def api_records_delete():
+    body = request.get_json(force=True)
+    dim_name = body.get("dimension")
+    ids = body.get("ids", [])
+
+    if dim_name not in config.DIMENSIONS:
+        return jsonify({"ok": False, "error": f"Неизвестное измерение: {dim_name}"}), 400
+    if not ids:
+        return jsonify({"ok": False, "error": "Пустой список записей."}), 400
+
+    relation_type = config.DIMENSIONS[dim_name]["relation_type"]
+    try:
+        deleted = db_ops.delete_records(dim_name, relation_type, ids)
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Ошибка при удалении: {e}"}), 500
+
+    return jsonify({"ok": True, "deleted": deleted})
 
 
 if __name__ == "__main__":

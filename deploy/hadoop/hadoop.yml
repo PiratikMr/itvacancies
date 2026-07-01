@@ -10,6 +10,7 @@ services:
   namenode:
     <<: *hadoop-common
     container_name: ${HOST_NAMENODE}
+    mem_limit: 1g
     ports:
       - "127.0.0.1:${PORT_NAMENODE}:9870"
     environment:
@@ -28,6 +29,7 @@ services:
     <<: *hadoop-common
     container_name: datanode1
     hostname: datanode1
+    mem_limit: 1g
     environment:
       <<: *hadoop-common-env
       JMX_PORT: 8002
