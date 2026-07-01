@@ -250,14 +250,28 @@ function App() {
     });
   };
 
+  const allVisibleSelected = visiblePairs.length > 0 &&
+    visiblePairs.every(({ g, c }) => selected.has(matchKey(g.golden_id, c.id)));
+  const someVisibleSelected = !allVisibleSelected &&
+    visiblePairs.some(({ g, c }) => selected.has(matchKey(g.golden_id, c.id)));
+
+  const toggleSelectAll = () => {
+    const keys = visiblePairs.map(({ g, c }) => matchKey(g.golden_id, c.id));
+    setSelected((s) => {
+      const n = new Set(s);
+      keys.forEach((k) => allVisibleSelected ? n.delete(k) : n.add(k));
+      return n;
+    });
+  };
+
   const apply = async () => {
-    if (!matchData || !totalActive) return;
-    if (!confirm(`Применить ${totalActive} объединений к базе данных? Это действие нельзя отменить.`)) return;
+    if (!matchData || !selected.size) return;
+    if (!confirm(`Применить ${selected.size} объединений к базе данных? Это действие нельзя отменить.`)) return;
 
     const merges = [];
     for (const g of matchData.groups) {
       for (const c of g.candidates) {
-        if (!removed.has(matchKey(g.golden_id, c.id))) {
+        if (selected.has(matchKey(g.golden_id, c.id))) {
           merges.push({ candidate_id: c.id, golden_id: g.golden_id });
         }
       }
@@ -470,6 +484,9 @@ function App() {
               removeOne={removeOne}
               removeGroup={removeGroup}
               matchKey={matchKey}
+              allVisibleSelected={allVisibleSelected}
+              someVisibleSelected={someVisibleSelected}
+              toggleSelectAll={toggleSelectAll}
             />
           )}
         </section>
@@ -494,14 +511,14 @@ function App() {
         <div className="apply-bar">
           <div className="apply-info">
             <span className="apply-info-label">К применению</span>
-            <span className="apply-info-num num">{totalActive}</span>
+            <span className="apply-info-num num">{selected.size}/{totalActive}</span>
             <span className="apply-info-sub">
-              {totalActive === 1 ? "объединение" : "объединений"}
+              {selected.size === 1 ? "объединение" : "объединений"}
             </span>
           </div>
           <div className="apply-actions">
             <button className="btn btn-ghost" onClick={cancel}>Отмена</button>
-            <button className="btn btn-primary" onClick={apply}>
+            <button className="btn btn-primary" onClick={apply} disabled={!selected.size}>
               <Icon name="check" /> Применить
             </button>
           </div>
@@ -549,13 +566,23 @@ function App() {
   );
 }
 
-function ResultsTable({ groups, selected, toggleSelect, toggleSelectGroup, removeOne, removeGroup, matchKey }) {
+function ResultsTable({
+  groups, selected, toggleSelect, toggleSelectGroup, removeOne, removeGroup, matchKey,
+  allVisibleSelected, someVisibleSelected, toggleSelectAll,
+}) {
   return (
     <div className="table-wrap">
       <table className="results-table">
         <thead>
           <tr>
-            <th className="col-check"></th>
+            <th className="col-check">
+              <Checkbox
+                checked={allVisibleSelected}
+                indeterminate={someVisibleSelected}
+                onChange={toggleSelectAll}
+                title="Выбрать все"
+              />
+            </th>
             <th className="col-golden">Эталон</th>
             <th className="col-arrow"></th>
             <th className="col-cand">Кандидат</th>
