@@ -579,24 +579,22 @@ function ResultsTable({ groups, selected, toggleSelect, toggleSelectGroup, remov
                       className={`row ${isSel ? "row-selected" : ""} ${i === 0 ? "row-first" : ""} ${i === candidates.length - 1 ? "row-last" : ""}`}
                     >
                       <td className="col-check">
-                        {i === 0 ? (
-                          <Checkbox
-                            checked={allSelected}
-                            indeterminate={someSelected}
-                            onChange={() => toggleSelectGroup(g.golden_id)}
-                          />
-                        ) : (
-                          <Checkbox
-                            checked={isSel}
-                            onChange={() => toggleSelect(g.golden_id, c.id)}
-                          />
-                        )}
+                        <Checkbox
+                          checked={isSel}
+                          onChange={() => toggleSelect(g.golden_id, c.id)}
+                        />
                       </td>
                       <td className="col-golden">
                         {i === 0 ? (
                           <div className="golden-cell">
                             <span className="golden-name">{g.golden_name}</span>
                             <span className="golden-meta">
+                              <Checkbox
+                                checked={allSelected}
+                                indeterminate={someSelected}
+                                onChange={() => toggleSelectGroup(g.golden_id)}
+                                title="Выбрать всю группу"
+                              />
                               <span className="badge-count">{candidates.length}</span>
                               <button
                                 className="cell-btn"
@@ -641,13 +639,13 @@ function ResultsTable({ groups, selected, toggleSelect, toggleSelectGroup, remov
   );
 }
 
-function Checkbox({ checked, indeterminate, onChange }) {
+function Checkbox({ checked, indeterminate, onChange, title }) {
   const ref = React.useRef(null);
   React.useEffect(() => {
     if (ref.current) ref.current.indeterminate = !!indeterminate;
   }, [indeterminate]);
   return (
-    <label className="cb">
+    <label className="cb" title={title}>
       <input ref={ref} type="checkbox" checked={!!checked} onChange={onChange} />
       <span className="cb-box">
         {checked && !indeterminate && <Icon name="check" size={11} />}
