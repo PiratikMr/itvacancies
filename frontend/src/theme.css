@@ -50,6 +50,9 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--text-5); border-radius: 4px; }
 input[type=date] { font-family: 'Onest', sans-serif; appearance: none; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
@@ -70,22 +73,31 @@ input[type=date] { font-family: 'Onest', sans-serif; appearance: none; }
   .mob-sidebar { transform: translateX(-244px) !important; transition: transform .28s cubic-bezier(.22,1,.36,1) !important; }
   .mob-sidebar.open { transform: translateX(0) !important; box-shadow: 6px 0 32px rgba(0,0,0,.22) !important; }
   .mob-main { margin-left: 0 !important; }
-  .mob-content { padding: 14px 14px 76px !important; }
+  .mob-content { padding: 14px 14px calc(80px + env(safe-area-inset-bottom)) !important; }
   .mob-topbar { padding: 0 14px !important; gap: 10px; }
   .mob-kpi { grid-template-columns: repeat(2, 1fr) !important; }
   .mob-2col { grid-template-columns: 1fr !important; }
   .mob-hide { display: none !important; }
   .mob-show { display: flex !important; }
-  .mob-bnav { display: flex !important; }
+  .mob-bnav { display: flex !important; padding-bottom: env(safe-area-inset-bottom); }
   .mob-table { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; border-radius: 12px; }
   .mob-tmin { min-width: 560px; }
   .mob-tmin7 { min-width: 900px; }
   .mob-kpi-val { font-size: 20px !important; letter-spacing: -.03em !important; }
   .mob-page-sub { display: none !important; }
-  .mob-bnav span { font-size: 11px !important; }
-  .mob-bnav > div { min-height: 52px !important; padding: 6px 4px !important; }
+  .mob-bnav .bnav-label { font-size: 10.5px !important; }
+  .mob-bnav button { min-height: 56px !important; }
+  .mob-bnav button:active { background: var(--hover) !important; }
   .mob-map { height: 380px !important; }
   .mob-topbar h1 { font-size: 15px !important; }
+
+  .mob-filters { padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important; }
+  .fchip { padding: 8px 13px !important; font-size: 13px !important; border-radius: 8px !important; }
+  .salary-inp { padding: 11px 10px !important; font-size: 16px !important; border-radius: 8px !important; }
+  .facet-trigger { padding: 12px 12px !important; }
+  .facet-search { padding: 12px 12px !important; font-size: 16px !important; }
+  .facet-opt { padding: 11px 12px !important; font-size: 14px !important; }
+  .pager-btn { min-width: 42px !important; height: 42px !important; font-size: 14px !important; }
 }
 @media (min-width: 769px) {
   .mob-bnav { display: none !important; }

@@ -8,11 +8,14 @@ export interface AreaPoint {
   year?: string;
 }
 
-export function AreaChart({ data }: { data: AreaPoint[] }) {
-  const W = 780, H = 230, pL = 14, pR = 18, pT = 36, pB = 30;
+export function AreaChart({ data, mobile = false }: { data: AreaPoint[]; mobile?: boolean }) {
+  const W = mobile ? 340 : 780, H = mobile ? 210 : 230;
+  const pL = 14, pR = 18, pT = 36, pB = 30;
   const cW = W - pL - pR, cH = H - pT - pB;
+  const fs = mobile ? 12.5 : 11.5;
+  const labelTarget = mobile ? 5 : 8;
 
-  const { pts, linePath, areaPath, mx, step } = useMemo(() => {
+  const { pts, linePath, areaPath, step } = useMemo(() => {
     const vals = data.map((d) => d.y);
     const mx = Math.max(1, ...vals);
     const n = Math.max(1, data.length - 1);
@@ -31,11 +34,15 @@ export function AreaChart({ data }: { data: AreaPoint[] }) {
     const areaPath = pts.length
       ? `${linePath} L${(pL + cW).toFixed(1)},${pT + cH} L${pL},${pT + cH} Z`
       : "";
-    const step = Math.max(1, Math.ceil(pts.length / 8));
-    return { pts, linePath, areaPath, mx, step };
-  }, [data]);
+    const step = Math.max(1, Math.ceil(pts.length / labelTarget));
+    return { pts, linePath, areaPath, step };
+  }, [data, cW, cH, labelTarget]);
 
-  const labeled = (i: number) => i % step === 0 || i === pts.length - 1;
+  const lastIdx = pts.length - 1;
+  const labeled = (i: number) => i === lastIdx || (i % step === 0 && lastIdx - i >= Math.ceil(step * 0.6));
+  const labeledIdx = pts.map((_, i) => i).filter(labeled);
+  const firstLbl = labeledIdx[0], lastLbl = labeledIdx[labeledIdx.length - 1];
+  const anchorFor = (i: number): "start" | "end" | "middle" => (i === firstLbl ? "start" : i === lastLbl ? "end" : "middle");
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }}>
@@ -70,7 +77,7 @@ export function AreaChart({ data }: { data: AreaPoint[] }) {
 
       {pts.map((p, i) =>
         labeled(i) ? (
-          <text key={"vl" + i} x={p.x} y={(p.y - 11).toFixed(1)} textAnchor="middle" fontSize={11.5} fontWeight={700} fill="#4F46E5"
+          <text key={"vl" + i} x={p.x.toFixed(1)} y={(p.y - 11).toFixed(1)} textAnchor={anchorFor(i)} fontSize={fs} fontWeight={700} fill="#4F46E5"
             style={{ paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 3, strokeLinejoin: "round", opacity: 0, animation: `fadeIn .4s ease ${0.6 + i * 0.02}s both` }}>
             {compact(p.v)}
           </text>
@@ -93,7 +100,7 @@ export function AreaChart({ data }: { data: AreaPoint[] }) {
             lastYear = p.year;
           }
           return (
-            <text key={"xl" + i} x={p.x} y={H - 6} textAnchor="middle" fill="var(--text-4)" fontSize={11.5}>
+            <text key={"xl" + i} x={p.x.toFixed(1)} y={H - 6} textAnchor={anchorFor(i)} fill="var(--text-4)" fontSize={fs}>
               {label}
             </text>
           );

@@ -4,8 +4,9 @@ import { compact } from "../lib/format";
 
 export interface ComboPoint { x: string; bar: number; line: number; year?: string }
 
-export function ComboChart({ data, barName, lineName }: { data: ComboPoint[]; barName: string; lineName: string }) {
-  const W = 760, H = 300, pL = 32, pR = 34, pT = 26, pB = 26;
+export function ComboChart({ data, barName, lineName, mobile = false }: { data: ComboPoint[]; barName: string; lineName: string; mobile?: boolean }) {
+  const W = mobile ? 340 : 760, H = mobile ? 260 : 300;
+  const pL = mobile ? 28 : 32, pR = mobile ? 30 : 34, pT = 26, pB = 26;
   const cW = W - pL - pR, cH = H - pT - pB;
   const n = Math.max(1, data.length);
   const barMax = Math.max(1, ...data.map((d) => d.bar));
@@ -15,12 +16,17 @@ export function ComboChart({ data, barName, lineName }: { data: ComboPoint[]; ba
   const xc = (i: number) => pL + (i + 0.5) * slot;
   const yBar = (v: number) => pT + cH - (v / barMax) * cH;
   const yLine = (v: number) => pT + cH - (v / lineMax) * cH;
-  const step = Math.max(1, Math.ceil(data.length / 7));
-  const labeled = (i: number) => i % step === 0 || i === data.length - 1;
+  const axisFs = mobile ? 11.5 : 10.5, lblFs = mobile ? 12 : 11;
+  const step = Math.max(1, Math.ceil(data.length / (mobile ? 5 : 7)));
+  const lastIdx = data.length - 1;
+  const labeled = (i: number) => i === lastIdx || (i % step === 0 && lastIdx - i >= Math.ceil(step * 0.6));
+  const labeledIdx = data.map((_, i) => i).filter(labeled);
+  const firstLbl = labeledIdx[0], lastLbl = labeledIdx[labeledIdx.length - 1];
+  const anchorFor = (i: number): "start" | "end" | "middle" => (i === firstLbl ? "start" : i === lastLbl ? "end" : "middle");
 
   const linePath = useMemo(
     () => data.map((d, i) => `${i ? "L" : "M"}${xc(i).toFixed(1)},${yLine(d.line).toFixed(1)}`).join(" "),
-    [data]
+    [data, mobile]
   );
 
   return (
@@ -30,8 +36,8 @@ export function ComboChart({ data, barName, lineName }: { data: ComboPoint[]; ba
         return (
           <g key={f}>
             <line x1={pL} x2={W - pR} y1={gy} y2={gy} stroke="var(--track)" strokeWidth={1} />
-            <text x={pL - 7} y={gy + 4} textAnchor="end" fontSize={10.5} fill="var(--text-4)">{compact(barMax * f)}</text>
-            <text x={W - pR + 7} y={gy + 4} textAnchor="start" fontSize={10.5} fill="#4F46E5">{(lineMax * f).toFixed(1)}</text>
+            <text x={pL - 7} y={gy + 4} textAnchor="end" fontSize={axisFs} fill="var(--text-4)">{compact(barMax * f)}</text>
+            <text x={W - pR + 7} y={gy + 4} textAnchor="start" fontSize={axisFs} fill="#4F46E5">{(lineMax * f).toFixed(1)}</text>
           </g>
         );
       })}
@@ -48,14 +54,14 @@ export function ComboChart({ data, barName, lineName }: { data: ComboPoint[]; ba
           style={{ opacity: 0, animation: `fadeIn .3s ease ${0.5 + i * 0.03}s both` }} />
       ))}
       {data.map((d, i) => labeled(i) ? (
-        <text key={"ll" + i} x={xc(i)} y={(yLine(d.line) - 9).toFixed(1)} textAnchor="middle" fontSize={11} fontWeight={700} fill="#4F46E5"
+        <text key={"ll" + i} x={xc(i).toFixed(1)} y={(yLine(d.line) - 9).toFixed(1)} textAnchor={anchorFor(i)} fontSize={lblFs} fontWeight={700} fill="#4F46E5"
           style={{ paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 3, strokeLinejoin: "round", opacity: 0, animation: `fadeIn .4s ease ${0.7 + i * 0.02}s both` }}>{d.line}</text>
       ) : null)}
 
       {(() => { let ly = ""; return data.map((d, i) => {
         if (!labeled(i)) return null;
         let lab = d.x; if (d.year && d.year !== ly) { lab = `${d.x} ${d.year}`; ly = d.year; }
-        return <text key={"x" + i} x={xc(i)} y={H - 6} textAnchor="middle" fontSize={11} fill="var(--text-4)">{lab}</text>;
+        return <text key={"x" + i} x={xc(i).toFixed(1)} y={H - 6} textAnchor={anchorFor(i)} fontSize={lblFs} fill="var(--text-4)">{lab}</text>;
       }); })()}
     </svg>
   );

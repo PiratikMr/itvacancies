@@ -6,6 +6,7 @@ import type { Filters } from "../state/filters";
 import { Notice, Track, Pager, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { Card, KpiGrid, StatCard, TableCard } from "../components/ui";
 import { tip } from "../lib/tooltip";
+import { useIsMobile } from "../lib/useIsMobile";
 import { nfmt, salary } from "../lib/format";
 import { tableTh as th, tableTd as td, capsLabel } from "../lib/tokens";
 
@@ -27,6 +28,7 @@ export function SkillsPage({ filters }: { filters: Filters }) {
 }
 
 function SkillsBody({ data, loading, offset, onOffset, sort, onSort }: { data: SkillsResponse; loading: boolean; offset: number; onOffset: (o: number) => void; sort: Sort; onSort: (s: Sort) => void }) {
+  const mobile = useIsMobile();
   const k = data.kpis;
   const market = data.market_median || 1;
 
@@ -67,6 +69,30 @@ function SkillsBody({ data, loading, offset, onOffset, sort, onSort }: { data: S
       </Card>
 
       <TableCard title="Все навыки">
+        {mobile ? (
+          <div>
+            {data.table.rows.map((s, i) => {
+              const prem = Math.round((s.median / market - 1) * 100);
+              return (
+                <div key={s.name} {...tip(`${s.name} · ${nfmt(s.count)} упоминаний · медиана ${salary(s.median)}`)}
+                  style={{ padding: "12px 16px", borderBottom: "1px solid var(--hover)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text)" }}>
+                      <span style={{ color: "var(--text-5)", fontWeight: 700, marginRight: 8 }}>{offset + i + 1}</span>{s.name}
+                    </span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: prem >= 0 ? "#059669" : "#DC2626", background: prem >= 0 ? "var(--tint-green)" : "var(--tint-red)", padding: "2px 7px", borderRadius: 5, flexShrink: 0 }}>{prem >= 0 ? "+" : ""}{prem}%</span>
+                  </div>
+                  <div style={{ marginTop: 7 }}>
+                    <Track pct={(s.count / tableMax) * 100} color="#4F46E5" height={6} />
+                  </div>
+                  <div style={{ marginTop: 8, fontSize: 12.5, color: "var(--text-4)" }}>
+                    {nfmt(s.count)} упоминаний · медиана <span style={{ fontWeight: 700, color: "var(--text-2)" }}>{salary(s.median)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
@@ -102,6 +128,7 @@ function SkillsBody({ data, loading, offset, onOffset, sort, onSort }: { data: S
             </tbody>
           </table>
         </div>
+        )}
         <Pager total={data.table.total} limit={data.table.limit} offset={offset} onOffset={onOffset} />
       </TableCard>
     </div>

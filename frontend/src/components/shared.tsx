@@ -59,7 +59,7 @@ export function Pager({ total, limit, offset, onOffset }: { total: number; limit
   }
 
   const btn = (label: string, p: number, active: boolean, dis: boolean) => (
-    <div key={label + p} onClick={dis ? undefined : () => go(p)}
+    <div key={label + p} onClick={dis ? undefined : () => go(p)} className="pager-btn"
       style={{ minWidth: 32, height: 32, padding: "0 10px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, fontSize: 13, fontWeight: active ? 700 : 500, cursor: dis ? "default" : "pointer", color: active ? "var(--on-accent)" : dis ? "var(--text-5)" : "var(--text-2)", background: active ? "var(--accent)" : "var(--surface)", border: "1px solid", borderColor: active ? "var(--accent)" : "var(--border)" }}>
       {label}
     </div>

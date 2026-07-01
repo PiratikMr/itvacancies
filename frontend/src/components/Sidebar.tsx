@@ -81,7 +81,7 @@ export function Sidebar({
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "12px 10px 16px" }}>
+      <div className="mob-filters" style={{ flex: 1, overflowY: "auto", padding: "12px 10px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 8px 10px" }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Фильтры</div>
           {hasActiveFilters(filters) && (
@@ -98,8 +98,8 @@ export function Sidebar({
         <div style={{ padding: "0 6px 13px", marginBottom: 13, borderBottom: "1px solid var(--track)" }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", marginBottom: 7 }}>Зарплата, ₽/мес</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-            <input type="number" placeholder="от" min={0} max={salaryMax ?? undefined} step={10000} value={filters.salaryMin ?? ""} onChange={(e) => onMin(e.target.value)} style={inp} />
-            <input type="number" placeholder="до" min={0} max={salaryMax ?? undefined} step={10000} value={filters.salaryMax ?? ""} onChange={(e) => onMax(e.target.value)} style={inp} />
+            <input type="number" inputMode="numeric" className="salary-inp" placeholder="от" min={0} max={salaryMax ?? undefined} step={10000} value={filters.salaryMin ?? ""} onChange={(e) => onMin(e.target.value)} style={inp} />
+            <input type="number" inputMode="numeric" className="salary-inp" placeholder="до" min={0} max={salaryMax ?? undefined} step={10000} value={filters.salaryMax ?? ""} onChange={(e) => onMax(e.target.value)} style={inp} />
           </div>
         </div>
 

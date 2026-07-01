@@ -5,6 +5,7 @@ import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
 import { Notice, Pager, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { TableCard } from "../components/ui";
+import { useIsMobile } from "../lib/useIsMobile";
 import { salary } from "../lib/format";
 import { tableTh as th, tableTd as td, capsLabel } from "../lib/tokens";
 
@@ -45,6 +46,48 @@ function VacanciesBody({ data, loading, offset, onOffset, sort, onSort }: {
   data: VacanciesResponse; loading: boolean; offset: number; onOffset: (o: number) => void;
   sort: Sort; onSort: (s: Sort) => void;
 }) {
+  const mobile = useIsMobile();
+
+  if (mobile) {
+    return (
+      <div style={{ opacity: loading ? 0.55 : 1, transition: "opacity .15s" }}>
+        <TableCard title="Актуальные вакансии" subtitle="Только активные">
+          <div>
+            {data.rows.map((v: VacancyRow) => {
+              const days = daysSince(v.published_at);
+              const exp = v.experience && v.experience !== "Не указано" ? v.experience : null;
+              const grades = (v.grades || []).filter(Boolean);
+              const scheds = (v.schedules || []).filter(Boolean);
+              return (
+                <div key={v.vacancy_id} className="vac-row"
+                  onClick={() => v.url && window.open(v.url, "_blank", "noopener")}
+                  style={{ padding: "13px 16px", borderBottom: "1px solid var(--hover)", cursor: v.url ? "pointer" : "default" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+                    <div className="vac-title" style={{ fontSize: 15, fontWeight: 600, color: "var(--text)", lineHeight: 1.3 }}>{v.title}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", whiteSpace: "nowrap", flexShrink: 0 }}>{salary(v.salary)}</div>
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--text-4)", marginTop: 2 }}>{v.employer || "—"}</div>
+                  {(grades.length > 0 || scheds.length > 0) && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+                      {grades.length > 0 && <Chips items={grades} color={(g) => GRADE_COLOR[g] || "var(--text-3)"} />}
+                      {scheds.length > 0 && <Chips items={scheds} color={fmtColor} />}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 12px", marginTop: 8, fontSize: 12.5, color: "var(--text-4)" }}>
+                    {exp && <span>Опыт: {exp}</span>}
+                    <span>{v.platform}</span>
+                    <span style={{ fontWeight: days === 0 ? 700 : 500, color: days === 0 ? "#059669" : "var(--text-4)" }}>{days === 0 ? "Сегодня" : `${days} дн. назад`}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <Pager total={data.total} limit={data.limit} offset={offset} onOffset={onOffset} />
+        </TableCard>
+      </div>
+    );
+  }
+
   return (
     <div style={{ opacity: loading ? 0.55 : 1, transition: "opacity .15s" }}>
       <TableCard title="Актуальные вакансии" subtitle="Только активные">

@@ -41,7 +41,7 @@ function SalaryBody({ data, loading }: { data: SalaryResponse; loading: boolean 
         <StatCard label="Разрыв Sr / Jr" value={k.sr_jr_ratio ? `${k.sr_jr_ratio}×` : "—"} accent />
       </KpiGrid>
 
-      <Card title="Диапазон зарплат по грейдам" subtitle="Разброс зарплат, тыс. ₽" style={{ marginBottom: 12 }}>
+      <Card title="Диапазон зарплат по грейдам" subtitle="Разброс зарплат, ₽" style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {bands.map((g) => {
             const color = GRADE_COLOR[g.name] ?? "#9CA3AF";
@@ -111,7 +111,7 @@ function SalaryBody({ data, loading }: { data: SalaryResponse; loading: boolean 
         </Card>
       </div>
 
-      <Card title="Медиана ЗП по направлениям" subtitle="Тыс. ₽">
+      <Card title="Медиана ЗП по направлениям">
         <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
           {data.by_direction.map((d) => (
             <div key={d.name} {...tip(`${d.name}: медиана ${salary(d.median)} · ${nfmt(d.count)} вак.`)}>

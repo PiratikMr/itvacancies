@@ -7,6 +7,7 @@ import { Notice, Track, SortTh, NO_SORT, type Sort } from "../components/shared"
 import { Card, KpiGrid, StatCard, TableCard } from "../components/ui";
 import { GeoMap } from "../charts/GeoMap";
 import { tip } from "../lib/tooltip";
+import { useIsMobile } from "../lib/useIsMobile";
 import { nfmt, salary, salaryFull } from "../lib/format";
 import { tableTh as th, tableTd as td, capsLabel } from "../lib/tokens";
 
@@ -18,6 +19,7 @@ export function GeoPage({ filters }: { filters: Filters }) {
 }
 
 function GeoBody({ data, loading }: { data: GeoResponse; loading: boolean }) {
+  const mobile = useIsMobile();
   const k = data.kpis;
   const dark = document.body.classList.contains("dark");
   const maxV = Math.max(1, ...data.countries.map((c) => c.count));
@@ -49,6 +51,32 @@ function GeoBody({ data, loading }: { data: GeoResponse; loading: boolean }) {
       </Card>
 
       <TableCard title="Вакансии по странам">
+        {mobile ? (
+          <div>
+            {countries.map((c, i) => {
+              const ru = c.name === "Россия";
+              return (
+                <div key={c.name} {...tip(`${c.name}: ${nfmt(c.count)} вак · ${c.cities} городов · медиана ${salary(c.median)} · ${c.remote_pct}% удал.`)}
+                  style={{ padding: "12px 16px", borderBottom: "1px solid var(--hover)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: ru ? "#4F46E5" : "var(--text)" }}>
+                      <span style={{ color: "var(--text-5)", fontWeight: 700, marginRight: 8 }}>{i + 1}</span>{c.name}
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", whiteSpace: "nowrap", flexShrink: 0 }}>{nfmt(c.count)} вак.</span>
+                  </div>
+                  <div style={{ marginTop: 7 }}>
+                    <Track pct={Math.sqrt(c.count / maxV) * 100} color={ru ? "linear-gradient(90deg,#4F46E5,#818CF8)" : "linear-gradient(90deg,#06B6D4,#67E8F9)"} height={6} />
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "2px 12px", marginTop: 8, fontSize: 12.5, color: "var(--text-4)" }}>
+                    <span>{c.cities} городов</span>
+                    <span>медиана {salary(c.median)}</span>
+                    <span>удалённо {c.remote_pct}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
@@ -84,6 +112,7 @@ function GeoBody({ data, loading }: { data: GeoResponse; loading: boolean }) {
             </tbody>
           </table>
         </div>
+        )}
       </TableCard>
     </div>
   );

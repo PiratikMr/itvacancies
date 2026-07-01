@@ -59,7 +59,12 @@ export function TopBar({
           </div>
         </div>
 
-        <div onClick={onToggleTheme} title="Сменить тему" style={{ width: 32, height: 32, background: "var(--track)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+        <div className="mob-show" title={fx.live ? `Курс ЦБ РФ на ${fx.date || "сегодня"}` : "Курс ЦБ РФ · резервные значения"} style={{ display: "none", alignItems: "center", gap: 7, padding: "5px 9px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, flexShrink: 0 }}>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--text-2)", whiteSpace: "nowrap" }}>$ {fx.usd.toFixed(1)}</span>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--text-3)", whiteSpace: "nowrap" }}>€ {fx.eur.toFixed(1)}</span>
+        </div>
+
+        <div onClick={onToggleTheme} title="Сменить тему" style={{ width: 32, height: 32, background: "var(--track)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
           {dark ? (
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--text-3)" }} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
