@@ -3,18 +3,22 @@ from __future__ import annotations
 from app.queries.common import ACTIVE, order_by, where_with
 
 _SORT_COLS = {
-    "title":      "title",
     "salary":     "salary",
-    "grade":      "arrayElement(grades, 1)",
-    "experience": "experience",
-    "format":     "arrayElement(schedules, 1)",
-    "platform":   "platform",
+    "grade":      "arrayElement(grades_sort, 1)",
+    "experience": "experience_min_years * 1000 + experience_max_years",
     "date":       "published_at",
 }
 
 
 def rows(table: str, where: str, limit: int, offset: int, sort: str, direction: str) -> str:
     w = where_with(where, ACTIVE)
+    cols = _SORT_COLS
+    if sort == "experience":
+        unspecified_last = -1 if direction == "desc" else 999999
+        cols = {**_SORT_COLS, "experience": f"""
+            if(experience_min_years = 255, {unspecified_last},
+               toInt32(experience_min_years) * 1000 + toInt32(experience_max_years))
+        """}
     return f"""
         SELECT
             vacancy_id,
@@ -29,7 +33,7 @@ def rows(table: str, where: str, limit: int, offset: int, sort: str, direction: 
             published_at
         FROM {table}
         {w}
-        ORDER BY {order_by(sort, direction, _SORT_COLS, "date", "vacancy_id DESC")}
+        ORDER BY {order_by(sort, direction, cols, "date", "vacancy_id DESC")}
         LIMIT {limit} OFFSET {offset}
     """
 

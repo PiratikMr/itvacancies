@@ -11,7 +11,7 @@ keep_dumps = conf_tree.get_int("Dags.BackupDB.keepDumps")
 CLEAN_STAGING_CMD = r"""
 set -euo pipefail
 PGPASSWORD="$PG_PASS" psql -v ON_ERROR_STOP=1 \
-  -h "$HOST_APP_POSTGRES" -U "$PG_USER" -d "$PG_DB" <<'SQL'
+  -h "$HOST_APP_POSTGRES" -U "$PG_USER" -d "$PG_DB" <<'SQL' 2>&1
 DO $$
 DECLARE
     r record;

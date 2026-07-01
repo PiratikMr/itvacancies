@@ -75,7 +75,7 @@ function SkillsBody({ data, loading, offset, onOffset, sort, onSort }: { data: S
                 <th style={th}><SortTh label="Навык" col="name" sort={sort} onSort={onSort} /></th>
                 <th style={{ ...th, width: "34%" }}><SortTh label="Упоминаний" col="count" sort={sort} onSort={onSort} /></th>
                 <th style={th}><SortTh label="Медиана ЗП" col="median" sort={sort} onSort={onSort} align="right" /></th>
-                <th style={{ ...th, ...capsLabel, paddingRight: 22, textAlign: "right" }}>vs рынок</th>
+                <th style={{ ...th, paddingRight: 22 }}><SortTh label="vs рынок" col="median" sort={sort} onSort={onSort} align="right" /></th>
               </tr>
             </thead>
             <tbody>

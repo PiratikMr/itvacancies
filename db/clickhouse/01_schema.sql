@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS analytics.vacancies (
     employer        LowCardinality(String),
     currency        LowCardinality(String),
     experience      LowCardinality(String),
+    experience_min_years UInt8,
+    experience_max_years UInt8,
     latitude        Float32,
     longitude       Float32,
     salary          Float64,
@@ -23,10 +25,12 @@ CREATE TABLE IF NOT EXISTS analytics.vacancies (
                 )),
     fields      Array(LowCardinality(String)),
     grades      Array(LowCardinality(String)),
+    grades_sort Array(UInt8),
     employments Array(LowCardinality(String)),
     languages   Array(Tuple(
-                    language LowCardinality(String),
-                    level    LowCardinality(String)
+                    language   LowCardinality(String),
+                    level      LowCardinality(String),
+                    level_sort UInt8
                 ))
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(published_at)

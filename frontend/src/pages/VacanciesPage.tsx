@@ -6,7 +6,7 @@ import type { Filters } from "../state/filters";
 import { Notice, Pager, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { TableCard } from "../components/ui";
 import { salary } from "../lib/format";
-import { tableTh as th, tableTd as td } from "../lib/tokens";
+import { tableTh as th, tableTd as td, capsLabel } from "../lib/tokens";
 
 const LIMIT = 20;
 const GRADE_COLOR: Record<string, string> = {
@@ -52,12 +52,12 @@ function VacanciesBody({ data, loading, offset, onOffset, sort, onSort }: {
           <table style={{ width: "100%", minWidth: 760, borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
               <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--track)" }}>
-                <th style={{ ...th, paddingLeft: 22 }}><SortTh label="Вакансия / Компания" col="title" sort={sort} onSort={onSort} /></th>
+                <th style={{ ...th, ...capsLabel, paddingLeft: 22, textAlign: "left" }}>Вакансия / Компания</th>
                 <th style={th}><SortTh label="ЗП" col="salary" sort={sort} onSort={onSort} /></th>
                 <th style={th}><SortTh label="Грейд" col="grade" sort={sort} onSort={onSort} /></th>
                 <th style={th}><SortTh label="Опыт" col="experience" sort={sort} onSort={onSort} /></th>
-                <th style={th}><SortTh label="Формат" col="format" sort={sort} onSort={onSort} /></th>
-                <th style={th}><SortTh label="Площадка" col="platform" sort={sort} onSort={onSort} /></th>
+                <th style={{ ...th, ...capsLabel, textAlign: "left" }}>Формат</th>
+                <th style={{ ...th, ...capsLabel, textAlign: "left" }}>Площадка</th>
                 <th style={th}><SortTh label="Дней" col="date" sort={sort} onSort={onSort} /></th>
                 <th style={{ ...th, paddingRight: 22 }} />
               </tr>

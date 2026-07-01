@@ -8,9 +8,10 @@ INSERT_BATCH_SIZE = 50_000
 
 COLUMNS = [
     'vacancy_id', 'platform', 'employer', 'currency', 'experience',
+    'experience_min_years', 'experience_max_years',
     'latitude', 'longitude', 'salary', 'has_range', 'published_at',
     'title', 'url', 'closed_at', 'is_active', 'skills', 'schedules', 'locations',
-    'fields', 'grades', 'employments', 'languages',
+    'fields', 'grades', 'grades_sort', 'employments', 'languages',
 ]
 
 HAS_RANGE_IDX = COLUMNS.index('has_range')
@@ -49,7 +50,7 @@ def sync_mv_core_vacancy():
             for item in (row[LOCATIONS_IDX] or [])
         ]
         row[LANGUAGES_IDX] = [
-            (item['language'], item['level'])
+            (item['language'], item['level'], item['level_sort'])
             for item in (row[LANGUAGES_IDX] or [])
         ]
 
