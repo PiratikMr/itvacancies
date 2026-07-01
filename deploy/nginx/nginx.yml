@@ -9,23 +9,23 @@ services:
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
       - ./snippets:/etc/nginx/templates/snippets:ro
-      - ./static:/etc/nginx/static:ro
       - ./entrypoint.sh:/etc/nginx/entrypoint.sh:ro
       - ./ssl:/etc/nginx/ssl:ro
     environment:
       DOMAIN: ${DOMAIN}
-      SUPERSET_SUBDOMAIN: ${SUPERSET_SUBDOMAIN}
       AIRFLOW_SUBDOMAIN: ${AIRFLOW_SUBDOMAIN}
       GRAFANA_SUBDOMAIN: ${GRAFANA_SUBDOMAIN}
-      SUPERSET_DASHBOARD_PATH: ${SUPERSET_DASHBOARD_PATH}
-      
-      SUPERSET_UPSTREAM: ${HOST_SUPERSET}:8088
+
+      FRONTEND_UPSTREAM: ${HOST_FRONTEND}:80
+      API_UPSTREAM: ${HOST_API}:8000
+
       AIRFLOW_UPSTREAM: ${HOST_AIRFLOW_WEBSERVER}:8080
       GRAFANA_UPSTREAM: ${HOST_GRAFANA}:3000
     restart: unless-stopped
     networks:
       - data_platform_net
     depends_on:
-      - superset
+      - frontend
+      - api
       - airflow-webserver
       - grafana
