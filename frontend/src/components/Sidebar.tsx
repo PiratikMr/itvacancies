@@ -51,7 +51,7 @@ export function Sidebar({
 
   return (
     <aside className={"mob-sidebar" + (open ? " open" : "")} style={{ width: 244, background: "var(--surface)", borderRight: "1px solid var(--border)", position: "fixed", top: 0, left: 0, height: "100vh", display: "flex", flexDirection: "column", zIndex: 50 }}>
-      <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--track)", flexShrink: 0 }}>
+      <div className="desk-hide" style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--track)", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
             <div style={{ width: 34, height: 34, background: "#4F46E5", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -71,7 +71,7 @@ export function Sidebar({
         </div>
       </div>
 
-      <div style={{ padding: "9px 14px", borderBottom: "1px solid var(--track)", flexShrink: 0 }}>
+      <div className="side-date" style={{ padding: "9px 14px", borderBottom: "1px solid var(--track)", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "7px 10px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--text-3)" }} strokeWidth={2} strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
           <div>

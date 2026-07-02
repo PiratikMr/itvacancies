@@ -32,6 +32,10 @@ function GeoBody({ data, loading }: { data: GeoResponse; loading: boolean }) {
     arr.sort((a, b) => {
       const av = a[key] as string | number, bv = b[key] as string | number;
       if (typeof av === "string") return sort.dir === "asc" ? av.localeCompare(bv as string) : (bv as string).localeCompare(av);
+      if (key === "median") {
+        const ae = (av as number) <= 0, be = (bv as number) <= 0;
+        if (ae !== be) return ae ? 1 : -1;
+      }
       return sort.dir === "asc" ? (av as number) - (bv as number) : (bv as number) - (av as number);
     });
     return arr;

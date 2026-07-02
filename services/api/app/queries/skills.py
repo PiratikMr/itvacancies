@@ -52,6 +52,7 @@ def english_levels(table: str, where: str) -> str:
 
 
 _TABLE_SORT = {"name": "name", "count": "count", "median": "median"}
+_EMPTIES = {"median": "median <= 0"}
 
 
 def skills_table(table: str, where: str, limit: int, offset: int,
@@ -60,7 +61,7 @@ def skills_table(table: str, where: str, limit: int, offset: int,
         SELECT arrayJoin(skills) AS name, count() AS count, {MEDIAN_SALARY} AS median
         FROM {table} {where}
         GROUP BY name HAVING count >= {MIN_SKILL_COUNT}
-        ORDER BY {order_by(sort, direction, _TABLE_SORT, "count", "name ASC")}
+        ORDER BY {order_by(sort, direction, _TABLE_SORT, "count", "name ASC", _EMPTIES)}
         LIMIT {limit} OFFSET {offset}
     """
 

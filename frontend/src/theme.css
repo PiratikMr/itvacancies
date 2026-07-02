@@ -30,8 +30,8 @@ body.dark .leaflet-control-attribution { background: rgba(20,24,30,.55) !importa
 
 .topnav { scrollbar-width: none; }
 .topnav::-webkit-scrollbar { height: 0; display: none; }
-.topnav-item { transition: background .12s ease, color .12s ease; }
-.topnav-item:hover { background: var(--hover); }
+.topnav-item { transition: background .12s ease, color .12s ease, border-color .18s ease; }
+.topnav-item:hover { background: var(--hover); color: var(--text-2); }
 
 .vac-row { transition: background .12s ease; }
 .vac-row:hover { background: var(--hover); }
@@ -85,11 +85,13 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
   .mob-tmin7 { min-width: 900px; }
   .mob-kpi-val { font-size: 20px !important; letter-spacing: -.03em !important; }
   .mob-page-sub { display: none !important; }
-  .mob-bnav .bnav-label { font-size: 10.5px !important; }
+  .mob-bnav .bnav-label { font-size: 10px !important; letter-spacing: -0.02em !important; white-space: nowrap; }
+  .mob-bnav button { min-width: 0; }
   .mob-bnav button { min-height: 56px !important; }
   .mob-bnav button:active { background: var(--hover) !important; }
   .mob-map { height: 380px !important; }
-  .mob-topbar h1 { font-size: 15px !important; }
+  .mob-topbar h1 { font-size: 15px !important; display: block !important; }
+  .mob-date { display: none !important; }
 
   .mob-filters { padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important; }
   .fchip { padding: 8px 13px !important; font-size: 13px !important; border-radius: 8px !important; }
@@ -99,7 +101,14 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
   .facet-opt { padding: 11px 12px !important; font-size: 14px !important; }
   .pager-btn { min-width: 42px !important; height: 42px !important; font-size: 14px !important; }
 }
+@media (min-width: 480px) and (max-width: 768px) {
+  .mob-date { display: flex !important; }
+}
+@media (min-width: 480px) {
+  .side-date { display: none !important; }
+}
 @media (min-width: 769px) {
   .mob-bnav { display: none !important; }
   .mob-show { display: none !important; }
+  .desk-hide { display: none !important; }
 }

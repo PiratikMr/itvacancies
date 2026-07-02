@@ -19,7 +19,7 @@ with calculated_salary as (
             else false
         end as has_range
     from fact_vacancy as f
-    -- join dim_currency dc on f.currency_id = dc.currency_id and dc.is_reference = true
+    join dim_currency dc on f.currency_id = dc.currency_id and dc.is_reference = true
     join lateral (
         select rate
         from dim_currency_rate_history
@@ -63,7 +63,7 @@ vacancy_locations as (
     from bridge_vacancy_location b
     join dim_location l on b.location_id = l.location_id
     left join dim_country c on l.country_id = c.country_id
-    -- where l.is_reference = true and c.is_reference = true
+    where (c.country_id is null or c.is_reference = true) -- and l.is_reference = true
     group by b.vacancy_id
 ),
 vacancy_fields as (
@@ -158,5 +158,5 @@ left join vacancy_employments v_emp on f.vacancy_id = v_emp.vacancy_id
 left join vacancy_languages v_lng on f.vacancy_id = v_lng.vacancy_id
 where (p.platform_id is null or p.is_reference = true)
 --  and (e.employer_id is null or e.is_reference = true)
-  -- and (c.currency_id is null or c.is_reference = true)
+  and (c.currency_id is null or c.is_reference = true)
   and (exp.experience_id is null or exp.is_reference = true);
