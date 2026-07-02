@@ -138,7 +138,7 @@ select
     coalesce(v_loc.locations,   '[]'::jsonb)      as locations,
     coalesce(v_fld.fields,      ARRAY[]::text[])  as fields,
     coalesce(v_grd.grades,      ARRAY[]::text[])  as grades,
-    coalesce(v_grd.grades_sort, ARRAY[]::smallint[]) as grades_sort,
+    coalesce(v_grd.grades_sort, ARRAY[255]::smallint[]) as grades_sort,
     coalesce(v_emp.employments, ARRAY[]::text[])  as employments,
     coalesce(v_lng.languages,   '[]'::jsonb)      as languages
 
