@@ -35,9 +35,6 @@ def sync_mv_core_vacancy():
     pg_hook = PostgresHook(postgres_conn_id="POSTGRES_CONN")
     rows = pg_hook.get_records(f"SELECT * FROM {PG_SOURCE}")
 
-    client = _ch_client()
-    client.command(f"TRUNCATE TABLE {CH_TABLE}")
-
     if not rows:
         return
 
@@ -54,8 +51,16 @@ def sync_mv_core_vacancy():
             for item in (row[LANGUAGES_IDX] or [])
         ]
 
+    staging = f"{CH_TABLE}_new"
+    client = _ch_client()
+    client.command(f"CREATE TABLE IF NOT EXISTS {staging} AS {CH_TABLE}")
+    client.command(f"TRUNCATE TABLE {staging}")
+
     for start in range(0, len(data), INSERT_BATCH_SIZE):
-        client.insert(CH_TABLE, data[start:start + INSERT_BATCH_SIZE], column_names=COLUMNS)
+        client.insert(staging, data[start:start + INSERT_BATCH_SIZE], column_names=COLUMNS)
+
+    client.command(f"EXCHANGE TABLES {CH_TABLE} AND {staging}")
+    client.command(f"TRUNCATE TABLE {staging}")
 
 
 def _latest_rub_per_unit(pg_hook, code):
@@ -78,9 +83,12 @@ def write_meta(finished_at):
     eur_rate = _latest_rub_per_unit(pg_hook, "EUR")
 
     client = _ch_client()
-    client.command("TRUNCATE TABLE meta")
+    client.command("CREATE TABLE IF NOT EXISTS meta_new AS meta")
+    client.command("TRUNCATE TABLE meta_new")
     client.insert(
-        "meta",
+        "meta_new",
         [[finished_at, usd_rate, eur_rate]],
         column_names=["finished_at", "usd_rate", "eur_rate"],
     )
+    client.command("EXCHANGE TABLES meta AND meta_new")
+    client.command("TRUNCATE TABLE meta_new")
