@@ -81,6 +81,8 @@ export interface SalaryResponse {
 }
 
 export interface SkillRow { name: string; count: number; median: number; }
+export interface FieldSkillRow { field: string; skill: string; count: number; field_total: number; }
+export interface SkillPairRow { skill_a: string; skill_b: string; count: number; median: number; }
 export interface SkillsResponse {
   kpis: {
     avg_skills: number; english_pct: number;
@@ -89,6 +91,8 @@ export interface SkillsResponse {
   };
   english: { levels: { level: string; count: number; median: number }[]; not_required: number; total: number };
   market_median: number;
+  by_field: FieldSkillRow[];
+  pairs: SkillPairRow[];
   table: { rows: SkillRow[]; total: number; limit: number; offset: number };
 }
 

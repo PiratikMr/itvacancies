@@ -98,12 +98,17 @@ class HHTransformer(
 object HHTransformer {
 
   private val AVG_WORK_HOURS_PER_MONTH: Int = 166
+  private val AVG_SHIFTS_PER_MONTH: Int = 15
 
   import org.apache.spark.sql.Column
-  import org.apache.spark.sql.functions.when
+  import org.apache.spark.sql.functions.{lit, when}
+
 
   private def normalizedSalary(salaryCol: Column, modeIdCol: Column): Column =
-    when(salaryCol.isNotNull && modeIdCol === "HOUR", salaryCol * AVG_WORK_HOURS_PER_MONTH)
+    when(salaryCol.isNull, salaryCol)
+      .when(modeIdCol === "HOUR", salaryCol * AVG_WORK_HOURS_PER_MONTH)
+      .when(modeIdCol === "SHIFT", salaryCol * AVG_SHIFTS_PER_MONTH)
+      .when(modeIdCol.isin("FLY_IN_FLY_OUT", "SERVICE"), lit(null).cast(DoubleType))
       .otherwise(salaryCol)
 
   private val scheme = StructType(Seq(

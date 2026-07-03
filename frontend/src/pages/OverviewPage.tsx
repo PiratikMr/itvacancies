@@ -8,6 +8,7 @@ import { AreaChart } from "../charts/AreaChart";
 import { DonutChart, type DonutSlice } from "../charts/DonutChart";
 import { DirectionBars, FormatBars, PlatformBars } from "../charts/Bars";
 import { tip } from "../lib/tooltip";
+import { useIsMobile } from "../lib/useIsMobile";
 import { nfmt, salary, salaryFull, weekLabel, monthShort, yearOf, isMonthlyBuckets } from "../lib/format";
 
 const GRADE_COLOR: Record<string, string> = {
@@ -23,6 +24,7 @@ export function OverviewPage({ filters }: { filters: Filters }) {
 }
 
 function OverviewBody({ data, loading }: { data: OverviewResponse; loading: boolean }) {
+  const mobile = useIsMobile();
   const k = data.kpis;
   const series = data.timeseries;
   const monthly = isMonthlyBuckets(series.map((t) => t.period));
@@ -49,10 +51,10 @@ function OverviewBody({ data, loading }: { data: OverviewResponse; loading: bool
 
       <div className="mob-2col" style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: 12, marginBottom: 12 }}>
         <Card title="Динамика публикаций" subtitle={monthly ? "Новые вакансии по месяцам" : "Новые вакансии по неделям"}>
-          <AreaChart data={areaData} />
+          <AreaChart data={areaData} mobile={mobile} />
         </Card>
         <Card title="Грейды" subtitle="Доля вакансий" style={{ display: "flex", flexDirection: "column" }}>
-          <DonutChart data={donut} centerLabel="топ-грейд" />
+          <DonutChart data={donut} centerLabel="топ-грейд" mobile={mobile} />
         </Card>
       </div>
 

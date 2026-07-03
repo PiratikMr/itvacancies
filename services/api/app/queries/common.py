@@ -18,11 +18,20 @@ FORMAT_TO_SCHEDULE: dict[str, str] = {
 
 
 def order_by(sort: str, direction: str, columns: dict[str, str],
-             default: str, tiebreak: str = "") -> str:
-    col = columns.get(sort, columns[default])
+             default: str, tiebreak: str = "",
+             empties: dict[str, str] | None = None) -> str:
+    key = sort if sort in columns else default
+    col = columns[key]
     d = "ASC" if direction == "asc" else "DESC"
-    clause = f"{col} {d}"
-    return f"{clause}, {tiebreak}" if tiebreak else clause
+
+    parts: list[str] = []
+    empty_expr = (empties or {}).get(key)
+    if empty_expr:
+        parts.append(f"({empty_expr}) ASC")
+    parts.append(f"{col} {d}")
+    if tiebreak:
+        parts.append(tiebreak)
+    return ", ".join(parts)
 
 
 def where_with(base_where: str, *extra: str) -> str:

@@ -50,6 +50,7 @@ def kpis(table: str, where: str) -> str:
 
 
 _TABLE_SORT = {"name": "name", "count": "count", "active": "active", "median": "median"}
+_EMPTIES = {"median": "median <= 0"}
 
 
 def top_employers(table: str, where: str, limit: int, offset: int,
@@ -64,6 +65,6 @@ def top_employers(table: str, where: str, limit: int, offset: int,
         FROM {table}
         {w}
         GROUP BY name
-        ORDER BY {order_by(sort, direction, _TABLE_SORT, "count", "name ASC")}
+        ORDER BY {order_by(sort, direction, _TABLE_SORT, "count", "name ASC", _EMPTIES)}
         LIMIT {limit} OFFSET {offset}
     """

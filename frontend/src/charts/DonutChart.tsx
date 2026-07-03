@@ -7,8 +7,9 @@ export interface DonutSlice {
   color: string;
 }
 
-export function DonutChart({ data, centerLabel }: { data: DonutSlice[]; centerLabel?: string }) {
-  const cx = 190, cy = 116, r = 64, sw = 24, gap = 2.5;
+export function DonutChart({ data, centerLabel, mobile = false }: { data: DonutSlice[]; centerLabel?: string; mobile?: boolean }) {
+  const cx = mobile ? 90 : 190, cy = mobile ? 90 : 116;
+  const r = mobile ? 58 : 64, sw = mobile ? 22 : 24, gap = 2.5;
   const circ = 2 * Math.PI * r;
   const outerR = r + sw / 2 + 6, lineR = outerR + 22;
   const nameRef = useRef<SVGTextElement>(null);
@@ -31,6 +32,7 @@ export function DonutChart({ data, centerLabel }: { data: DonutSlice[]; centerLa
       const segA = (d.pct / 100) * 2 * Math.PI;
       const midA = -Math.PI / 2 + cumAngle + segA / 2;
       cumAngle += segA;
+      if (mobile) return;
       const p1x = cx + outerR * Math.cos(midA), p1y = cy + outerR * Math.sin(midA);
       const p2x = cx + lineR * Math.cos(midA), p2y = cy + lineR * Math.sin(midA);
       const isRight = Math.cos(midA) >= 0;
@@ -47,7 +49,7 @@ export function DonutChart({ data, centerLabel }: { data: DonutSlice[]; centerLa
       );
     });
     return { arcs, callouts };
-  }, [data]);
+  }, [data, mobile, cx, cy, r, sw, circ, outerR, lineR]);
 
   const setAll = (root: SVGSVGElement, active: number | null) => {
     data.forEach((_, j) => {
@@ -58,35 +60,53 @@ export function DonutChart({ data, centerLabel }: { data: DonutSlice[]; centerLa
     });
   };
 
+  const svg = (
+    <svg viewBox={mobile ? "0 0 180 180" : "0 0 380 236"}
+      style={{ width: "100%", maxWidth: "100%", height: "auto", display: "block" }}
+      onMouseLeave={(e) => {
+        setAll(e.currentTarget, null);
+        if (nameRef.current && top) { nameRef.current.textContent = top.name; nameRef.current.setAttribute("fill", top.color); }
+        if (subRef.current) subRef.current.textContent = centerLabel ?? "";
+      }}>
+      {data.map((d, i) => {
+        const t = tip(`${d.name}: ${d.pct}% вакансий`);
+        return (
+          <g key={"h" + i}
+            onMouseEnter={(e) => {
+              t.onMouseEnter(e);
+              const root = e.currentTarget.ownerSVGElement!;
+              setAll(root, i);
+              if (nameRef.current) { nameRef.current.textContent = d.name; nameRef.current.setAttribute("fill", d.color); }
+              if (subRef.current) subRef.current.textContent = `${d.pct}% вакансий`;
+            }}
+            onMouseMove={t.onMouseMove}
+            onMouseLeave={t.onMouseLeave}>
+            {arcs[i]}
+          </g>
+        );
+      })}
+      {!mobile && callouts}
+      <text ref={nameRef} x={cx} y={cy} textAnchor="middle" fill={top?.color ?? "#4F46E5"} fontSize={mobile ? 20 : 22} fontWeight={800} style={{ transition: "fill .18s ease" }}>{top?.name ?? ""}</text>
+      <text ref={subRef} x={cx} y={cy + (mobile ? 16 : 18)} textAnchor="middle" fill="var(--text-4)" fontSize={mobile ? 11 : 13} fontWeight={500}>{centerLabel ?? ""}</text>
+    </svg>
+  );
+
+  if (!mobile) {
+    return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{svg}</div>;
+  }
+
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
-      <svg viewBox="0 0 380 236" style={{ width: "100%", height: "auto", display: "block" }}
-        onMouseLeave={(e) => {
-          setAll(e.currentTarget, null);
-          if (nameRef.current && top) { nameRef.current.textContent = top.name; nameRef.current.setAttribute("fill", top.color); }
-          if (subRef.current) subRef.current.textContent = centerLabel ?? "";
-        }}>
-        {data.map((d, i) => {
-          const t = tip(`${d.name}: ${d.pct}% вакансий`);
-          return (
-            <g key={"h" + i}
-              onMouseEnter={(e) => {
-                t.onMouseEnter(e);
-                const root = e.currentTarget.ownerSVGElement!;
-                setAll(root, i);
-                if (nameRef.current) { nameRef.current.textContent = d.name; nameRef.current.setAttribute("fill", d.color); }
-                if (subRef.current) subRef.current.textContent = `${d.pct}% вакансий`;
-              }}
-              onMouseMove={t.onMouseMove}
-              onMouseLeave={t.onMouseLeave}>
-              {arcs[i]}
-            </g>
-          );
-        })}
-        {callouts}
-        <text ref={nameRef} x={cx} y={cy} textAnchor="middle" fill={top?.color ?? "#4F46E5"} fontSize={22} fontWeight={800} style={{ transition: "fill .18s ease" }}>{top?.name ?? ""}</text>
-        <text ref={subRef} x={cx} y={cy + 18} textAnchor="middle" fill="var(--text-4)" fontSize={13} fontWeight={500}>{centerLabel ?? ""}</text>
-      </svg>
+    <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1 }}>
+      <div style={{ flex: "0 0 50%", maxWidth: 200 }}>{svg}</div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 11, minWidth: 0 }}>
+        {data.map((d) => (
+          <div key={d.name} {...tip(`${d.name}: ${d.pct}% вакансий`)} style={{ display: "flex", alignItems: "center", gap: 9, minWidth: 0 }}>
+            <span style={{ width: 11, height: 11, borderRadius: 3, background: d.color, flexShrink: 0 }} />
+            <span style={{ fontSize: 14, color: "var(--text-2)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", flexShrink: 0 }}>{d.pct}%</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ const LABEL: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: "var(
 
 export function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <div onClick={onClick} style={{
+    <div onClick={onClick} className="fchip" style={{
       padding: "4px 9px", borderRadius: 6, fontSize: 12, cursor: "pointer",
       background: active ? "#4F46E5" : "var(--track)",
       color: active ? "var(--on-accent)" : "var(--text-3)",
@@ -75,7 +75,7 @@ export function FacetSelect({ title, selected, onChange, initialOptions, search,
     <div style={GROUP}>
       <div style={LABEL}>{title}</div>
 
-      <div onClick={() => setOpen((v) => !v)} style={{
+      <div onClick={() => setOpen((v) => !v)} className="facet-trigger" style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
         padding: "8px 11px", borderRadius: 8, cursor: "pointer",
         border: `1px solid ${open ? "var(--accent)" : "var(--border)"}`,
@@ -102,14 +102,14 @@ export function FacetSelect({ title, selected, onChange, initialOptions, search,
 
       {open && (
         <div style={{ marginTop: 6, border: "1px solid var(--border)", borderRadius: 8, background: "var(--surface)", overflow: "hidden" }}>
-          <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Поиск…"
+          <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Поиск…" className="facet-search"
             style={{ width: "100%", padding: "8px 11px", border: "none", borderBottom: "1px solid var(--track)", fontSize: 12, color: "var(--text-2)", outline: "none", background: "var(--surface)" }} />
           <div style={{ maxHeight: 184, overflowY: "auto" }}>
             {results.length === 0 && <div style={{ padding: "10px", fontSize: 12, color: "var(--text-4)", textAlign: "center" }}>Ничего не найдено</div>}
             {results.map((v) => {
               const on = selected.includes(v);
               return (
-                <div key={v} onClick={() => toggle(v)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 11px", fontSize: 12.5, cursor: "pointer", color: on ? "var(--accent)" : "var(--text-2)", fontWeight: on ? 600 : 400, background: on ? "var(--hover)" : "transparent" }}>
+                <div key={v} onClick={() => toggle(v)} className="facet-opt" style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 11px", fontSize: 12.5, cursor: "pointer", color: on ? "var(--accent)" : "var(--text-2)", fontWeight: on ? 600 : 400, background: on ? "var(--hover)" : "transparent" }}>
                   <span style={{ width: 14, height: 14, borderRadius: 4, border: `1.5px solid ${on ? "var(--accent)" : "var(--border)"}`, background: on ? "var(--accent)" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {on && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>}
                   </span>

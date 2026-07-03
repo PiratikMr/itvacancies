@@ -9,16 +9,15 @@ _SORT_COLS = {
     "date":       "published_at",
 }
 
+_EMPTIES = {
+    "salary":     "salary <= 0",
+    "grade":      "empty(grades_sort) or arrayElement(grades_sort, 1) = 255",
+    "experience": "experience_min_years = 255",
+}
+
 
 def rows(table: str, where: str, limit: int, offset: int, sort: str, direction: str) -> str:
     w = where_with(where, ACTIVE)
-    cols = _SORT_COLS
-    if sort == "experience":
-        unspecified_last = -1 if direction == "desc" else 999999
-        cols = {**_SORT_COLS, "experience": f"""
-            if(experience_min_years = 255, {unspecified_last},
-               toInt32(experience_min_years) * 1000 + toInt32(experience_max_years))
-        """}
     return f"""
         SELECT
             vacancy_id,
@@ -33,7 +32,7 @@ def rows(table: str, where: str, limit: int, offset: int, sort: str, direction: 
             published_at
         FROM {table}
         {w}
-        ORDER BY {order_by(sort, direction, cols, "date", "vacancy_id DESC")}
+        ORDER BY {order_by(sort, direction, _SORT_COLS, "date", "vacancy_id DESC", _EMPTIES)}
         LIMIT {limit} OFFSET {offset}
     """
 

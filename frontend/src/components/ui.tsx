@@ -23,7 +23,7 @@ export function Card({
         </div>
       )}
       {!title && subtitle && <div style={{ ...panelSub, marginTop: 0, marginBottom: 12 }}>{subtitle}</div>}
-      {(title && subtitle) ? <div style={{ marginTop: 16 }}>{children}</div> : children}
+      {(title && subtitle) ? <div style={{ marginTop: 16, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>{children}</div> : children}
     </div>
   );
 }

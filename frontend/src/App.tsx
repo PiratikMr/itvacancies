@@ -129,7 +129,7 @@ export default function App() {
       <main className="mob-main" style={{ marginLeft: 244, flex: 1, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <TopBar
           title={TITLES[tab]} tab={tab} onTab={setTab}
-          fx={fx} dark={dark}
+          fx={fx} dark={dark} dataUpdatedAt={dataUpdatedAt}
           onToggleTheme={toggleTheme}
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
         />
@@ -154,20 +154,32 @@ export default function App() {
   );
 }
 
-const BNAV: { id: TabId; label: string }[] = [
-  { id: "overview", label: "Обзор" }, { id: "salary", label: "Зарплаты" },
-  { id: "skills", label: "Навыки" }, { id: "employers", label: "Компании" },
-  { id: "geo", label: "Гео" }, { id: "vacancies", label: "Вакансии" },
+const BI = (d: string) => (
+  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>
+);
+
+const BNAV: { id: TabId; label: string; icon: JSX.Element }[] = [
+  { id: "overview", label: "Обзор", icon: <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg> },
+  { id: "salary", label: "Зарплаты", icon: BI("M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6") },
+  { id: "skills", label: "Навыки", icon: BI("M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5") },
+  { id: "employers", label: "Работодатели", icon: BI("M3 21h18M5 21V7l8-4v18M19 21V11l-6-4") },
+  { id: "geo", label: "Гео", icon: <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg> },
+  { id: "vacancies", label: "Вакансии", icon: BI("M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8") },
 ];
 
 function BottomNav({ tab, onTab }: { tab: TabId; onTab: (t: TabId) => void }) {
   return (
     <nav className="mob-bnav" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, background: "var(--surface)", borderTop: "1px solid var(--border)", zIndex: 60, alignItems: "stretch" }}>
-      {BNAV.map((n) => (
-        <div key={n.id} onClick={() => onTab(n.id)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, padding: "7px 2px", cursor: "pointer", color: tab === n.id ? "var(--accent)" : "var(--text-3)" }}>
-          <span style={{ fontSize: 11, fontWeight: 600 }}>{n.label}</span>
-        </div>
-      ))}
+      {BNAV.map((n) => {
+        const on = tab === n.id;
+        return (
+          <button key={n.id} onClick={() => onTab(n.id)} aria-label={n.label} aria-current={on ? "page" : undefined}
+            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 2px", border: "none", background: "transparent", cursor: "pointer", fontFamily: "inherit", color: on ? "var(--accent)" : "var(--text-3)" }}>
+            <span style={{ display: "flex" }}>{n.icon}</span>
+            <span className="bnav-label" style={{ fontWeight: on ? 700 : 500, letterSpacing: "-0.01em" }}>{n.label}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 }
