@@ -67,12 +67,11 @@ export function TopBar({
 
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
         <div className="mob-hide" title={`Данные актуальны на ${fmtDateShort(dataUpdatedAt)}`} style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 11px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--text-3)" }} strokeWidth={2} strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--text-3)" }} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6" /><path d="M1 20v-6h6" /><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
           <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", whiteSpace: "nowrap" }}>{fmtDateShort(dataUpdatedAt)}</span>
         </div>
 
         <div title={fx.live ? `Курс ЦБ РФ на ${fx.date || "сегодня"}` : "Курс ЦБ РФ · резервные значения"} className="mob-hide" style={{ display: "flex", alignItems: "center", gap: 9, padding: "6px 11px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-4)", textTransform: "uppercase", letterSpacing: ".04em" }}>Курс ЦБ</span>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-3)" }}>$</span>
             <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{fx.usd.toFixed(2)} ₽</span>
@@ -84,7 +83,7 @@ export function TopBar({
         </div>
 
         <div className="mob-date" title={`Данные актуальны на ${fmtDateShort(dataUpdatedAt)}`} style={{ display: "none", alignItems: "center", gap: 6, padding: "5px 9px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, flexShrink: 0 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--text-3)" }} strokeWidth={2} strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: "var(--text-3)" }} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6" /><path d="M1 20v-6h6" /><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
           <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--text-2)", whiteSpace: "nowrap" }}>{fmtDateShort(dataUpdatedAt)}</span>
         </div>
 
