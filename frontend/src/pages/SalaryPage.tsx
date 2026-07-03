@@ -41,7 +41,9 @@ function SalaryBody({ data, loading }: { data: SalaryResponse; loading: boolean 
         <StatCard label="Разрыв Sr / Jr" value={k.sr_jr_ratio ? `${k.sr_jr_ratio}×` : "—"} accent />
       </KpiGrid>
 
-      <Card title="Диапазон зарплат по грейдам" subtitle="Разброс зарплат, ₽" style={{ marginBottom: 12 }}>
+      <div className="mob-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <Card title="Диапазон зарплат по грейдам" subtitle="Разброс зарплат, ₽">
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {bands.map((g) => {
             const color = GRADE_COLOR[g.name] ?? "#9CA3AF";
@@ -67,7 +69,21 @@ function SalaryBody({ data, loading }: { data: SalaryResponse; loading: boolean 
         </div>
       </Card>
 
-      <div className="mob-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+      <Card title="Медиана ЗП по направлениям" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1, justifyContent: "space-between" }}>
+          {data.by_direction.map((d) => (
+            <div key={d.name} {...tip(`${d.name}: медиана ${salary(d.median)} · ${nfmt(d.count)} вак.`)}
+              style={{ display: "grid", gridTemplateColumns: "minmax(120px, 42%) 1fr 64px", gap: 10, alignItems: "center" }}>
+              <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</span>
+              <Track pct={(d.median / dirMax) * 100} color="linear-gradient(90deg,#4F46E5,#818CF8)" height={7} />
+              <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)", textAlign: "right", whiteSpace: "nowrap" }}>{salary(d.median)}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <Card title="Требуемый опыт" subtitle="Доля и медиана ЗП">
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {data.by_experience.map((e) => {
@@ -88,14 +104,14 @@ function SalaryBody({ data, loading }: { data: SalaryResponse; loading: boolean 
           </div>
         </Card>
 
-        <Card title="Прозрачность зарплат" subtitle="Сумма и валюта">
+        <Card title="Прозрачность зарплат" subtitle="Сумма и валюта" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 10 }}>
             <div style={{ fontSize: 36, fontWeight: 800, color: "#4F46E5", letterSpacing: "-0.03em" }}>{data.transparency.with_salary_pct}%</div>
             <div style={{ fontSize: 13, color: "var(--text-3)" }}>вакансий с указанной зарплатой</div>
           </div>
           <div style={{ marginBottom: 18 }}><Track pct={data.transparency.with_salary_pct} color="#4F46E5" /></div>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-4)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 11 }}>Валюта зарплаты</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 11, flex: 1, justifyContent: "space-between" }}>
             {data.by_currency.map((c) => {
               const pct = +((c.count / curSum) * 100).toFixed(1);
               return (
@@ -110,20 +126,8 @@ function SalaryBody({ data, loading }: { data: SalaryResponse; loading: boolean 
           </div>
         </Card>
       </div>
+      </div>
 
-      <Card title="Медиана ЗП по направлениям">
-        <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
-          {data.by_direction.map((d) => (
-            <div key={d.name} {...tip(`${d.name}: медиана ${salary(d.median)} · ${nfmt(d.count)} вак.`)}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, marginBottom: 5 }}>
-                <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-2)" }}>{d.name}</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", whiteSpace: "nowrap" }}>{salary(d.median)}</span>
-              </div>
-              <Track pct={(d.median / dirMax) * 100} color="linear-gradient(90deg,#4F46E5,#818CF8)" height={7} />
-            </div>
-          ))}
-        </div>
-      </Card>
     </div>
   );
 }

@@ -11,7 +11,7 @@ import { useIsMobile } from "../lib/useIsMobile";
 import { nfmt, salary, weekLabel, monthShort, yearOf, isMonthlyBuckets } from "../lib/format";
 import { surfaceCard, panelTitle, panelSub, pad, tableTh as th, tableTd as td, capsLabel } from "../lib/tokens";
 
-const LIMIT = 14;
+const LIMIT = 15;
 
 export function EmployersPage({ filters }: { filters: Filters }) {
   const [offset, setOffset] = useState(0);

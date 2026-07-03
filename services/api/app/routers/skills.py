@@ -44,6 +44,8 @@ def get_skills(
         },
         "english": {"levels": english, "not_required": not_required, "total": kpi.get("total")},
         "market_median": market,
+        "by_field": execute_query(q.by_field(_TABLE, where)),
+        "pairs": execute_query(q.top_pairs(_TABLE, where)),
         "table": {
             "rows": execute_query(q.skills_table(_TABLE, where, limit, offset, sort, direction)),
             "total": total,
