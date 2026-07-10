@@ -14,18 +14,24 @@ class VacancyUpdater(spark: SparkSession, dbAdapter: DataBaseAdapter) extends La
   private val dimPlatformDef = DimPlatformDef
 
 
-  def getActiveVacancies(limit: Int, platformName: String): Dataset[String] = {
+  def getActiveVacancies(limit: Int, platformName: String, maxAgeDays: Option[Int] = None): Dataset[String] = {
 
     getPlatformId(platformName) match {
       case None =>
         spark.emptyDataset[String]
 
       case Some(id) =>
+        val ageClause = maxAgeDays match {
+          case Some(days) => s"AND ${factDef.publishedAt} < NOW() - INTERVAL '$days days'"
+          case None => ""
+        }
+
         val activeQuery =
           s"""
              |SELECT ${factDef.externalId} as id
              |FROM ${factDef.meta.tableName}
              |WHERE ${factDef.platformId} = $id AND ${factDef.closedAt} IS NULL
+             |$ageClause
              |ORDER BY ${factDef.publishedAt} ASC
              |LIMIT $limit
              |""".stripMargin

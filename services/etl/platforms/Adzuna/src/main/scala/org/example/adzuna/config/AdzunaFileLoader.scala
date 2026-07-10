@@ -23,4 +23,6 @@ class AdzunaFileLoader(confPath: String, override val saveFolder: String, locati
   lazy val urlDomain: String = args.getStringList("urlDomains").get(locationIndex)
 
   lazy val pageLimit: Int = args.getInt("pageLimit")
+
+  lazy val expireAfterDays: Int = args.getInt("expireAfterDays")
 }

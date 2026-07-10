@@ -46,9 +46,9 @@ class ETLUService(
     normalized
   }
 
-  private def update(extractor: Extractor, updateLimit: Int, platformName: String): Unit = {
+  private def update(extractor: Extractor, updateLimit: Int, platformName: String, maxAgeDays: Option[Int]): Unit = {
 
-    val activeIds = vacancyUpdater.getActiveVacancies(updateLimit, platformName)
+    val activeIds = vacancyUpdater.getActiveVacancies(updateLimit, platformName, maxAgeDays)
 
     val unActiveIds = extractor.filterActiveVacancies(spark, activeIds, webAdapter)
 
@@ -62,6 +62,7 @@ class ETLUService(
            transformer: Transformer,
            loader: Option[Loader] = None,
            updateLimit: Option[Int] = None,
+           updateMaxAgeDays: Option[Int] = None,
            platformName: String,
            folderName: String = "Vacancies"
          ): Unit = {
@@ -76,7 +77,7 @@ class ETLUService(
 
       case Success(Update) =>
         updateLimit match {
-          case Some(limit) => update(extractor, limit, platformName)
+          case Some(limit) => update(extractor, limit, platformName, updateMaxAgeDays)
           case None =>
             logger.error("Ошибка запуска ETL: Не передан updateLimit для процесса Update")
         }

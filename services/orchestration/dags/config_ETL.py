@@ -60,7 +60,7 @@ PLATFORMS = [
     Platform("gj", "GeekJob"),
     Platform("hc", "HabrCareer"),
     Platform("hh", "HeadHunter", args=[ArgDef("datefrom", "Dags.ETL.dateFrom")]),
-    Platform("az", "Adzuna", with_update=False,
+    Platform("az", "Adzuna",
              batch_extra_args=[["--locidx", "0"], ["--locidx", "1"], ["--locidx", "2"]],
              inter_batch_wait_secs=120),
 ]

@@ -26,7 +26,8 @@ class AdzunaExtractor(
       .repartition(rawPartition)
   }
 
-  override def filterActiveVacancies(spark: SparkSession, activeIds: Dataset[String], webService: WebAdapter): Dataset[String] = ???
+  override def filterActiveVacancies(spark: SparkSession, activeIds: Dataset[String], webService: WebAdapter): Dataset[String] =
+    activeIds
 }
 
 object AdzunaExtractor {
