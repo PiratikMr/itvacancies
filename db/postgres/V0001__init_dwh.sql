@@ -74,6 +74,8 @@ create table dim_experience (
     experience_id                       bigserial               primary key,
     experience                          text                    not null,
     is_reference                        boolean                 not null default false,
+    min_years                           smallint,
+    max_years                           smallint,
 
     unique(experience)
 );
@@ -114,6 +116,7 @@ create table dim_grade (
     grade_id                         bigserial               primary key,
     grade                            text                    not null,
     is_reference                     boolean                 not null default false,
+    sort_order                       smallint,
 
     unique(grade)
 );
@@ -134,6 +137,7 @@ create table dim_language_level (
     language_level_id                         bigserial               primary key,
     language_level                            text                    not null,
     is_reference                              boolean                 not null default false,
+    sort_order                                smallint,
 
     unique(language_level)
 );
