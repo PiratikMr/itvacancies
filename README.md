@@ -56,30 +56,9 @@
 
 ## Архитектура
 
-```mermaid
-flowchart LR
-    classDef source fill:#F9FAFB,stroke:#9CA3AF,stroke-width:1px,color:#374151
-    classDef store fill:#EEF2FF,stroke:#4F46E5,stroke-width:1.5px,color:#1E1B4B
-    classDef app fill:#ECFDF5,stroke:#059669,stroke-width:1.5px,color:#064E3B
-    classDef orch fill:#FFFFFF,stroke:#9CA3AF,stroke-width:1px,color:#6B7280,stroke-dasharray:3 3
-
-    S["Источники вакансий"]:::source
-    H[("HDFS<br/>сырые данные")]:::store
-    P[("PostgreSQL<br/>DWH")]:::store
-    C[("ClickHouse<br/>аналитический слой")]:::store
-    A["FastAPI"]:::app
-    W["React SPA"]:::app
-
-    S -->|"Spark: Extract"| H
-    H -->|"Spark: Transform<br/>+ NLP-нормализация"| P
-    P -->|"sync"| C
-    C --> A --> W
-
-    AF(["Airflow<br/>оркестрация DAG'ов"]):::orch
-    AF -.-> S
-    AF -.-> H
-    AF -.-> P
-```
+<p align="center">
+  <img src="docs/screenshots/architecture.png" alt="Архитектура A.S.H" width="900">
+</p>
 
 Сбор вакансий разнесён по времени между площадками, чтобы не создавать пиковую нагрузку на источники и инфраструктуру. NLP-сервис (отдельный Flask-процесс с `sentence-transformers` + `rapidfuzz`) сопоставляет термины источников со справочниками вручную выверенных значений — через него же проходит ручная модерация спорных совпадений.
 
