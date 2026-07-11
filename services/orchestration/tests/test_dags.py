@@ -1,9 +1,11 @@
+import sys
 from pathlib import Path
 
 import pytest
 from airflow.models import DagBag
 
 DAGS_DIR = str(Path(__file__).resolve().parents[1] / "dags")
+sys.path.insert(0, DAGS_DIR)
 
 EXPECTED_DAG_IDS = {
     "Adzuna_ETL",
