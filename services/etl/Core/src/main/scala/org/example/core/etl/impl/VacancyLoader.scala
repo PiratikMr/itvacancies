@@ -26,7 +26,7 @@ class VacancyLoader(dbAdapter: DataBaseAdapter) extends Loader with LazyLogging 
       spark, factVacancy, factDef.meta.tableName,
       returns = Seq(factDef.vacancyId, factDef.externalId),
       conflicts = factDef.meta.conflictKeys,
-      updates = Some(Seq(factDef.closedAt))
+      updates = Some(Seq(factDef.closedAt, factDef.updatedAt))
     )
 
     val dfWithId = ds.toDF().join(

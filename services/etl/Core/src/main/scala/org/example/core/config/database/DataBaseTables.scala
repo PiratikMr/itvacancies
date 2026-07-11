@@ -109,6 +109,7 @@ object FactVacancyDef {
   val url = "url"
 
   val closedAt = "closed_at"
+  val updatedAt = "updated_at"
 
   val meta: TableMeta = TableMeta(
     "fact_vacancy",

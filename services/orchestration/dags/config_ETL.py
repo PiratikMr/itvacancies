@@ -8,6 +8,8 @@ DAGS_CONFIG_PATH = f"{CONFIG_DIR_PATH}/dags/common.conf"
 
 _dags_config = ConfigFactory.parse_file(Path(DAGS_CONFIG_PATH))
 
+ETL_MIN_ROWS = _dags_config.get_int('Dags.ETL.minRows')
+
 DEFAULT_ARGS = {
     'start_date': pendulum.datetime(2025, 10, 1, 0, 0, 0, tz="Asia/Krasnoyarsk"),
     'email': [_dags_config.get_string('Airflow.email')],
