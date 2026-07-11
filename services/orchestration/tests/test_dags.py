@@ -39,5 +39,5 @@ def test_platform_dags_end_with_row_check(dag_bag):
     assert platform_dag_ids
 
     for dag_id in platform_dag_ids:
-        dag = dag_bag.get_dag(dag_id)
+        dag = dag_bag.dags[dag_id]
         assert [t.task_id for t in dag.leaves] == ["check_min_rows"]
