@@ -36,6 +36,7 @@ jobs:
     - name: Prepare configs
       run: |
         for f in conf/secrets/*.example; do cp "$f" "${f%.example}"; done
+        grep -E '^[A-Za-z_][A-Za-z_0-9]*=' .env.example >> "$GITHUB_ENV"
         sudo mkdir -p /opt/airflow
         sudo ln -s "$GITHUB_WORKSPACE/conf" /opt/airflow/conf
 
