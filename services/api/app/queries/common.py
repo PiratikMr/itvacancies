@@ -9,6 +9,16 @@ CLOSED = "is_active = 0"
 
 REMOTE = "has(schedules, 'Удалённо')"
 
+SYNTHETIC_CLOSE_PLATFORMS = ("Adzuna",)
+_synthetic = ", ".join(f"'{p}'" for p in SYNTHETIC_CLOSE_PLATFORMS)
+
+REAL_CLOSED = f"{CLOSED} AND closed_at >= published_at AND platform NOT IN ({_synthetic})"
+
+
+def avg_close_days_expr(predicate: str = REAL_CLOSED) -> str:
+    expr = f"avgIf(dateDiff('day', published_at, closed_at), {predicate})"
+    return f"if(isNaN({expr}), NULL, round({expr}))"
+
 FORMAT_TO_SCHEDULE: dict[str, str] = {
     "remote": "Удалённо",
     "office": "На месте работодателя",

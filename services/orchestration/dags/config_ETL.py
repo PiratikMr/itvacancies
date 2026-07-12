@@ -8,6 +8,8 @@ DAGS_CONFIG_PATH = f"{CONFIG_DIR_PATH}/dags/common.conf"
 
 _dags_config = ConfigFactory.parse_file(Path(DAGS_CONFIG_PATH))
 
+ETL_MIN_ROWS = _dags_config.get_int('Dags.ETL.minRows')
+
 DEFAULT_ARGS = {
     'start_date': pendulum.datetime(2025, 10, 1, 0, 0, 0, tz="Asia/Krasnoyarsk"),
     'email': [_dags_config.get_string('Airflow.email')],
@@ -60,7 +62,7 @@ PLATFORMS = [
     Platform("gj", "GeekJob"),
     Platform("hc", "HabrCareer"),
     Platform("hh", "HeadHunter", args=[ArgDef("datefrom", "Dags.ETL.dateFrom")]),
-    Platform("az", "Adzuna", with_update=False,
+    Platform("az", "Adzuna",
              batch_extra_args=[["--locidx", "0"], ["--locidx", "1"], ["--locidx", "2"]],
              inter_batch_wait_secs=120),
 ]

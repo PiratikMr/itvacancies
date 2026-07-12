@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.queries.common import ACTIVE, CLOSED, MEDIAN_SALARY, order_by, where_with
+from app.queries.common import ACTIVE, MEDIAN_SALARY, avg_close_days_expr, order_by, where_with
 
 _NON_EMPTY = "employer != ''"
 
@@ -37,13 +37,12 @@ def top_active(table: str, where: str, limit: int = 8) -> str:
 
 def kpis(table: str, where: str) -> str:
     w = where_with(where, _NON_EMPTY)
-    closed = f"{CLOSED} AND closed_at >= published_at"
     return f"""
         SELECT
             uniqExact(employer)                                AS unique_employers,
             uniqExactIf(employer, {ACTIVE})                    AS active_employers,
             round(count() / uniqExact(employer), 1)            AS avg_per_company,
-            round(avgIf(dateDiff('day', published_at, closed_at), {closed})) AS avg_close_days
+            {avg_close_days_expr()}                            AS avg_close_days
         FROM {table}
         {w}
     """

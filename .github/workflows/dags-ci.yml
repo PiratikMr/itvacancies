@@ -1,0 +1,44 @@
+name: Airflow DAGs CI
+
+on:
+  push:
+    branches: ["master", "develop"]
+    paths:
+      - 'services/orchestration/**'
+      - 'conf/**'
+      - 'deploy/airflow/requirements.txt'
+      - '.github/workflows/dags-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      AIRFLOW_HOME: /tmp/airflow
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+        cache-dependency-path: deploy/airflow/requirements.txt
+
+    - name: Install Airflow and dependencies
+      run: |
+        pip install "apache-airflow==2.11.2" apache-airflow-providers-postgres \
+          --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.11.2/constraints-3.12.txt"
+        pip install -r deploy/airflow/requirements.txt pytest
+
+    - name: Prepare configs
+      run: |
+        for f in conf/secrets/*.example; do cp "$f" "${f%.example}"; done
+        grep -E '^[A-Za-z_][A-Za-z_0-9]*=' .env.example >> "$GITHUB_ENV"
+        sudo mkdir -p /opt/airflow
+        sudo ln -s "$GITHUB_WORKSPACE/conf" /opt/airflow/conf
+
+    - name: Run DAG tests
+      run: pytest services/orchestration/tests -v

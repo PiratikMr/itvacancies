@@ -1,49 +1,49 @@
-from config_ETL import PLATFORMS, DEFAULT_ARGS
-from utils import build_spark_etl_task, get_config, parse_args
+from config_ETL import PLATFORMS, DEFAULT_ARGS, ETL_MIN_ROWS
+from utils import build_spark_etl_task, build_row_check_task, get_config, parse_args
 from airflow.decorators import dag
+from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 
 def generate_platform_dag(platform_cfg):
     conf_tree = get_config(platform_cfg.fileName)
 
-    raw_schedule = conf_tree.get_string("Dags.ETL.schedule")
-    dag_schedule = raw_schedule if raw_schedule else None
-
     @dag(
         dag_id=f"{platform_cfg.name}_ETL",
         tags=["scala", "etl", platform_cfg.moduleName],
         default_args=DEFAULT_ARGS,
-        schedule=dag_schedule,
+        schedule=conf_tree.get_string("Dags.ETL.schedule") or None,
         catchup=False
     )
     def platform_dag():
         args = parse_args(conf_tree, platform_cfg.args)
         batches = platform_cfg.batch_extra_args or [None]
-        prev_task = None
 
+        tasks = []
         for i, batch_args in enumerate(batches):
-            extra = batch_args or []
             suffix = f"_{i}" if platform_cfg.batch_extra_args else ""
 
-            for part in platform_cfg.parts:
-                curr_task = build_spark_etl_task(
+            tasks += [
+                build_spark_etl_task(
                     platform=platform_cfg,
                     part=part,
-                    args=args + extra,
+                    args=args + (batch_args or []),
                     task_name=f"{part}{suffix}"
                 )
-                if prev_task:
-                    prev_task >> curr_task
-                prev_task = curr_task
+                for part in platform_cfg.parts
+            ]
 
-            is_last = (i == len(batches) - 1)
-            if not is_last and platform_cfg.inter_batch_wait_secs > 0:
-                wait = BashOperator(
+            if i < len(batches) - 1 and platform_cfg.inter_batch_wait_secs > 0:
+                tasks.append(BashOperator(
                     task_id=f"wait_after_idx_{i}",
                     bash_command=f"sleep {platform_cfg.inter_batch_wait_secs}"
-                )
-                prev_task >> wait
-                prev_task = wait
+                ))
+
+        tasks.append(build_row_check_task(
+            platform_name=conf_tree.get_string("FileSystem.platform"),
+            min_rows=ETL_MIN_ROWS
+        ))
+
+        chain(*tasks)
 
     return platform_dag()
 

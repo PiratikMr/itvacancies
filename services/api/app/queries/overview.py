@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.queries.common import ACTIVE, CLOSED, MEDIAN_SALARY, REMOTE
+from app.queries.common import ACTIVE, MEDIAN_SALARY, REMOTE, avg_close_days_expr
 
 
 def kpis(table: str, where: str) -> str:
@@ -96,12 +96,11 @@ def formats(table: str, where: str) -> str:
 
 
 def platforms(table: str, where: str) -> str:
-    closed = f"{CLOSED} AND closed_at >= published_at"
     return f"""
         SELECT
-            platform                                                  AS name,
-            count()                                                   AS count,
-            round(avgIf(dateDiff('day', published_at, closed_at), {closed})) AS avg_close_days
+            platform               AS name,
+            count()                AS count,
+            {avg_close_days_expr()} AS avg_close_days
         FROM {table}
         {where}
         GROUP BY name
