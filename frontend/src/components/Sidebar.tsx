@@ -50,7 +50,7 @@ export function Sidebar({
   const inp = { width: "100%", padding: "5px 6px", border: "1px solid var(--border)", borderRadius: 6, fontSize: 12, color: "var(--text-2)", outline: "none", background: "var(--surface)" } as const;
 
   return (
-    <aside className={"mob-sidebar" + (open ? " open" : "")} style={{ width: 244, background: "var(--surface)", borderRight: "1px solid var(--border)", position: "fixed", top: 0, left: 0, height: "100vh", display: "flex", flexDirection: "column", zIndex: 50 }}>
+    <aside className={"mob-sidebar" + (open ? " open" : "")} style={{ width: 244, background: "var(--surface)", borderRight: "1px solid var(--border)", position: "fixed", top: 0, left: 0, display: "flex", flexDirection: "column", zIndex: 50 }}>
       <div className="desk-hide" style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--track)", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>

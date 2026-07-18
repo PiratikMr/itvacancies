@@ -11,9 +11,9 @@ export function DirectionBars({ data }: { data: NamedCount[] }) {
       {data.map((d, i) => (
         <div key={d.name} {...tip(`${d.name}: ${nfmt(d.count)} вак. · медиана ${salary(d.median_salary)}/мес`)}
           style={{ padding: "5px 7px", margin: "0 -7px", borderRadius: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
-            <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-2)", minWidth: 108 }}>{d.name}</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 5 }}>
+            <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-2)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
               <span style={{ fontSize: 13, color: "var(--text-4)" }}>{nfmt(d.count)}</span>
               <span style={{ fontSize: 14, fontWeight: 700, color: "#4F46E5", minWidth: 38, textAlign: "right" }}>{salary(d.median_salary)}</span>
               {d.trend != null && (
@@ -48,9 +48,9 @@ export function FormatBars({ data }: { data: NamedCount[] }) {
         return (
           <div key={d.name} {...tip(`${d.name}: ${pct}% вакансий · медиана ${salary(d.median_salary)}/мес`)}
             style={{ padding: "6px 8px", margin: "0 -8px", borderRadius: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-2)" }}>{d.name}</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
+              <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-2)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                 <span style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em" }}>{pct}%</span>
                 <span style={{ fontSize: 13, fontWeight: 600, color: "#4F46E5", background: "var(--tint-indigo)", padding: "2px 8px", borderRadius: 5 }}>медиана {salary(d.median_salary)}</span>
               </div>
@@ -77,8 +77,8 @@ export function PlatformBars({ data }: { data: PlatformStat[] }) {
         return (
           <div key={d.name} {...tip(`${d.name}: ${nfmt(d.count)} вак. · закрытие ${days}`)}
             style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 7px", margin: "0 -7px", borderRadius: 8 }}>
-            <div style={{ width: 92, fontSize: 14, fontWeight: 500, color: "var(--text-2)", flexShrink: 0 }}>{d.name}</div>
-            <div style={{ flex: 1, height: 8, background: "var(--track)", borderRadius: 4, overflow: "hidden" }}>
+            <div style={{ width: 92, fontSize: 14, fontWeight: 500, color: "var(--text-2)", flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</div>
+            <div style={{ flex: 1, minWidth: 0, height: 8, background: "var(--track)", borderRadius: 4, overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${pct}%`, background: PLATFORM_COLORS[i % PLATFORM_COLORS.length], borderRadius: 4, transformOrigin: "left", animation: `growX .8s cubic-bezier(.22,1,.36,1) ${i * 0.06}s both` }} />
             </div>
             <div style={{ fontSize: 13, color: "var(--text-3)", width: 38, textAlign: "right" }}>{pct}%</div>
