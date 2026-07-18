@@ -82,7 +82,7 @@ function OverviewBody({ data, loading }: { data: OverviewResponse; loading: bool
 function SkillsTable({ data }: { data: OverviewResponse["top_skills"] }) {
   return (
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "22px 1fr 64px 64px", gap: "0 8px", paddingBottom: 8, borderBottom: "1px solid var(--track)", marginBottom: 2 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "22px minmax(0, 1fr) 64px 64px", gap: "0 8px", paddingBottom: 8, borderBottom: "1px solid var(--track)", marginBottom: 2 }}>
         <div />
         <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-4)", textTransform: "uppercase", letterSpacing: ".05em" }}>Навык</div>
         <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-4)", textAlign: "right", textTransform: "uppercase", letterSpacing: ".05em" }}>Вак.</div>
@@ -90,7 +90,7 @@ function SkillsTable({ data }: { data: OverviewResponse["top_skills"] }) {
       </div>
       {data.map((s, i) => (
         <div key={s.name} {...tip(`${s.name}: ${nfmt(s.count)} упоминаний · медиана ${salary(s.median_salary)}`)}
-          style={{ display: "grid", gridTemplateColumns: "22px 1fr 64px 64px", gap: "0 8px", padding: "8px 0", borderBottom: "1px solid var(--hover)", alignItems: "center" }}>
+          style={{ display: "grid", gridTemplateColumns: "22px minmax(0, 1fr) 64px 64px", gap: "0 8px", padding: "8px 0", borderBottom: "1px solid var(--hover)", alignItems: "center" }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-5)", textAlign: "center" }}>{String(i + 1).padStart(2, "0")}</div>
           <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text)" }}>{s.name}</div>
           <div style={{ fontSize: 14, color: "var(--text-3)", textAlign: "right" }}>{nfmt(s.count)}</div>
