@@ -64,7 +64,6 @@ export default function App() {
   const [fx, setFx] = useState<Fx>(FX_FALLBACK);
   const [dataUpdatedAt, setDataUpdatedAt] = useState<string | null>(null);
   const [facets, setFacets] = useState<Record<string, string[]>>({});
-  const [salaryMax, setSalaryMax] = useState<number | null>(null);
 
   useEffect(() => {
     try {
@@ -96,7 +95,7 @@ export default function App() {
     const ctrl = new AbortController();
     const t = setTimeout(() => {
       api.facets(filters, ctrl.signal)
-        .then((r) => { setFacets(r.facets); if (r.salary?.max != null) setSalaryMax(r.salary.max); })
+        .then((r) => setFacets(r.facets))
         .catch(() => {});
     }, 250);
     return () => { clearTimeout(t); ctrl.abort(); };
@@ -116,7 +115,6 @@ export default function App() {
       <Sidebar
         filters={filters} onFilters={setFilters}
         facets={facets}
-        salaryMax={salaryMax}
         onSearch={searchFacet}
         dataUpdatedAt={dataUpdatedAt}
         open={sidebarOpen}

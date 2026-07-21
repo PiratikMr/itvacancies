@@ -1,10 +1,15 @@
+import { useEffect, useState } from "react";
 import { CLEARED_FILTERS, hasActiveFilters, type Filters } from "../state/filters";
+import { nfmt } from "../lib/format";
 import { ChipGroup, FacetChips, FacetSelect } from "./facets";
 
 const PERIODS = [{ id: "1w", label: "Неделя" }, { id: "1m", label: "Месяц" }, { id: "3m", label: "3 мес." }, { id: "6m", label: "6 мес." }, { id: "1y", label: "Год" }, { id: "all", label: "Всё время" }];
 const STATUSES = [{ id: "all", label: "Все" }, { id: "active", label: "Активные" }, { id: "closed", label: "Закрытые" }];
 const FORMAT_OPTS = ["remote", "office", "hybrid", "travel"];
 const FORMAT_LABELS: Record<string, string> = { remote: "Удалённо", office: "Офис", hybrid: "Гибрид", travel: "Разъездной" };
+
+type SalaryField = "min" | "max";
+const SALARY_KEY = { min: "salaryMin", max: "salaryMax" } as const;
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
@@ -14,40 +19,58 @@ function fmtDate(iso: string | null): string {
 }
 
 export function Sidebar({
-  filters, onFilters, facets, salaryMax, onSearch, dataUpdatedAt, open,
+  filters, onFilters, facets, onSearch, dataUpdatedAt, open,
 }: {
   filters: Filters;
   onFilters: (f: Filters) => void;
   facets: Record<string, string[]>;
-  salaryMax: number | null;
   onSearch: (field: string, q: string) => Promise<string[]>;
   dataUpdatedAt: string | null;
   open: boolean;
 }) {
-  const clampNum = (raw: string): number | null => {
-    if (raw === "") return null;
-    let n = Math.round(Number(raw));
-    if (!Number.isFinite(n)) return null;
-    n = Math.max(0, n);
-    if (salaryMax != null) n = Math.min(n, salaryMax);
-    return n;
+  const inp = { width: "100%", padding: "5px 6px", border: "1px solid var(--border)", borderRadius: 6, fontSize: 12, color: "var(--text-2)", outline: "none", background: "var(--surface)", fontVariantNumeric: "tabular-nums" } as const;
+
+  const [draft, setDraft] = useState<{ field: SalaryField; raw: string } | null>(null);
+
+  const parseNum = (raw: string): number | null => {
+    const digits = raw.replace(/\D/g, "");
+    return digits === "" ? null : Number(digits);
   };
-  const onMin = (raw: string) => {
-    const v = clampNum(raw);
-    let max = filters.salaryMax;
-    if (v != null && max != null && max < v) max = v;
-    onFilters({ ...filters, salaryMin: v, salaryMax: max });
+
+  const commit = (field: SalaryField, raw: string) => {
+    const key = SALARY_KEY[field];
+    const next = parseNum(raw);
+    if (next !== filters[key]) onFilters({ ...filters, [key]: next } as Filters);
   };
-  const onMax = (raw: string) => {
-    let v = clampNum(raw);
-    if (v != null && filters.salaryMin != null && v < filters.salaryMin) v = filters.salaryMin;
-    onFilters({ ...filters, salaryMax: v });
+
+  useEffect(() => {
+    if (draft == null) return;
+    const t = setTimeout(() => commit(draft.field, draft.raw), 600);
+    return () => clearTimeout(t);
+  }, [draft]);
+
+  const shown = (field: SalaryField): string => {
+    if (draft?.field === field) return draft.raw;
+    const v = filters[SALARY_KEY[field]];
+    return v == null ? "" : nfmt(v);
   };
+
+  const salaryInput = (field: SalaryField, placeholder: string) => (
+    <input
+      type="text" inputMode="numeric" autoComplete="off" className="salary-inp"
+      placeholder={placeholder}
+      value={shown(field)}
+      onChange={(e) => setDraft({ field, raw: e.target.value.replace(/\D/g, "") })}
+      onFocus={() => setDraft({ field, raw: String(filters[SALARY_KEY[field]] ?? "") })}
+      onBlur={() => { if (draft) commit(draft.field, draft.raw); setDraft(null); }}
+      onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+      style={inp}
+    />
+  );
 
   const list = (key: keyof Filters) => (filters[key] as string[]);
   const setList = (key: string, next: string[]) => onFilters({ ...filters, [key]: next } as Filters);
   const opt = (key: string) => facets[key] ?? [];
-  const inp = { width: "100%", padding: "5px 6px", border: "1px solid var(--border)", borderRadius: 6, fontSize: 12, color: "var(--text-2)", outline: "none", background: "var(--surface)" } as const;
 
   return (
     <aside className={"mob-sidebar" + (open ? " open" : "")} style={{ width: 244, background: "var(--surface)", borderRight: "1px solid var(--border)", position: "fixed", top: 0, left: 0, display: "flex", flexDirection: "column", zIndex: 50 }}>
@@ -98,8 +121,8 @@ export function Sidebar({
         <div style={{ padding: "0 6px 13px", marginBottom: 13, borderBottom: "1px solid var(--track)" }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", marginBottom: 7 }}>Зарплата, ₽/мес</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-            <input type="number" inputMode="numeric" className="salary-inp" placeholder="от" min={0} max={salaryMax ?? undefined} step={10000} value={filters.salaryMin ?? ""} onChange={(e) => onMin(e.target.value)} style={inp} />
-            <input type="number" inputMode="numeric" className="salary-inp" placeholder="до" min={0} max={salaryMax ?? undefined} step={10000} value={filters.salaryMax ?? ""} onChange={(e) => onMax(e.target.value)} style={inp} />
+            {salaryInput("min", "от")}
+            {salaryInput("max", "до")}
           </div>
         </div>
 
