@@ -3,7 +3,7 @@ import type { GeoResponse } from "../api/types";
 import { api } from "../api/client";
 import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
-import { Notice, Track, SortTh, NO_SORT, type Sort } from "../components/shared";
+import { EmptyState, Notice, Track, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { Card, KpiGrid, StatCard, TableCard } from "../components/ui";
 import { GeoMap } from "../charts/GeoMap";
 import { tip } from "../lib/tooltip";
@@ -15,6 +15,7 @@ export function GeoPage({ filters }: { filters: Filters }) {
   const { data, loading, error } = usePageData(() => api.geo(filters), [filters], cacheKey("geo", filters));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
+  if (data.countries.length === 0) return <EmptyState sub="По выбранным фильтрам нет вакансий с известной географией" />;
   return <GeoBody data={data} loading={loading} />;
 }
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.queries.common import MEDIAN_SALARY, REMOTE, where_with
+from app.queries.common import MEDIAN_SALARY, REMOTE, pct_expr, where_with
 
 _NOISE = "('', 'Неизвестно', 'Другие регионы')"
 
@@ -12,7 +12,7 @@ def by_country(table: str, where: str) -> str:
             count()                                     AS count,
             uniqExact(loc.1)                            AS cities,
             {MEDIAN_SALARY}                             AS median,
-            round(100 * countIf({REMOTE}) / count(), 1) AS remote_pct
+            {pct_expr(REMOTE)}                          AS remote_pct
         FROM (
             SELECT arrayJoin(locations) AS loc, salary, schedules
             FROM {table} {where}

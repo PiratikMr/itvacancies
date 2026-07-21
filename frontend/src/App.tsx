@@ -64,7 +64,6 @@ export default function App() {
   const [fx, setFx] = useState<Fx>(FX_FALLBACK);
   const [dataUpdatedAt, setDataUpdatedAt] = useState<string | null>(null);
   const [facets, setFacets] = useState<Record<string, string[]>>({});
-  const [salaryMax, setSalaryMax] = useState<number | null>(null);
 
   useEffect(() => {
     try {
@@ -96,7 +95,7 @@ export default function App() {
     const ctrl = new AbortController();
     const t = setTimeout(() => {
       api.facets(filters, ctrl.signal)
-        .then((r) => { setFacets(r.facets); if (r.salary?.max != null) setSalaryMax(r.salary.max); })
+        .then((r) => setFacets(r.facets))
         .catch(() => {});
     }, 250);
     return () => { clearTimeout(t); ctrl.abort(); };
@@ -112,11 +111,10 @@ export default function App() {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", fontSize: 14, lineHeight: 1.5 }}>
+    <div className="app-shell" style={{ display: "flex", fontSize: 14, lineHeight: 1.5 }}>
       <Sidebar
         filters={filters} onFilters={setFilters}
         facets={facets}
-        salaryMax={salaryMax}
         onSearch={searchFacet}
         dataUpdatedAt={dataUpdatedAt}
         open={sidebarOpen}
@@ -126,7 +124,7 @@ export default function App() {
         <div onClick={() => setSidebarOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", zIndex: 49, cursor: "pointer" }} />
       )}
 
-      <main className="mob-main" style={{ marginLeft: 244, flex: 1, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <main className="mob-main" style={{ marginLeft: 244, flex: 1, display: "flex", flexDirection: "column" }}>
         <TopBar
           title={TITLES[tab]} tab={tab} onTab={setTab}
           fx={fx} dark={dark} dataUpdatedAt={dataUpdatedAt}
@@ -169,7 +167,7 @@ const BNAV: { id: TabId; label: string; icon: JSX.Element }[] = [
 
 function BottomNav({ tab, onTab }: { tab: TabId; onTab: (t: TabId) => void }) {
   return (
-    <nav className="mob-bnav" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, background: "var(--surface)", borderTop: "1px solid var(--border)", zIndex: 60, alignItems: "stretch" }}>
+    <nav className="mob-bnav" style={{ background: "var(--surface)", borderTop: "1px solid var(--border)", alignItems: "stretch" }}>
       {BNAV.map((n) => {
         const on = tab === n.id;
         return (

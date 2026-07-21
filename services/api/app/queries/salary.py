@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.queries.common import HAS_SALARY, MEDIAN_SALARY, where_with
+from app.queries.common import HAS_SALARY, MEDIAN_SALARY, pct_expr, where_with
 
 
 def grade_band(table: str, where: str) -> str:
@@ -43,7 +43,7 @@ def by_experience(table: str, where: str) -> str:
 
 def transparency(table: str, where: str) -> str:
     return f"""
-        SELECT round(100 * countIf({HAS_SALARY}) / count(), 1) AS with_salary_pct,
+        SELECT {pct_expr(HAS_SALARY)} AS with_salary_pct,
                count() AS total
         FROM {table}
         {where}

@@ -3,7 +3,7 @@ import type { VacanciesResponse, VacancyRow } from "../api/types";
 import { api } from "../api/client";
 import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
-import { Notice, Pager, SortTh, NO_SORT, type Sort } from "../components/shared";
+import { EmptyState, Notice, Pager, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { TableCard } from "../components/ui";
 import { useIsMobile } from "../lib/useIsMobile";
 import { salary } from "../lib/format";
@@ -39,6 +39,7 @@ export function VacanciesPage({ filters }: { filters: Filters }) {
   const { data, loading, error } = usePageData(() => api.vacancies(filters, LIMIT, offset, sort), [filters, offset, sort], cacheKey("vacancies", filters, offset, sort));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
+  if (data.total === 0) return <EmptyState />;
   return <VacanciesBody data={data} loading={loading} offset={offset} onOffset={setOffset} sort={sort} onSort={setSort} />;
 }
 

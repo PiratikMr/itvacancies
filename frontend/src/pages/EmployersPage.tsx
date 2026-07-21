@@ -3,7 +3,7 @@ import type { EmployersResponse } from "../api/types";
 import { api } from "../api/client";
 import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
-import { Notice, Pager, Track, SortTh, NO_SORT, type Sort } from "../components/shared";
+import { EmptyState, Notice, Pager, Track, SortTh, NO_SORT, type Sort } from "../components/shared";
 import { KpiGrid, StatCard, TableCard } from "../components/ui";
 import { ComboChart } from "../charts/ComboChart";
 import { tip } from "../lib/tooltip";
@@ -20,6 +20,7 @@ export function EmployersPage({ filters }: { filters: Filters }) {
   const { data, loading, error } = usePageData(() => api.employers(filters, LIMIT, offset, sort), [filters, offset, sort], cacheKey("employers", filters, offset, sort));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
+  if (data.kpis.unique_employers === 0) return <EmptyState />;
   return <EmployersBody data={data} loading={loading} offset={offset} onOffset={setOffset} sort={sort} onSort={setSort} />;
 }
 
