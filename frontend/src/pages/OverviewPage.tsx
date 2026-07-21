@@ -1,7 +1,7 @@
 import type { OverviewResponse } from "../api/types";
 import { api } from "../api/client";
 import { usePageData, cacheKey } from "../lib/usePageData";
-import { Notice } from "../components/shared";
+import { EmptyState, Notice } from "../components/shared";
 import type { Filters } from "../state/filters";
 import { Card, KpiCard, KpiGrid } from "../components/ui";
 import { AreaChart } from "../charts/AreaChart";
@@ -20,6 +20,7 @@ export function OverviewPage({ filters }: { filters: Filters }) {
   const { data, loading, error } = usePageData(() => api.overview(filters), [filters], cacheKey("overview", filters));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
+  if (data.kpis.total === 0) return <EmptyState />;
   return <OverviewBody data={data} loading={loading} />;
 }
 

@@ -1,7 +1,22 @@
 import { nfmt } from "../lib/format";
+import { surfaceCard } from "../lib/tokens";
 
 export function Notice({ text }: { text: string }) {
   return <div style={{ padding: "60px 0", textAlign: "center", color: "var(--text-4)", fontSize: 14 }}>{text}</div>;
+}
+
+export function EmptyState({ sub = "Ни одна вакансия не подходит под выбранные фильтры" }: { sub?: string }) {
+  return (
+    <div style={{ ...surfaceCard, padding: "76px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", animation: "fadeUp .3s ease-out both" }}>
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-5)", marginBottom: 18 }}>
+        <circle cx="11" cy="11" r="7" />
+        <line x1="16.5" y1="16.5" x2="21" y2="21" />
+        <line x1="8" y1="11" x2="14" y2="11" />
+      </svg>
+      <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-2)", letterSpacing: "-0.02em", marginBottom: 6 }}>Ничего не найдено</div>
+      <div style={{ fontSize: 14, color: "var(--text-4)", maxWidth: 340, lineHeight: 1.5 }}>{sub}</div>
+    </div>
+  );
 }
 
 export type SortDir = "asc" | "desc" | null;

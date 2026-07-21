@@ -2,7 +2,7 @@ import type { SalaryResponse } from "../api/types";
 import { api } from "../api/client";
 import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
-import { Notice, Track } from "../components/shared";
+import { EmptyState, Notice, Track } from "../components/shared";
 import { Card, KpiGrid, StatCard } from "../components/ui";
 import { tip } from "../lib/tooltip";
 import { nfmt, salary, salaryFull, salaryNum } from "../lib/format";
@@ -16,6 +16,7 @@ export function SalaryPage({ filters }: { filters: Filters }) {
   const { data, loading, error } = usePageData(() => api.salary(filters), [filters], cacheKey("salary", filters));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
+  if (data.transparency.total === 0) return <EmptyState />;
   return <SalaryBody data={data} loading={loading} />;
 }
 
