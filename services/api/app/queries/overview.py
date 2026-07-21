@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.queries.common import ACTIVE, MEDIAN_SALARY, REMOTE, avg_close_days_expr
+from app.queries.common import ACTIVE, MEDIAN_SALARY, REMOTE, avg_close_days_expr, pct_expr
 
 
 def kpis(table: str, where: str) -> str:
@@ -9,7 +9,7 @@ def kpis(table: str, where: str) -> str:
             count()                                   AS total,
             countIf({ACTIVE})                         AS active,
             {MEDIAN_SALARY}                           AS median_salary,
-            round(100 * countIf({REMOTE}) / count(), 1) AS remote_pct
+            {pct_expr(REMOTE)}                        AS remote_pct
         FROM {table}
         {where}
     """
@@ -22,7 +22,7 @@ def kpi_sparks(table: str, where: str) -> str:
             count()                                   AS total,
             countIf({ACTIVE})                         AS active,
             {MEDIAN_SALARY}                           AS median_salary,
-            round(100 * countIf({REMOTE}) / count(), 1) AS remote_pct
+            {pct_expr(REMOTE)}                        AS remote_pct
         FROM {table}
         {where}
         GROUP BY w

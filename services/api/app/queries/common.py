@@ -19,6 +19,10 @@ def avg_close_days_expr(predicate: str = REAL_CLOSED) -> str:
     expr = f"avgIf(dateDiff('day', published_at, closed_at), {predicate})"
     return f"if(isNaN({expr}), NULL, round({expr}))"
 
+
+def pct_expr(condition: str) -> str:
+    return f"if(count() = 0, 0, round(100 * countIf({condition}) / count(), 1))"
+
 FORMAT_TO_SCHEDULE: dict[str, str] = {
     "remote": "Удалённо",
     "office": "На месте работодателя",

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.queries.common import MEDIAN_SALARY, order_by
+from app.queries.common import MEDIAN_SALARY, order_by, pct_expr
 
 _ENGLISH = "arrayExists(x -> x.1 = 'Английский', languages)"
 MIN_SKILL_COUNT = 20
@@ -9,8 +9,9 @@ MIN_SKILL_COUNT = 20
 def kpis(table: str, where: str) -> str:
     return f"""
         SELECT
-            round(avg(length(skills)), 1)                      AS avg_skills,
-            round(100 * countIf({_ENGLISH}) / count(), 1)      AS english_pct,
+            if(isNaN(avg(length(skills))), 0,
+               round(avg(length(skills)), 1))                  AS avg_skills,
+            {pct_expr(_ENGLISH)}                               AS english_pct,
             count()                                            AS total
         FROM {table}
         {where}
