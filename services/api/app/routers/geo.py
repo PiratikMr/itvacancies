@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Path
 
 from app.database import execute_query
 from app.filters import FilterBuilder, parse_filters
@@ -34,6 +34,23 @@ def get_geo(filters: Annotated[dict[str, Any], Depends(parse_filters)]) -> dict[
             "outside_russia_pct": outside_pct,
             "median_outside": median_outside,
         },
-        "map": execute_query(q.map_points(_TABLE, where)),
         "countries": countries,
     }
+
+
+@router.get("/geo/points")
+def get_geo_points(filters: Annotated[dict[str, Any], Depends(parse_filters)]) -> dict[str, Any]:
+    rows = execute_query(q.map_points(_TABLE, where=_builder.build(filters)))
+    return {
+        "lat": [r["lat"] for r in rows],
+        "lng": [r["lng"] for r in rows],
+        "ids": [r["id"] for r in rows],
+    }
+
+
+@router.get("/geo/point/{vacancy_id}")
+def get_geo_point(vacancy_id: Annotated[int, Path(ge=0)]) -> dict[str, Any]:
+    rows = execute_query(q.point_detail(_TABLE), {"id": vacancy_id})
+    if not rows:
+        raise HTTPException(status_code=404, detail="Вакансия не найдена")
+    return rows[0]

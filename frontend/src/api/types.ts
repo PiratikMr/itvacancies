@@ -105,13 +105,14 @@ export interface EmployersResponse {
   table: { rows: EmployerRow[]; total: number; limit: number; offset: number };
 }
 
-export interface MapPoint { lat: number; lng: number; title: string; salary: number; url: string; }
 export interface CountryRow { name: string; count: number; cities: number; median: number; remote_pct: number; }
 export interface GeoResponse {
   kpis: { countries: number; cities: number; outside_russia_pct: number; median_outside: number };
-  map: MapPoint[];
   countries: CountryRow[];
 }
+
+export interface GeoPoints { lat: number[]; lng: number[]; ids: number[]; }
+export interface PointDetail { title: string; salary: number; url: string; }
 
 export interface VacancyRow {
   vacancy_id: number; title: string; employer: string; url: string;
