@@ -14,10 +14,7 @@ with calculated_salary as (
             when f.salary_to is not null then
                 f.salary_to / cr.rate
         end as salary,
-        case
-            when f.salary_from is not null and f.salary_to is not null then true
-            else false
-        end as has_range
+        coalesce(f.salary_to > f.salary_from, false) as has_range
     from fact_vacancy as f
     join dim_currency dc on f.currency_id = dc.currency_id and dc.is_reference = true
     join lateral (
