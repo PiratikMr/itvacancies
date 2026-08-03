@@ -16,27 +16,32 @@ def generate_platform_dag(platform_cfg):
     )
     def platform_dag():
         args = parse_args(conf_tree, platform_cfg.args)
-        batches = platform_cfg.batch_extra_args or [None]
+        groups = platform_cfg.batch_groups or [[None]]
 
         tasks = []
-        for i, batch_args in enumerate(batches):
-            suffix = f"_{i}" if platform_cfg.batch_extra_args else ""
+        batch_idx = 0
 
-            tasks += [
-                build_spark_etl_task(
-                    platform=platform_cfg,
-                    part=part,
-                    args=args + (batch_args or []),
-                    task_name=f"{part}{suffix}"
-                )
-                for part in platform_cfg.parts
-            ]
+        for group in groups:
+            for i, batch_args in enumerate(group):
+                suffix = f"_{batch_idx}" if platform_cfg.batch_groups else ""
 
-            if i < len(batches) - 1 and platform_cfg.inter_batch_wait_secs > 0:
-                tasks.append(BashOperator(
-                    task_id=f"wait_after_idx_{i}",
-                    bash_command=f"sleep {platform_cfg.inter_batch_wait_secs}"
-                ))
+                tasks += [
+                    build_spark_etl_task(
+                        platform=platform_cfg,
+                        part=part,
+                        args=args + (batch_args or []),
+                        task_name=f"{part}{suffix}"
+                    )
+                    for part in platform_cfg.parts
+                ]
+
+                if i < len(group) - 1 and platform_cfg.inter_batch_wait_secs > 0:
+                    tasks.append(BashOperator(
+                        task_id=f"wait_after_idx_{batch_idx}",
+                        bash_command=f"sleep {platform_cfg.inter_batch_wait_secs}"
+                    ))
+
+                batch_idx += 1
 
         tasks.append(build_row_check_task(
             platform_name=conf_tree.get_string("FileSystem.platform"),

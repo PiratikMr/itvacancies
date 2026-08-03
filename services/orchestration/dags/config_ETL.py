@@ -26,6 +26,16 @@ class ArgDef:
     is_static: bool = False
 
 
+BatchArgs = list[str]
+BatchGroup = list[BatchArgs]
+
+
+def grouped_batches(arg: str, total: int, per_group: int) -> list[BatchGroup]:
+    batches = [[f"--{arg}", str(i)] for i in range(total)]
+
+    return [batches[i:i + per_group] for i in range(0, total, per_group)]
+
+
 class Platform:
     def __init__(self,
                  fileName: str,
@@ -33,7 +43,7 @@ class Platform:
                  args: list[ArgDef] = None,
                  with_update: bool = True,
                  module_path: str = None,
-                 batch_extra_args: list[list[str]] = None,
+                 batch_groups: list[BatchGroup] = None,
                  inter_batch_wait_secs: int = 0
                  ):
 
@@ -52,7 +62,7 @@ class Platform:
         self.parts = ["update"] if with_update else []
         self.parts.extend(["extract", "transform-load"])
 
-        self.batch_extra_args = batch_extra_args
+        self.batch_groups = batch_groups
         self.inter_batch_wait_secs = inter_batch_wait_secs
 
 
@@ -63,6 +73,6 @@ PLATFORMS = [
     Platform("hc", "HabrCareer"),
     Platform("hh", "HeadHunter", args=[ArgDef("datefrom", "Dags.ETL.dateFrom")]),
     Platform("az", "Adzuna",
-             batch_extra_args=[["--locidx", "0"], ["--locidx", "1"], ["--locidx", "2"]],
-             inter_batch_wait_secs=120),
+             batch_groups=grouped_batches("locidx", total=6, per_group=3),
+             inter_batch_wait_secs=60),
 ]
