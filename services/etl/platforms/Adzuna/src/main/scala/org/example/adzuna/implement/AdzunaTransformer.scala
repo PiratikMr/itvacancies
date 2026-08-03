@@ -3,7 +3,7 @@ package org.example.adzuna.implement
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession, functions}
-import org.example.adzuna.implement.AdzunaTransformer.schema
+import org.example.adzuna.implement.AdzunaTransformer.{MonthsPerYear, schema}
 import org.example.core.adapter.database.DataBaseAdapter
 import org.example.core.config.model.structures.FuzzyMatcherConf
 import org.example.core.etl.model.{Language, NormalizedVacancy, Vacancy, VacancyColumns}
@@ -35,8 +35,8 @@ class AdzunaTransformer(
         lit(_currency).as(VacancyColumns.CURRENCY),
         lit(null).cast(StringType).as(VacancyColumns.EXPERIENCE),
 
-        col("salary_min").cast(DoubleType).as(VacancyColumns.SALARY_FROM),
-        col("salary_max").cast(DoubleType).as(VacancyColumns.SALARY_TO),
+        (col("salary_min").cast(DoubleType) / MonthsPerYear).as(VacancyColumns.SALARY_FROM),
+        (col("salary_max").cast(DoubleType) / MonthsPerYear).as(VacancyColumns.SALARY_TO),
 
         col("latitude").cast(DoubleType).as(VacancyColumns.LATITUDE),
         col("longitude").cast(DoubleType).as(VacancyColumns.LONGITUDE),
@@ -82,6 +82,8 @@ class AdzunaTransformer(
 }
 
 object AdzunaTransformer {
+
+  private val MonthsPerYear = 12
 
   private val schema = StructType(Seq(
     StructField("id", StringType),

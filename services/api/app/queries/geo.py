@@ -23,26 +23,30 @@ def by_country(table: str, where: str) -> str:
     """
 
 
+_COORD_DP = 7
+
+
 def map_points(table: str, where: str) -> str:
-    # One representative vacancy per exact coordinate (no rounding — points are
-    # kept as-is). Among vacancies sharing a coordinate we prefer one with a
-    # stated salary, then the most recent; title/salary/url all come from that
-    # same row. Payload is intentionally minimal: only what the map shows.
     w = where_with(where, "latitude != 200 AND longitude != 200")
     rank = "(salary > 0, published_at)"
     return f"""
-        SELECT lat, lng, rep.1 AS title, rep.2 AS salary, rep.3 AS url
-        FROM (
-            SELECT
-                latitude                              AS lat,
-                longitude                             AS lng,
-                argMax((title, salary, url), {rank})  AS rep,
-                count()                               AS cnt
-            FROM {table}
-            {w}
-            GROUP BY lat, lng
-        )
-        ORDER BY cnt DESC
+        SELECT
+            round(toFloat64(latitude), {_COORD_DP})  AS lat,
+            round(toFloat64(longitude), {_COORD_DP}) AS lng,
+            argMax(vacancy_id, {rank})               AS id
+        FROM {table}
+        {w}
+        GROUP BY lat, lng
+        ORDER BY count() DESC
+    """
+
+
+def point_detail(table: str) -> str:
+    return f"""
+        SELECT title, salary, url
+        FROM {table}
+        WHERE vacancy_id = {{id:UInt64}}
+        LIMIT 1
     """
 
 

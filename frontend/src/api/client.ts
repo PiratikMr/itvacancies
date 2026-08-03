@@ -3,6 +3,7 @@ import type { Sort } from "../components/shared";
 import type {
   OverviewResponse, MetaResponse, FiltersResponse, FacetsResponse,
   SalaryResponse, SkillsResponse, EmployersResponse, GeoResponse, VacanciesResponse,
+  GeoPoints, PointDetail,
 } from "./types";
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
@@ -27,6 +28,8 @@ export const api = {
   employers: (f: Filters, limit: number, offset: number, sort?: Sort) =>
     getJson<EmployersResponse>(`/api/v1/employers?${qs(f)}&limit=${limit}&offset=${offset}${sortQs(sort)}`),
   geo: (f: Filters) => getJson<GeoResponse>(`/api/v1/geo?${qs(f)}`),
+  geoPoints: (f: Filters) => getJson<GeoPoints>(`/api/v1/geo/points?${qs(f)}`),
+  geoPoint: (id: number) => getJson<PointDetail>(`/api/v1/geo/point/${id}`),
   vacancies: (f: Filters, limit: number, offset: number, sort?: Sort) =>
     getJson<VacanciesResponse>(`/api/v1/vacancies?${qs(f)}&limit=${limit}&offset=${offset}${sortQs(sort)}`),
 };

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { GeoResponse } from "../api/types";
+import type { GeoPoints, GeoResponse } from "../api/types";
 import { api } from "../api/client";
 import { usePageData, cacheKey } from "../lib/usePageData";
 import type { Filters } from "../state/filters";
@@ -13,13 +13,14 @@ import { tableTh as th, tableTd as td, capsLabel } from "../lib/tokens";
 
 export function GeoPage({ filters }: { filters: Filters }) {
   const { data, loading, error } = usePageData(() => api.geo(filters), [filters], cacheKey("geo", filters));
+  const points = usePageData(() => api.geoPoints(filters), [filters], cacheKey("geo-points", filters));
   if (error) return <Notice text={`Ошибка загрузки: ${error}`} />;
   if (!data) return <Notice text="Загрузка…" />;
   if (data.countries.length === 0) return <EmptyState sub="По выбранным фильтрам нет вакансий с известной географией" />;
-  return <GeoBody data={data} loading={loading} />;
+  return <GeoBody data={data} loading={loading} points={points.data} />;
 }
 
-function GeoBody({ data, loading }: { data: GeoResponse; loading: boolean }) {
+function GeoBody({ data, loading, points }: { data: GeoResponse; loading: boolean; points: GeoPoints | null }) {
   const mobile = useIsMobile();
   const k = data.kpis;
   const dark = document.body.classList.contains("dark");
@@ -52,7 +53,7 @@ function GeoBody({ data, loading }: { data: GeoResponse; loading: boolean }) {
       </KpiGrid>
 
       <Card title="Карта вакансий" style={{ marginBottom: 12 }}>
-        <GeoMap points={data.map} dark={dark} />
+        <GeoMap points={points} dark={dark} loadDetail={api.geoPoint} />
       </Card>
 
       <TableCard title="Вакансии по странам">

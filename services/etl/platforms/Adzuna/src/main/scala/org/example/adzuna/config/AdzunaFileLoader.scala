@@ -10,14 +10,30 @@ class AdzunaFileLoader(confPath: String, override val saveFolder: String, locati
 
   private val args = rootConfig.getConfig("Arguments")
 
+  private val keyIndex: Int = args.getIntList("appKeyIndexes").get(locationIndex)
+
   lazy val apiParams = AdzunaApiParams(
     args.getStringList("locationTags").get(locationIndex),
     args.getInt("maxDaysOld"),
     args.getInt("vacsPerPage"),
-    args.getString("appId"),
-    args.getString("appKey"),
+    credential("appIds"),
+    credential("appKeys"),
     args.getString("categoryTag")
   )
+
+  private def credential(listName: String): String = {
+    val values = args.getStringList(listName)
+
+    require(
+      keyIndex < values.size,
+      s"$listName: No value with index $keyIndex, length is  ${values.size}"
+    )
+
+    val value = values.get(keyIndex)
+    require(value.nonEmpty, s"$listName[$keyIndex] is empty")
+
+    value
+  }
 
   lazy val currency: String = args.getStringList("currencies").get(locationIndex)
   lazy val urlDomain: String = args.getStringList("urlDomains").get(locationIndex)
