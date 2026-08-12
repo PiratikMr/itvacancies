@@ -29,3 +29,7 @@ services:
       SPARK_MASTER_URL: spark://${HOST_SPARK_MASTER}:7077
       SPARK_LOCAL_HOSTNAME: datanode1
       SPARK_WORKER_WEBUI_PORT: 8081
+      SPARK_WORKER_OPTS: >-
+        -Dspark.worker.cleanup.enabled=true
+        -Dspark.worker.cleanup.interval=1800
+        -Dspark.worker.cleanup.appDataTtl=86400
