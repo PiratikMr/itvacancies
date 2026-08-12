@@ -25,4 +25,16 @@ def create_dag():
         }
     )
 
+    BashOperator(
+        task_id="delete_expired_logs",
+        bash_command=(
+            'bash /opt/airflow/dags/scripts/delete_expired_logs.sh '
+            '"{{ params.logs_root }}" "{{ params.expire_days }}"'
+        ),
+        params={
+            "logs_root": "/opt/airflow/logs",
+            "expire_days": conf_tree.get_string("Dags.DeleteData.airflowLogs")
+        }
+    )
+
 create_dag()
