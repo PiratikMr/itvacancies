@@ -7,6 +7,7 @@ services:
       - "127.0.0.1:${PORT_CLICKHOUSE_HTTP}:8123"
       - "127.0.0.1:${PORT_CLICKHOUSE_TCP}:9000"
     volumes:
+      - clickhouse-volume:/var/lib/clickhouse
       - ../../db/clickhouse:/docker-entrypoint-initdb.d
       - ./clickhouse-config/system-logs.xml:/etc/clickhouse-server/config.d/zz-system-logs.xml:ro
       - ./clickhouse-config/query-profiler.xml:/etc/clickhouse-server/users.d/zz-query-profiler.xml:ro
@@ -22,3 +23,6 @@ services:
     restart: unless-stopped
     networks:
       - data_platform_net
+
+volumes:
+  clickhouse-volume:
