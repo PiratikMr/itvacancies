@@ -8,6 +8,8 @@ services:
       - "127.0.0.1:${PORT_CLICKHOUSE_TCP}:9000"
     volumes:
       - ../../db/clickhouse:/docker-entrypoint-initdb.d
+      - ./clickhouse-config/system-logs.xml:/etc/clickhouse-server/config.d/zz-system-logs.xml:ro
+      - ./clickhouse-config/query-profiler.xml:/etc/clickhouse-server/users.d/zz-query-profiler.xml:ro
     environment:
       CLICKHOUSE_DB: ${CH_DB}
       CLICKHOUSE_USER: ${CH_USER}
