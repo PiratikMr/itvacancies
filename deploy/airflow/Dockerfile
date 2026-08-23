@@ -4,6 +4,7 @@ USER root
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
     hdfs-cli \
+    rclone \
     openjdk-17-jdk && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
