@@ -17,30 +17,28 @@ rclone_cmd=(rclone --config "$rclone_conf")
 
 declare -A day_paths
 
-list_date_dirs() {
-    local root_path=""
-
-    hdfs ls "$@" | while read -r path; do
-        if [[ -z "$path" ]]; then
-            continue
-        elif [[ $path == /* ]]; then
-            root_path="${path::-1}"
-        elif [[ $path == ????-??-??* ]]; then
-            echo "${root_path}${path}"
-        fi
+list_names() {
+    hdfs ls "$1" 2>/dev/null | while read -r name; do
+        [[ -z "$name" || "$name" == /* ]] && continue
+        echo "$name"
     done
 }
 
 collect_days() {
-    local kind dir day
+    local platform kind base name
 
-    for kind in Vacancies Rates Alive; do
-        while read -r dir; do
-            [[ -n "$dir" ]] || continue
-            day="${dir##*/}"
-            day_paths["${day:0:10}"]+="$dir"$'\n'
-        done < <(list_date_dirs "/$hdfs_root/*/$kind/" 2>/dev/null || true)
-    done
+    while read -r platform; do
+        [[ -n "$platform" && "$platform" != "Archive" ]] || continue
+
+        for kind in Vacancies Rates Alive; do
+            base="/$hdfs_root/$platform/$kind"
+
+            while read -r name; do
+                [[ "$name" == ????-??-??* ]] || continue
+                day_paths["${name:0:10}"]+="$base/$name"$'\n'
+            done < <(list_names "$base/")
+        done
+    done < <(list_names "/$hdfs_root/")
 }
 
 archive_day() {
