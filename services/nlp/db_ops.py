@@ -120,6 +120,47 @@ def list_records(
     return [dict(r) for r in rows], int(total)
 
 
+def _absorb_duplicate_locations(conn, target_country_id: int, source_country_id: int) -> None:
+    dupes = conn.execute(text("""
+        SELECT c.location_id AS cand_id, g.location_id AS gold_id
+        FROM dim_location c
+        JOIN dim_location g
+          ON g.location = c.location
+         AND g.country_id = :target
+         AND g.location_id <> c.location_id
+        WHERE c.country_id = :source
+    """), {"target": target_country_id, "source": source_country_id}).fetchall()
+
+    for cand_id, gold_id in dupes:
+        conn.execute(text("""
+            INSERT INTO bridge_vacancy_location (vacancy_id, location_id)
+            SELECT vacancy_id, :gold_id
+            FROM bridge_vacancy_location
+            WHERE location_id = :cand_id
+            ON CONFLICT (vacancy_id, location_id) DO NOTHING
+        """), {"gold_id": gold_id, "cand_id": cand_id})
+
+        conn.execute(text("""
+            DELETE FROM bridge_vacancy_location WHERE location_id = :cand_id
+        """), {"cand_id": cand_id})
+
+        conn.execute(text("""
+            INSERT INTO mapping_dim_location (location_id, mapped_value, is_canonical)
+            SELECT :gold_id, mapped_value, false
+            FROM mapping_dim_location
+            WHERE location_id = :cand_id
+            ON CONFLICT (location_id, mapped_value) DO NOTHING
+        """), {"gold_id": gold_id, "cand_id": cand_id})
+
+        conn.execute(text("""
+            DELETE FROM mapping_dim_location WHERE location_id = :cand_id
+        """), {"cand_id": cand_id})
+
+        conn.execute(text("""
+            DELETE FROM dim_location WHERE location_id = :cand_id
+        """), {"cand_id": cand_id})
+
+
 def set_reference(dimension_name: str, ids: list[int], value: bool) -> int:
     table = f"dim_{dimension_name}"
     id_col = f"{dimension_name}_id"
@@ -174,6 +215,8 @@ def delete_records(dimension_name: str, relation_type: str, ids: list[int]) -> i
                 {"ids": ids},
             )
         elif relation_type == "country_dim":
+            for country_id in ids:
+                _absorb_duplicate_locations(conn, 0, country_id)
             conn.execute(
                 text("UPDATE dim_location SET country_id = 0 WHERE country_id = ANY(:ids)"),
                 {"ids": ids},
@@ -259,6 +302,8 @@ def apply_normalization_batch(dimension_name: str, relation_type: str, merges: l
                 """), {"c_id": candidate_id})
 
             elif relation_type == "country_dim":
+                _absorb_duplicate_locations(conn, golden_id, candidate_id)
+
                 conn.execute(text("""
                     UPDATE dim_location SET country_id = :g_id WHERE country_id = :c_id
                 """), {"g_id": golden_id, "c_id": candidate_id})

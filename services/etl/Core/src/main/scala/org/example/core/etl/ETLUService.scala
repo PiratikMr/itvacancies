@@ -1,6 +1,7 @@
 package org.example.core.etl
 
 import com.typesafe.scalalogging.LazyLogging
+import org.apache.spark.sql.functions.{coalesce, col, current_timestamp, lit}
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.example.core.adapter.database.DataBaseAdapter
 import org.example.core.adapter.storage.StorageAdapter
@@ -49,10 +50,30 @@ class ETLUService(
   private def update(extractor: Extractor, updateLimit: Int, platformName: String, maxAgeDays: Option[Int]): Unit = {
 
     val activeIds = vacancyUpdater.getActiveVacancies(updateLimit, platformName, maxAgeDays)
+      .reliableCheckpoint()
 
     val unActiveIds = extractor.filterActiveVacancies(spark, activeIds, webAdapter)
+      .reliableCheckpoint()
+
+    saveLiveness(activeIds, unActiveIds, platformName)
 
     vacancyUpdater.updateVacancies(unActiveIds, platformName)
+  }
+
+
+  private def saveLiveness(checkedIds: Dataset[String], unActiveIds: Dataset[String], platformName: String): Unit = {
+
+    val unActiveDf = unActiveIds.toDF(VacancyColumns.EXTERNAL_ID)
+      .dropDuplicates(VacancyColumns.EXTERNAL_ID)
+      .withColumn(ETLUService.IS_ALIVE, lit(false))
+
+    val livenessDf = checkedIds.toDF(VacancyColumns.EXTERNAL_ID)
+      .join(unActiveDf, Seq(VacancyColumns.EXTERNAL_ID), "left")
+      .withColumn(ETLUService.IS_ALIVE, coalesce(col(ETLUService.IS_ALIVE), lit(true)))
+      .withColumn(VacancyColumns.PLATFORM, lit(platformName))
+      .withColumn(ETLUService.CHECKED_AT, current_timestamp())
+
+    storageAdapter.write(livenessDf, ETLUService.ALIVE_FOLDER, withDate = true)
   }
 
 
@@ -89,4 +110,12 @@ class ETLUService(
         throw e
     }
   }
+}
+
+object ETLUService {
+
+  private val ALIVE_FOLDER = "Alive"
+
+  private val IS_ALIVE = "isAlive"
+  private val CHECKED_AT = "checkedAt"
 }

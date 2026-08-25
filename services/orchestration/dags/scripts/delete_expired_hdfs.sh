@@ -7,13 +7,13 @@ hdfs_root="$3"
 target=$(date -d "$execution_date - $expire_days days" +%s)
 
 process_path() {
-    local search_path="$1"
-    local depth="$2"
+    local depth="$1"
+    shift
 
     if (( depth > 2 )); then return; fi
 
-    local root_path="$search_path"
-    hdfs ls "$search_path" | while read -r path; do
+    local root_path="$1"
+    hdfs ls "$@" | while read -r path; do
         if [[ -z "$path" ]]; then
             continue
         elif [[ $path == /* ]]; then
@@ -28,9 +28,9 @@ process_path() {
                 echo "deleted $root_path$path"
             fi
         else
-            process_path "$root_path$path/" $((depth + 1))
+            process_path $((depth + 1)) "$root_path$path/"
         fi
     done
 }
 
-process_path "/$hdfs_root/*/Vacancies/" 0
+process_path 0 "/$hdfs_root/*/Vacancies/" "/$hdfs_root/*/Rates/"

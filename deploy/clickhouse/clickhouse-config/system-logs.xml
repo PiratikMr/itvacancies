@@ -1,0 +1,43 @@
+<clickhouse>
+    <logger>
+        <level>warning</level>
+        <size>50M</size>
+        <count>3</count>
+    </logger>
+
+    <trace_log remove="1"/>
+    <text_log remove="1"/>
+    <metric_log remove="1"/>
+    <asynchronous_metric_log remove="1"/>
+    <histogram_metric_log remove="1"/>
+    <query_metric_log remove="1"/>
+    <instrumentation_trace_log remove="1"/>
+
+    <part_log remove="1"/>
+    <processors_profile_log remove="1"/>
+    <background_schedule_pool_log remove="1"/>
+    <query_thread_log remove="1"/>
+    <query_views_log remove="1"/>
+    <asynchronous_insert_log remove="1"/>
+
+    <zookeeper_log remove="1"/>
+    <zookeeper_connection_log remove="1"/>
+    <aggregated_zookeeper_log remove="1"/>
+    <opentelemetry_span_log remove="1"/>
+    <blob_storage_log remove="1"/>
+    <backup_log remove="1"/>
+    <delta_lake_metadata_log remove="1"/>
+    <iceberg_metadata_log remove="1"/>
+
+    <query_log>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+    </query_log>
+
+    <error_log>
+        <ttl>event_date + INTERVAL 30 DAY DELETE</ttl>
+    </error_log>
+
+    <crash_log>
+        <ttl>event_date + INTERVAL 90 DAY DELETE</ttl>
+    </crash_log>
+</clickhouse>
