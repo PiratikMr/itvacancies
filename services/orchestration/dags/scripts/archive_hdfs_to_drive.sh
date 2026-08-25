@@ -13,7 +13,9 @@ workdir="$(mktemp -d)"
 stage_root="$workdir/stage"
 trap 'rm -rf "$workdir"' EXIT
 
-rclone_cmd=(rclone --config "$rclone_conf")
+cp "$rclone_conf" "$workdir/rclone.conf"
+chmod 600 "$workdir/rclone.conf"
+rclone_cmd=(rclone --config "$workdir/rclone.conf")
 
 declare -A day_paths
 
