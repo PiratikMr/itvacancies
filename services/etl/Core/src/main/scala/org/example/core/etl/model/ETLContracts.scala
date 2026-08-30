@@ -42,6 +42,8 @@ case class Vacancy(
 case class NormalizedVacancy(
                               externalId: String,
                               title: String,
+                              description: Option[String],
+                              descriptionHash: Option[String],
                               url: String,
 
                               latitude: Option[Double],
@@ -71,6 +73,7 @@ object VacancyColumns {
   val EXTERNAL_ID = "externalId"
   val TITLE = "title"
   val DESCRIPTION = "description"
+  val DESCRIPTION_HASH = "descriptionHash"
   val URL = "url"
   val PLATFORM = "platform"
   val PUBLISHED_AT = "publishedAt"

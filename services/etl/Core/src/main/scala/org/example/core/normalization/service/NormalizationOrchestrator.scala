@@ -6,6 +6,7 @@ import org.example.core.adapter.database.DataBaseAdapter
 import org.example.core.config.model.structures.FuzzyMatcherConf
 import org.example.core.etl.model.{NormalizedLanguage, NormalizedVacancy, Vacancy, VacancyColumns}
 import org.example.core.normalization.api.NormalizationTask
+import org.example.core.normalization.engine.similarity.impl.TextNormalizer
 import org.example.core.normalization.factory.NormalizerFactory
 import org.example.core.normalization.model.NormalizationColumns
 import org.example.core.normalization.model.NormalizersEnum._
@@ -20,6 +21,9 @@ class NormalizationOrchestrator(spark: SparkSession,
 
     val initialDf = ds.toDF()
       .repartition(col(VacancyColumns.EXTERNAL_ID))
+      .withColumn(VacancyColumns.DESCRIPTION_HASH,
+        md5(TextNormalizer.simpleNormalize(col(VacancyColumns.DESCRIPTION)))
+      )
 
     if (tasks.isEmpty) {
       return buildFinalContract(initialDf)
@@ -61,6 +65,8 @@ class NormalizationOrchestrator(spark: SparkSession,
     enrichedDf.select(
       col(VacancyColumns.EXTERNAL_ID),
       col(VacancyColumns.TITLE),
+      col(VacancyColumns.DESCRIPTION),
+      col(VacancyColumns.DESCRIPTION_HASH),
       col(VacancyColumns.URL),
       col(VacancyColumns.LATITUDE),
       col(VacancyColumns.LONGITUDE),

@@ -30,4 +30,20 @@ object TextNormalizer {
   def normalize(c: Column): Column = {
     normalizeUdf(c)
   }
+
+
+  private val simpleNormalizationRules: Seq[Column => Column] = Seq(
+    c => regexp_replace(c, "<[^>]*>", " "),
+    c => regexp_replace(c, "&nbsp;|&#160;", " "),
+    c => regexp_replace(c, "[\\s\\p{Z}]+", " "),
+    c => trim(c),
+    c => lower(c)
+  )
+
+
+  def simpleNormalize(c: Column): Column = {
+    simpleNormalizationRules.foldLeft(c)((acc, cl) => cl.apply(acc))
+  }
+
+
 }

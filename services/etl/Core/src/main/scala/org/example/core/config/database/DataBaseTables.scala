@@ -106,6 +106,8 @@ object FactVacancyDef {
   val salaryTo = "salary_to"
   val publishedAt = "published_at"
   val title = "title"
+  val description = "description"
+  val description_hash = "description_hash"
   val url = "url"
 
   val closedAt = "closed_at"
@@ -120,6 +122,8 @@ object FactVacancyDef {
                      vacancy_id: Option[Long] = None,
                      external_id: String,
                      title: String,
+                     description: Option[String],
+                     description_hash: Option[String],
                      url: String,
                      platform_id: Long,
                      employer_id: Option[Long],

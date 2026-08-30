@@ -26,6 +26,8 @@ object VacancyDBMapper {
       $"$SALARY_TO".as(FactVacancyDef.salaryTo),
       $"$PUBLISHED_AT".as(FactVacancyDef.publishedAt),
       $"$TITLE".as(FactVacancyDef.title),
+      $"$DESCRIPTION".as(FactVacancyDef.description),
+      $"$DESCRIPTION_HASH".as(FactVacancyDef.description_hash),
       $"$URL".as(FactVacancyDef.url)
     ).as[FactVacancyDef.Record]
   }

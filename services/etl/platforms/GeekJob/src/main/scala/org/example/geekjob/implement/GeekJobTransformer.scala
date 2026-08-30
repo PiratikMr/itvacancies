@@ -1,15 +1,14 @@
 package org.example.geekjob.implement
 
+import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql._
 import org.example.core.adapter.database.DataBaseAdapter
 import org.example.core.config.model.structures.FuzzyMatcherConf
-import org.example.core.etl.model.{NormalizedVacancy, Vacancy, VacancyColumns}
 import org.example.core.etl.Transformer
-import org.example.core.normalization.factory.NormalizerFactory
-import org.example.core.normalization.model.NormalizersEnum._
+import org.example.core.etl.model.{NormalizedVacancy, Vacancy, VacancyColumns}
 import org.example.core.normalization.api.NormalizationTask.Exact
+import org.example.core.normalization.model.NormalizersEnum._
 import org.example.core.normalization.service.NormalizationOrchestrator
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -54,7 +53,7 @@ class GeekJobTransformer(currDate: String,
 
         col("publish_date").as(VacancyColumns.PUBLISHED_AT),
         col("title").as(VacancyColumns.TITLE),
-        lit(null).cast(StringType).as(VacancyColumns.DESCRIPTION),
+        col("description").as(VacancyColumns.DESCRIPTION),
         concat(lit("https://geekjob.ru/vacancy/"), col("id")).as(VacancyColumns.URL),
 
         col("job_format").as(VacancyColumns.EMPLOYMENTS),
@@ -97,6 +96,7 @@ private object GeekJobTransformer {
   private val schema: StructType = StructType(Seq(
     StructField("id", StringType),
     StructField("title", StringType),
+    StructField("description", StringType),
     StructField("employer", StringType),
     StructField("experience", StringType),
     StructField("locations", ArrayType(StringType)),
@@ -123,6 +123,10 @@ private object GeekJobTransformer {
 
     val id: String = row.substring(0, 24)
     val title: String = Header.select("h1").text()
+    val description: String = Doc.select("div#vacancy-description").html() match {
+      case s if s == null || s.isBlank => null
+      case s => s
+    }
 
     val company = if (Company.html().contains("Частный рекрутер")) null
     else Company.select("a").first() match {
@@ -146,7 +150,7 @@ private object GeekJobTransformer {
     val (specs, fields, level) = tagsTransform(Doc.select("div.tags-list"))
 
 
-    Row(id, title, company, exp, locations, date, jobFormat, salary_from, salary_to, currency, specs, fields, level)
+    Row(id, title, description, company, exp, locations, date, jobFormat, salary_from, salary_to, currency, specs, fields, level)
   }
 
   private lazy val currencyMap: Map[String, String] = Map(
