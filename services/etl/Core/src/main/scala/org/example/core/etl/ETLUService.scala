@@ -1,15 +1,17 @@
 package org.example.core.etl
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.sql.functions.{coalesce, col, current_timestamp, lit}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.example.core.adapter.database.DataBaseAdapter
 import org.example.core.adapter.storage.StorageAdapter
 import org.example.core.adapter.web.WebAdapter
+import org.example.core.config.database.FactVacancyDef
 import org.example.core.etl.impl.{VacancyLoader, VacancyUpdater}
-import org.example.core.etl.model.ETLParts.{Extract, TransformLoad, Update}
+import org.example.core.etl.model.ETLParts.{BackFillDescription, Extract, TransformLoad, Update}
 import org.example.core.etl.model.{ETLParts, NormalizedVacancy, VacancyColumns}
 import org.example.core.etl.utils.DataTransformer
+import org.example.core.normalization.engine.similarity.impl.TextNormalizer
 import org.example.core.util.CheckpointSupport._
 
 import scala.util.{Failure, Success}
@@ -61,6 +63,38 @@ class ETLUService(
   }
 
 
+  private def backfillDescription(transformer: Transformer,
+                                  folderName: String,
+                                  platformName: String): Unit = {
+
+    vacancyUpdater.getPlatformId(platformName) match {
+      case None =>
+        logger.error(s"Платформа '$platformName' не найдена, бэкфилл пропущен")
+
+      case Some(platformId) =>
+        val rawDS = storageAdapter.readText(spark, folderName)
+        val transformed = transformer.transform(spark, transformer.toRows(spark, rawDS))
+
+        val df = transformed.toDF()
+          .filter(col(VacancyColumns.DESCRIPTION).isNotNull)
+          .select(
+            col(VacancyColumns.EXTERNAL_ID).as(FactVacancyDef.externalId),
+            col(VacancyColumns.DESCRIPTION).as(FactVacancyDef.description)
+          )
+          .withColumn(FactVacancyDef.platformId, lit(platformId))
+          .withColumn(FactVacancyDef.description_hash,
+            md5(TextNormalizer.simpleNormalize(col(FactVacancyDef.description))))
+
+        dbAdapter.update(
+          df = df,
+          targetTable = FactVacancyDef.meta.tableName,
+          joinColumns = Seq(FactVacancyDef.externalId, FactVacancyDef.platformId),
+          updateColumns = Seq(FactVacancyDef.description, FactVacancyDef.description_hash)
+        )
+    }
+  }
+
+
   private def saveLiveness(checkedIds: Dataset[String], unActiveIds: Dataset[String], platformName: String): Unit = {
 
     val unActiveDf = unActiveIds.toDF(VacancyColumns.EXTERNAL_ID)
@@ -91,6 +125,9 @@ class ETLUService(
     ETLParts.parse(etlPart) match {
       case Success(Extract) =>
         extract(extractor, folderName)
+
+      case Success(BackFillDescription) =>
+        backfillDescription(transformer, folderName, platformName)
 
       case Success(TransformLoad) =>
         val df = transform(transformer, folderName)

@@ -10,7 +10,9 @@ object ETLParts {
   case object TransformLoad extends ETLPart("transform-load")
   case object Update extends ETLPart("update")
 
-  val values: Seq[ETLPart] = Seq(Extract, TransformLoad, Update)
+  case object BackFillDescription extends ETLPart("backfill-description")
+
+  val values: Seq[ETLPart] = Seq(Extract, TransformLoad, Update, BackFillDescription)
 
   def parse(str: String): Try[ETLPart] = {
     val normalized = str.trim.toLowerCase

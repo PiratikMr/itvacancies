@@ -64,7 +64,7 @@ class VacancyUpdater(spark: SparkSession, dbAdapter: DataBaseAdapter) extends La
   }
 
 
-  private def getPlatformId(platformName: String): Option[Long] = {
+  def getPlatformId(platformName: String): Option[Long] = {
 
     val getQuery =
       s"""
