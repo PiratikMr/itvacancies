@@ -310,6 +310,8 @@ create table fact_vacancy (
     published_at                        timestamp without time zone     not null,
     title                               text                            not null,
     url                                 text                            not null,
+    description                         text,
+    description_hash                    text,
 
     created_at                          timestamp without time zone     not null default now(),
     updated_at                          timestamp without time zone     not null default now(),
@@ -317,6 +319,9 @@ create table fact_vacancy (
 
     unique(external_id, platform_id)
 );
+
+create index on fact_vacancy (description_hash) where description_hash is not null;
+alter table fact_vacancy alter column description set compression lz4;
 
 
 create table bridge_vacancy_skill (
