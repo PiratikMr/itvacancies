@@ -10,6 +10,7 @@ sys.path.insert(0, DAGS_DIR)
 EXPECTED_DAG_IDS = {
     "Adzuna_ETL",
     "Archive_toDrive",
+    "Cluster_duplicates",
     "Backup_database",
     "Currency_Updater",
     "Delete_expiredData",
