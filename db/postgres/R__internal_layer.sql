@@ -32,84 +32,118 @@ where salary between 1000 and 1500000;
 
 
 create or replace view internal.mv_core_vacancy as
-with vacancy_skills as (
+with members as (
     select
-        b.vacancy_id,
+        f.vacancy_id,
+        coalesce(m.cluster_id, f.vacancy_id) as cluster_id
+    from fact_vacancy f
+    left join dup_members m on m.vacancy_id = f.vacancy_id
+),
+cluster_skills as (
+    select
+        m.cluster_id,
         array_agg(distinct d.skill) as skills
-    from bridge_vacancy_skill b
+    from members m
+    join bridge_vacancy_skill b on b.vacancy_id = m.vacancy_id
     join dim_skill d on b.skill_id = d.skill_id
     where d.is_reference = true
-    group by b.vacancy_id
+    group by m.cluster_id
 ),
-vacancy_schedules as (
+cluster_schedules as (
     select
-        b.vacancy_id,
+        m.cluster_id,
         array_agg(distinct d.schedule) as schedules
-    from bridge_vacancy_schedule b
+    from members m
+    join bridge_vacancy_schedule b on b.vacancy_id = m.vacancy_id
     join dim_schedule d on b.schedule_id = d.schedule_id
     where d.is_reference = true
-    group by b.vacancy_id
+    group by m.cluster_id
 ),
-vacancy_locations as (
+cluster_locations as (
     select
-        b.vacancy_id,
+        m.cluster_id,
         jsonb_agg(distinct jsonb_build_object(
             'location', l.location,
             'country',  coalesce(c.country, '')
         )) as locations
-    from bridge_vacancy_location b
+    from members m
+    join bridge_vacancy_location b on b.vacancy_id = m.vacancy_id
     join dim_location l on b.location_id = l.location_id
     left join dim_country c on l.country_id = c.country_id
     where (c.country_id is null or c.is_reference = true) -- and l.is_reference = true
-    group by b.vacancy_id
+    group by m.cluster_id
 ),
-vacancy_fields as (
+cluster_fields as (
     select
-        b.vacancy_id,
+        m.cluster_id,
         array_agg(distinct d.field) as fields
-    from bridge_vacancy_field b
+    from members m
+    join bridge_vacancy_field b on b.vacancy_id = m.vacancy_id
     join dim_field d on b.field_id = d.field_id
     where d.is_reference = true
-    group by b.vacancy_id
+    group by m.cluster_id
 ),
-vacancy_grades as (
+cluster_grades as (
     select
-        vacancy_id,
+        cluster_id,
         array_agg(grade order by sort_order)      as grades,
         array_agg(sort_order order by sort_order) as grades_sort
     from (
         select distinct
-            b.vacancy_id,
+            m.cluster_id,
             d.grade,
             d.sort_order
-        from bridge_vacancy_grade b
+        from members m
+        join bridge_vacancy_grade b on b.vacancy_id = m.vacancy_id
         join dim_grade d on b.grade_id = d.grade_id
         where d.is_reference = true
     ) x
-    group by vacancy_id
+    group by cluster_id
 ),
-vacancy_employments as (
+cluster_employments as (
     select
-        b.vacancy_id,
+        m.cluster_id,
         array_agg(distinct d.employment) as employments
-    from bridge_vacancy_employment b
+    from members m
+    join bridge_vacancy_employment b on b.vacancy_id = m.vacancy_id
     join dim_employment d on b.employment_id = d.employment_id
     -- where d.is_reference = true
-    group by b.vacancy_id
+    group by m.cluster_id
 ),
-vacancy_languages as (
+cluster_languages as (
     select
-        b.vacancy_id,
+        m.cluster_id,
         jsonb_agg(distinct jsonb_build_object(
             'language',    l.language,
             'level',       lvl.language_level,
             'level_sort',  lvl.sort_order
         )) as languages
-    from bridge_vacancy_language b
+    from members m
+    join bridge_vacancy_language b on b.vacancy_id = m.vacancy_id
     join dim_language l on b.language_id = l.language_id
     join dim_language_level lvl on b.language_level_id = lvl.language_level_id
     where l.is_reference = true and lvl.is_reference = true
-    group by b.vacancy_id
+    group by m.cluster_id
+),
+cluster_time as (
+    select
+        m.cluster_id,
+        min(f.published_at)          as published_at,
+        bool_or(f.closed_at is null) as is_active,
+        max(f.closed_at)             as closed_at
+    from members m
+    join fact_vacancy f on f.vacancy_id = m.vacancy_id
+    group by m.cluster_id
+),
+cluster_salary as (
+    select distinct on (m.cluster_id)
+        m.cluster_id,
+        s.salary,
+        s.has_range
+    from members m
+    join fact_vacancy f on f.vacancy_id = m.vacancy_id
+    join internal.salary s on s.vacancy_id = m.vacancy_id
+    order by m.cluster_id, f.published_at desc, m.vacancy_id desc
 )
 
 select
@@ -124,11 +158,14 @@ select
     coalesce(f.longitude, 200)                           as longitude,
     coalesce(s.salary, 0)                                as salary,
     coalesce(s.has_range, false)                         as has_range,
-    f.published_at,
+    t.published_at,
     f.title,
     f.url,
-    coalesce(f.closed_at, '1970-01-01 00:00:00'::timestamp) as closed_at,
-    (f.closed_at is null)::int                              as is_active,
+    case
+        when t.is_active then '1970-01-01 00:00:00'::timestamp
+        else t.closed_at
+    end                                                  as closed_at,
+    t.is_active::int                                     as is_active,
 
     coalesce(v_sk.skills,       ARRAY[]::text[])  as skills,
     coalesce(v_sch.schedules,   ARRAY[]::text[])  as schedules,
@@ -139,20 +176,21 @@ select
     coalesce(v_emp.employments, ARRAY[]::text[])  as employments,
     coalesce(v_lng.languages,   '[]'::jsonb)      as languages
 
-from fact_vacancy f
+from cluster_time t
+join fact_vacancy f on f.vacancy_id = t.cluster_id
 left join dim_platform p on f.platform_id = p.platform_id
 left join dim_employer e on f.employer_id = e.employer_id
 left join dim_currency c on f.currency_id = c.currency_id
 left join dim_experience exp on f.experience_id = exp.experience_id
-left join internal.salary s on f.vacancy_id = s.vacancy_id
+left join cluster_salary s on s.cluster_id = t.cluster_id
 
-left join vacancy_skills v_sk on f.vacancy_id = v_sk.vacancy_id
-left join vacancy_schedules v_sch on f.vacancy_id = v_sch.vacancy_id
-left join vacancy_locations v_loc on f.vacancy_id = v_loc.vacancy_id
-left join vacancy_fields v_fld on f.vacancy_id = v_fld.vacancy_id
-left join vacancy_grades v_grd on f.vacancy_id = v_grd.vacancy_id
-left join vacancy_employments v_emp on f.vacancy_id = v_emp.vacancy_id
-left join vacancy_languages v_lng on f.vacancy_id = v_lng.vacancy_id
+left join cluster_skills v_sk on v_sk.cluster_id = t.cluster_id
+left join cluster_schedules v_sch on v_sch.cluster_id = t.cluster_id
+left join cluster_locations v_loc on v_loc.cluster_id = t.cluster_id
+left join cluster_fields v_fld on v_fld.cluster_id = t.cluster_id
+left join cluster_grades v_grd on v_grd.cluster_id = t.cluster_id
+left join cluster_employments v_emp on v_emp.cluster_id = t.cluster_id
+left join cluster_languages v_lng on v_lng.cluster_id = t.cluster_id
 where (p.platform_id is null or p.is_reference = true)
 --  and (e.employer_id is null or e.is_reference = true)
   and (c.currency_id is null or c.is_reference = true)
