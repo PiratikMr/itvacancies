@@ -9,7 +9,7 @@ import org.example.core.adapter.web.WebAdapter
 import org.example.core.etl.impl.{VacancyLoader, VacancyUpdater}
 import org.example.core.etl.model.ETLParts.{Extract, TransformLoad, Update}
 import org.example.core.etl.model.{ETLParts, NormalizedVacancy, VacancyColumns}
-import org.example.core.etl.utils.DataTransformer
+import org.example.core.etl.utils.VacancySanitizer
 import org.example.core.util.CheckpointSupport._
 
 import scala.util.{Failure, Success}
@@ -24,7 +24,6 @@ class ETLUService(
 
   private val vacancyUpdater = new VacancyUpdater(spark, dbAdapter)
 
-
   private def extract(extractor: Extractor, folderName: String): Unit = {
     val rawDS = extractor.extract(spark, webAdapter)
     storageAdapter.writeText(rawDS, folderName)
@@ -38,9 +37,9 @@ class ETLUService(
       .dropDuplicates(VacancyColumns.EXTERNAL_ID)
       .reliableCheckpoint()
 
-    val formattedSkillsDs = DataTransformer.normalizeSkills(transformedDs)
+    val finalTransformedDs = VacancySanitizer.applySanitize(transformedDs)
 
-    val normalized = transformer.normalize(spark, formattedSkillsDs)
+    val normalized = transformer.normalize(spark, finalTransformedDs)
       .dropDuplicates(VacancyColumns.EXTERNAL_ID)
       .reliableCheckpoint()
 

@@ -5,11 +5,11 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession, functions}
 import org.example.core.adapter.database.DataBaseAdapter
 import org.example.core.config.model.structures.FuzzyMatcherConf
-import org.example.core.etl.model.{NormalizedVacancy, Vacancy, VacancyColumns}
 import org.example.core.etl.Transformer
+import org.example.core.etl.model.{NormalizedVacancy, Vacancy, VacancyColumns}
 import org.example.core.normalization.api.NormalizationTask.ExtractTags
-import org.example.core.normalization.service.NormalizationOrchestrator
 import org.example.core.normalization.model.NormalizersEnum._
+import org.example.core.normalization.service.NormalizationOrchestrator
 
 class FinderTransformer(dbAdapter: DataBaseAdapter,
                         fuzzyConf: FuzzyMatcherConf) extends Transformer {
