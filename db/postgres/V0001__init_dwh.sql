@@ -18,11 +18,17 @@ create index idx_currency_rate_history_lookup
 on dim_currency_rate_history (currency_id, update_date desc);
 
 create table mapping_dim_currency (
+    mapping_id                          bigserial               primary key,
     currency_id                         bigint                  not null references dim_currency(currency_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (currency_id, mapped_value)
+    constraint uq_mapping_dim_currency_value unique (currency_id, mapped_value),
+    constraint ch_mapping_dim_currency_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_currency
@@ -39,11 +45,17 @@ create table dim_employer (
 );
 
 create table mapping_dim_employer (
+    mapping_id                          bigserial               primary key,
     employer_id                         bigint                  not null references dim_employer(employer_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (employer_id, mapped_value)
+    constraint uq_mapping_dim_employer_value unique (employer_id, mapped_value),
+    constraint ch_mapping_dim_employer_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_employer
@@ -59,11 +71,17 @@ create table dim_employment (
 );
 
 create table mapping_dim_employment (
-    employment_id                         bigint                  not null references dim_employment(employment_id),
+    mapping_id                          bigserial               primary key,
+    employment_id                       bigint                  not null references dim_employment(employment_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (employment_id, mapped_value)
+    constraint uq_mapping_dim_employment_value unique (employment_id, mapped_value),
+    constraint ch_mapping_dim_employment_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_employment
@@ -81,11 +99,17 @@ create table dim_experience (
 );
 
 create table mapping_dim_experience (
+    mapping_id                          bigserial               primary key,
     experience_id                       bigint                  not null references dim_experience(experience_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (experience_id, mapped_value)
+    constraint uq_mapping_dim_experience_value unique (experience_id, mapped_value),
+    constraint ch_mapping_dim_experience_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_experience
@@ -101,11 +125,17 @@ create table dim_field (
 );
 
 create table mapping_dim_field (
-    field_id                         bigint                  not null references dim_field(field_id),
-    mapped_value                     text                    not null,
-    is_canonical                     boolean                 not null,
+    mapping_id                          bigserial               primary key,
+    field_id                            bigint                  not null references dim_field(field_id),
+    mapped_value                        text                    not null,
+    is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (field_id, mapped_value)
+    constraint uq_mapping_dim_field_value unique (field_id, mapped_value),
+    constraint ch_mapping_dim_field_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_field
@@ -122,11 +152,17 @@ create table dim_grade (
 );
 
 create table mapping_dim_grade (
-    grade_id                         bigint                  not null references dim_grade(grade_id),
-    mapped_value                     text                    not null,
-    is_canonical                     boolean                 not null,
+    mapping_id                          bigserial               primary key,
+    grade_id                            bigint                  not null references dim_grade(grade_id),
+    mapped_value                        text                    not null,
+    is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (grade_id, mapped_value)
+    constraint uq_mapping_dim_grade_value unique (grade_id, mapped_value),
+    constraint ch_mapping_dim_grade_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_grade
@@ -143,11 +179,17 @@ create table dim_language_level (
 );
 
 create table mapping_dim_language_level (
-    language_level_id                         bigint                  not null references dim_language_level(language_level_id),
+    mapping_id                          bigserial               primary key,
+    language_level_id                   bigint                  not null references dim_language_level(language_level_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (language_level_id, mapped_value)
+    constraint uq_mapping_dim_language_level_value unique (language_level_id, mapped_value),
+    constraint ch_mapping_dim_language_level_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_language_level
@@ -163,11 +205,17 @@ create table dim_language (
 );
 
 create table mapping_dim_language (
+    mapping_id                          bigserial               primary key,
     language_id                         bigint                  not null references dim_language(language_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (language_id, mapped_value)
+    constraint uq_mapping_dim_language_value unique (language_id, mapped_value),
+    constraint ch_mapping_dim_language_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_language
@@ -185,11 +233,17 @@ create table dim_country (
 -- insert into dim_country (country_id, country) values (0, 'Неизвестно');
 
 create table mapping_dim_country (
+    mapping_id                          bigserial               primary key,
     country_id                          bigint                  not null references dim_country(country_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (country_id, mapped_value)
+    constraint uq_mapping_dim_country_value unique (country_id, mapped_value),
+    constraint ch_mapping_dim_country_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_country
@@ -208,11 +262,17 @@ create table dim_location (
 );
 
 create table mapping_dim_location (
+    mapping_id                          bigserial               primary key,
     location_id                         bigint                  not null references dim_location(location_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (location_id, mapped_value)
+    constraint uq_mapping_dim_location_value unique (location_id, mapped_value),
+    constraint ch_mapping_dim_location_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_location
@@ -228,11 +288,17 @@ create table dim_platform (
 );
 
 create table mapping_dim_platform (
+    mapping_id                          bigserial               primary key,
     platform_id                         bigint                  not null references dim_platform(platform_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (platform_id, mapped_value)
+    constraint uq_mapping_dim_platform_value unique (platform_id, mapped_value),
+    constraint ch_mapping_dim_platform_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_platform
@@ -249,11 +315,17 @@ create table dim_schedule (
 );
 
 create table mapping_dim_schedule (
+    mapping_id                          bigserial               primary key,
     schedule_id                         bigint                  not null references dim_schedule(schedule_id),
     mapped_value                        text                    not null,
     is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (schedule_id, mapped_value)
+    constraint uq_mapping_dim_schedule_value unique (schedule_id, mapped_value),
+    constraint ch_mapping_dim_schedule_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_schedule
@@ -279,11 +351,17 @@ create table dim_skill (
 );
 
 create table mapping_dim_skill (
-    skill_id                         bigint                  not null references dim_skill(skill_id),
-    mapped_value                     text                    not null,
-    is_canonical                     boolean                 not null,
+    mapping_id                          bigserial               primary key,
+    skill_id                            bigint                  not null references dim_skill(skill_id),
+    mapped_value                        text                    not null,
+    is_canonical                        boolean                 not null,
+    is_active                           boolean                 not null default true,
+    origin                              text                    not null default 'unknown',
+    link_score                          real,
 
-    primary key (skill_id, mapped_value)
+    constraint uq_mapping_dim_skill_value unique (skill_id, mapped_value),
+    constraint ch_mapping_dim_skill_origin
+        check (origin in ('reference', 'etl', 'nlp_merge', 'manual', 'legacy', 'unknown'))
 );
 
 create unique index uq_canonical_per_skill
@@ -373,3 +451,154 @@ create table bridge_vacancy_language (
 
     primary key (vacancy_id, language_id, language_level_id)
 );
+
+create table dup_members (
+    vacancy_id          bigint              references fact_vacancy (vacancy_id) primary key,
+    cluster_id          bigint              not null
+);
+
+create index on dup_members (cluster_id);
+
+
+create table match_log_currency (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_currency (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_currency (mapping_id);
+
+create table match_log_employer (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_employer (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_employer (mapping_id);
+
+create table match_log_employment (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_employment (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_employment (mapping_id);
+
+create table match_log_experience (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_experience (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_experience (mapping_id);
+
+create table match_log_field (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_field (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_field (mapping_id);
+
+create table match_log_grade (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_grade (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_grade (mapping_id);
+
+create table match_log_language_level (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_language_level (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_language_level (mapping_id);
+
+create table match_log_language (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_language (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_language (mapping_id);
+
+create table match_log_country (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_country (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_country (mapping_id);
+
+create table match_log_location (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_location (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_location (mapping_id);
+
+create table match_log_platform (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_platform (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_platform (mapping_id);
+
+create table match_log_schedule (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_schedule (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_schedule (mapping_id);
+
+create table match_log_skill (
+    vacancy_id                          bigint                          not null references fact_vacancy (vacancy_id),
+    mapping_id                          bigint                          not null references mapping_dim_skill (mapping_id),
+    raw_value                           text,
+    score                               real,
+
+    unique nulls not distinct (vacancy_id, mapping_id, raw_value)
+);
+
+create index on match_log_skill (mapping_id);
