@@ -15,7 +15,8 @@ DEFAULT_ARGS = {
     'email': [_dags_config.get_string('Airflow.email')],
     'email_on_failure': True,
     'retries': 2,
-    'retry_delay': pendulum.duration(minutes=5),
+    'retry_delay': pendulum.duration(minutes=20),
+    'execution_timeout': pendulum.duration(minutes=45),
 }
 
 
