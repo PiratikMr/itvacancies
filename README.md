@@ -2,13 +2,13 @@
   <img src="frontend/public/favicon.svg" width="64" height="64" alt="itvacancies logo" />
 
   <h1>itvacancies</h1>
-  <p><i>Аналитика рынка IT-вакансий России: зарплаты, навыки, грейды, работодатели и география</i></p>
+  <p><i>Платформа данных по рынку IT-вакансий: сбор с шести сайтов, нормализация, хранилище и аналитический дашборд</i></p>
 
-  <a href="https://itvacancies.tech"><img src="https://img.shields.io/badge/🌐_Live-itvacancies.tech-4F46E5?style=flat-square" alt="Live"></a>
   <img src="https://img.shields.io/badge/License-MIT-3DA639?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Spark-4.0.0-E25A1C?style=flat-square&logo=apachespark&logoColor=white" alt="Spark">
   <img src="https://img.shields.io/badge/Scala-2.13-DC322F?style=flat-square&logo=scala&logoColor=white" alt="Scala">
   <img src="https://img.shields.io/badge/Airflow-2.11-017CEE?style=flat-square&logo=apacheairflow&logoColor=white" alt="Airflow">
+  <img src="https://img.shields.io/badge/PostgreSQL-17-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/ClickHouse-26.4-FFCC01?style=flat-square&logo=clickhouse&logoColor=black" alt="ClickHouse">
   <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React">
@@ -16,57 +16,71 @@
 
 <br>
 
+> **Статус:** с лета по сентябрь 2026 года проект работал публично на itvacancies.tech, сейчас сервер выключен. Результат видно на скриншотах ниже.
+
 <p align="center">
-  <a href="https://itvacancies.tech">
-    <img src="docs/screenshots/overview.png" width="100%" alt="Обзор рынка IT-вакансий">
-  </a>
+  <img src="docs/screenshots/overview.png" width="100%" alt="Обзор рынка IT-вакансий">
 </p>
 
----
+**Что это.** Платформа по расписанию собирает IT-вакансии с шести сайтов (hh.ru, Хабр Карьера, GetMatch, Finder, GeekJob, Adzuna), сводит их к общим справочникам и показывает аналитику по зарплатам, навыкам, работодателям и городам.
 
-## О проекте
+**В цифрах, март–сентябрь 2026:**
+- 520 тыс. вакансий, в среднем 2,6 тыс. новых в день
+- после склейки дублей осталось 357 тыс. уникальных, дублями оказался 31% записей
+- в справочниках 53 тыс. работодателей, 20 тыс. навыков и 11 тыс. локаций в 40 странах
+- 12 DAG в Airflow, загрузка в PostgreSQL без дублей при перезапуске, перезаливка ClickHouse без простоя
 
-**itvacancies** ежедневно собирает вакансии с шести IT-площадок, приводит их к единому виду и показывает срез рынка труда в интерактивном дашборде: медианные зарплаты, востребованные навыки, грейды, работодатели и география.
-
-<table>
-<tr><td width="56"><img src="docs/icons/HeadHunter.png" height="38"></td><td><a href="https://hh.ru"><b>hh.ru</b></a></td></tr>
-<tr><td width="56"><img src="docs/icons/GeekJob.png" height="38"></td><td><a href="https://geekjob.ru"><b>GeekJob</b></a></td></tr>
-<tr><td width="56"><img src="docs/icons/GetMatch.png" height="38"></td><td><a href="https://getmatch.ru"><b>GetMatch</b></a></td></tr>
-<tr><td width="56"><img src="docs/icons/Habr_career.png" height="38"></td><td><a href="https://career.habr.com"><b>Habr Career</b></a></td></tr>
-<tr><td width="56"><img src="docs/icons/Finder.png" height="38"></td><td><a href="https://finder.work"><b>Finder</b></a></td></tr>
-<tr><td width="56"><img src="docs/icons/Adzuna.png" height="38"></td><td><a href="https://www.adzuna.com"><b>Adzuna</b></a></td></tr>
-</table>
-
-Каждая площадка описывает одну и ту же вакансию по-своему: разные названия должностей, грейдов, навыков и валют. Перед агрегацией данные проходят нечёткое сопоставление и нормализацию к общим справочникам, поэтому графики сравнивают сопоставимые величины, а не сырые строки с сайтов.
-
----
-
-## Возможности
-
-- **Обзор рынка** — динамика публикаций, медианные зарплаты, распределение по грейдам, доля удалённой работы
-- **Зарплаты и грейды** — медианы по направлениям, опыту и грейдам — от стажёра до тимлида
-- **Навыки** — самые востребованные технологии, частота упоминаний, медианные зарплаты по навыкам, требования к английскому
-- **Работодатели** — кто активнее всего нанимает, число вакансий, медианные зарплаты и динамика найма по компаниям
-- **География** — карта вакансий по городам и странам (WebGL-рендер, без потери точек на масштабе), доля удалёнки и зарплаты по регионам
-- **Вакансии** — список актуальных вакансий с гибкими фильтрами по периоду, площадке, направлению, грейду и опыту
-
-Данные обновляются ежедневно; фильтры в боковой панели применяются сквозно ко всем разделам.
+**Стек:** Spark 4 и Scala 2.13, HDFS, Airflow 2.11, PostgreSQL 17 и Flyway, ClickHouse, Python (FastAPI, Flask, sentence-transformers, rapidfuzz), React и TypeScript, Prometheus и Grafana, Docker Compose, GitHub Actions.
 
 ---
 
 ## Архитектура
 
 <p align="center">
-  <img src="docs/screenshots/architecture.png" alt="Архитектура A.S.H" width="900">
+  <img src="docs/screenshots/architecture.png" alt="Архитектура itvacancies" width="900">
 </p>
 
-Сбор вакансий разнесён по времени между площадками, чтобы не создавать пиковую нагрузку на источники и инфраструктуру. NLP-сервис (отдельный Flask-процесс с `sentence-transformers` + `rapidfuzz`) сопоставляет термины источников со справочниками вручную выверенных значений — через него же проходит ручная модерация спорных совпадений.
+У каждой площадки свой DAG в Airflow из трёх Spark-задач на Scala:
+
+1. **update** проверяет, какие из открытых вакансий сняты с публикации, и закрывает их в хранилище;
+2. **extract** забирает новые вакансии через API или страницы сайта и сохраняет сырые ответы в HDFS;
+3. **transform-load** разбирает ответы, приводит должности, грейды, навыки, работодателей, локации и валюты к справочникам и загружает результат в PostgreSQL.
+
+Отдельные DAG склеивают дубли и перезаливают витрину вакансий из PostgreSQL в ClickHouse. Дашборд читает только ClickHouse через FastAPI. Служебные DAG обновляют курсы валют, удаляют устаревшие сырые данные, архивируют HDFS в облако и делают бэкап базы.
+
+Расписания всех DAG задаются cron-выражениями в HOCON-конфигах: у площадок и курсов валют в `conf/platforms/*.conf`, у остальных в `conf/dags/common.conf`. Сбор можно запускать раз в час, раз в неделю или раз в месяц, каждую площадку в своё время. С пустым расписанием DAG запускается только вручную. В тех же конфигах задаются сроки хранения сырых данных и логов, число хранимых бэкапов и минимальное число строк для проверки загрузки.
+
+Новые значения справочников, которые ETL не смог отнести к эталонным, разбираются в отдельной консоли: NLP-сервис на Flask предлагает пары по эмбеддингам (sentence-transformers) и rapidfuzz, а слияние подтверждает человек.
 
 ---
 
-<details>
-<summary><b>Ещё скриншоты</b></summary>
-<br>
+## Ключевые инженерные решения
+
+- **Загрузка без дублей.** Spark пишет батч в отдельную staging-таблицу. Одна транзакция переносит его в целевую таблицу через `INSERT … SELECT … ON CONFLICT (бизнес-ключ) DO UPDATE`, после чего суррогатные ключи забираются join'ом staging с целевой таблицей. Перезапуск дня не создаёт дублей.
+- **Нормализация в два уровня.** Сначала точное совпадение, потом нечёткое на Spark: блокировка по n-граммам, скоринг и выбор лучшего кандидата через `row_number`. Что не нашло пары, сопоставляется само с собой и становится новыми каноническими значениями. Каждое сопоставление пишется в журнал `match_log_*`.
+- **Склейка дублей на SQL.** Вакансии группируются по работодателю, названию и хэшу описания. Если та же вакансия появилась через 60 дней после закрытия предыдущей, это новый наём, а не дубль. Границы считаются оконными функциями (gaps and islands).
+- **ClickHouse без простоя.** Витрина перезаливается в staging-таблицу и подменяется через `EXCHANGE TABLES`, поэтому API не видит полупустую таблицу.
+- **Аккуратный сбор.** По умолчанию площадки запускаются в разное время, чтобы не нагружать источники и инфраструктуру одновременно. Adzuna опрашивается группами регионов с паузами. После загрузки DAG проверяет минимальное число строк.
+
+## Что бы я сделал иначе
+
+- На таком объёме (тысячи записей в день) хватило бы Python и PostgreSQL или DuckDB, а Spark стоило добавлять при росте. Здесь Spark был учебным выбором и движком для тяжёлого нечёткого join справочников.
+- Вместо HDFS взял бы S3-совместимое хранилище (MinIO) и Apache Iceberg.
+- Синхронизацию PostgreSQL и ClickHouse перевёл бы с выгрузки через Python на `INSERT … SELECT FROM postgresql(...)` или на инкремент с ReplacingMergeTree.
+- Качество данных проверял бы не только по числу строк, но и на уникальность, NULL и свежесть, например через dbt tests или Soda.
+
+---
+
+## Дашборд
+
+React SPA с общими фильтрами по периоду, площадке, направлению, грейду и опыту. Фильтры действуют на все разделы.
+
+- **Обзор:** динамика публикаций, медианные зарплаты, грейды, доля удалённой работы
+- **Зарплаты и грейды:** медианы по направлениям, опыту и грейдам
+- **Навыки:** самые востребованные технологии, зарплаты по навыкам, требования к английскому
+- **Работодатели:** кто больше всех нанимает и сколько платит, динамика найма
+- **География:** карта вакансий по городам и странам на WebGL (Leaflet и leaflet.glify), зарплаты и удалёнка по регионам
+- **Вакансии:** список актуальных вакансий со ссылками на оригинал
 
 <table>
 <tr>
@@ -81,92 +95,43 @@
 </tr>
 </table>
 
-</details>
-
 ---
 
-## Технологический стек
+## Запуск локально
 
-| Слой | Инструмент |
-|---|---|
-| Оркестрация | Apache Airflow 2.11.2 |
-| ETL | Apache Spark 4.0.0 + Scala 2.13.16 |
-| Сырое хранилище | Hadoop HDFS 3.3.5 |
-| Хранилище данных (DWH) | PostgreSQL 17, миграции — Flyway 10 |
-| Аналитический слой | ClickHouse 26.4.2 |
-| NLP-нормализация | Python 3.11 + Flask + sentence-transformers + rapidfuzz |
-| Backend API | FastAPI (Python 3.11) + clickhouse-connect |
-| Frontend | React 18 + Vite 5 + TypeScript, карта — Leaflet + leaflet.glify (WebGL) |
-| Reverse proxy (прод) | nginx 1.27 |
-| Мониторинг | Grafana 11.6 + Prometheus 3.5 |
-| Контейнеризация | Docker Compose |
-
----
-
-## Быстрый старт (локально)
-
-**Нужно:** Docker + Docker Compose, минимум **6 GB** свободной RAM.
+Нужны Docker с Docker Compose и не меньше 6 ГБ свободной памяти.
 
 ```bash
-# 1. Клонировать
 git clone https://github.com/PiratikMr/itvacancies.git
 cd itvacancies
-
-# 2. Создать .env из примера (тестовые значения уже заполнены)
-cp .env.example .env
-
-# 3. Запустить
+cp .env.example .env   # значения для локального запуска уже заполнены
 docker compose up -d
 ```
 
-> **Данные появятся на следующий день** — Airflow запускает сбор по расписанию. Чтобы запустить сбор вручную, откройте Airflow UI и активируйте нужный DAG.
+База стартует пустой, сбор идёт по расписанию Airflow. Чтобы не ждать, включите DAG нужной площадки в Airflow UI и запустите его вручную.
 
-| Сервис | URL | Описание |
-|---|---|---|
-| Дашборд | http://localhost:5173 | React SPA — основной интерфейс |
-| API | http://localhost:17000 | FastAPI, отдаёт данные для дашборда |
-| NLP | http://localhost:15000 | Консоль нормализации справочников + matching API |
-| Airflow | http://localhost:11080 | Управление DAG-пайплайнами, ручной запуск сбора |
-| Grafana | http://localhost:16000 | Мониторинг инфраструктуры (Airflow, Spark, Postgres) |
-| Spark Master | http://localhost:12080 | UI кластера Spark |
-| HDFS NameNode | http://localhost:13870 | UI Hadoop — сырые данные в Parquet |
-| Prometheus | http://localhost:15090 | Метрики всех сервисов |
-| PostgreSQL | localhost:14432 | DWH |
-| ClickHouse | localhost:18123 (HTTP) · localhost:19000 (TCP) | Аналитический слой, на котором работает API |
-
-Логин/пароль по умолчанию: Airflow — `airflow` / `airflow`, Grafana — `admin` / `admin`.
-
----
-
-## Конфигурация
-
-Вся инфраструктурная конфигурация (хосты контейнеров, порты, логины/пароли баз данных, ключи Airflow и Grafana, домен) собрана в **едином `.env`-файле** в корне проекта:
+Ключи площадок и почта для уведомлений лежат отдельно, в HOCON-файлах `conf/secrets/`. Без ключей не запустятся парсеры hh.ru и Adzuna, остальные площадки работают без авторизации. В каждом `.example` есть комментарии.
 
 ```bash
-cp .env.example .env
+cp conf/secrets/local_hh.conf.example           conf/secrets/local_hh.conf            # OAuth-токен hh.ru, https://dev.hh.ru/
+cp conf/secrets/local_az.conf.example           conf/secrets/local_az.conf            # https://developer.adzuna.com/
+cp conf/secrets/local_exchangerate.conf.example conf/secrets/local_exchangerate.conf  # курсы валют, https://exchangerate.host/
+cp conf/secrets/local_airflow.conf.example      conf/secrets/local_airflow.conf       # почта для писем о падениях DAG
+cp conf/secrets/local_rclone.conf.example       conf/secrets/local_rclone.conf        # архив HDFS в облако
 ```
 
-`.env.example` уже заполнен рабочими значениями для локального запуска — менять ничего не нужно.
-
-### API-ключи площадок (`conf/secrets/`)
-
-Ключи площадок и SMTP для уведомлений хранятся отдельно — в HOCON-файлах в `conf/secrets/`. Без них парсеры hh.ru и Adzuna не запустятся, остальные источники работают без авторизации.
-
-```bash
-# HeadHunter (OAuth-токен — https://dev.hh.ru/)
-cp conf/secrets/local_hh.conf.example conf/secrets/local_hh.conf
-
-# Adzuna (https://developer.adzuna.com/)
-cp conf/secrets/local_az.conf.example conf/secrets/local_az.conf
-
-# Курсы валют (https://exchangerate.host/, бесплатный план)
-cp conf/secrets/local_exchangerate.conf.example conf/secrets/local_exchangerate.conf
-
-# Email для Airflow-уведомлений о падениях DAG
-cp conf/secrets/local_airflow.conf.example conf/secrets/local_airflow.conf
-```
-
-Внутри каждого `.example`-файла есть комментарии с объяснением что и зачем.
+| Сервис | Адрес |
+|---|---|
+| Дашборд | http://localhost:5173 |
+| API (FastAPI) | http://localhost:17000 |
+| NLP-консоль | http://localhost:15000 |
+| Airflow | http://localhost:11080 (`airflow` / `airflow`) |
+| Grafana | http://localhost:16000 (`admin` / `admin`) |
+| Spark Master | http://localhost:12080 |
+| HDFS NameNode | http://localhost:13870 |
+| Prometheus | http://localhost:15090 |
+| PostgreSQL | localhost:14432 |
+| ClickHouse | localhost:18123 (HTTP), localhost:19000 (TCP) |
 
 ---
 
@@ -174,19 +139,19 @@ cp conf/secrets/local_airflow.conf.example conf/secrets/local_airflow.conf
 
 ```
 .
-├── frontend/           # React SPA (Vite + TypeScript)
+├── frontend/           # React SPA (Vite, TypeScript)
 ├── services/
-│   ├── api/            # FastAPI — backend дашборда
-│   ├── etl/            # Spark/Scala ETL (extract, transform, нормализация, load)
-│   ├── nlp/            # Flask — fuzzy-matching и консоль нормализации справочников
-│   └── orchestration/  # Airflow DAG'и
-├── deploy/             # docker-compose-фрагменты и Dockerfile'ы по сервисам
-├── db/                 # схема и миграции PostgreSQL/ClickHouse
-└── conf/secrets/       # API-ключи и SMTP (вне репозитория, см. .example)
+│   ├── api/            # FastAPI, backend дашборда
+│   ├── etl/            # Spark ETL на Scala: extract, transform, нормализация, load
+│   ├── nlp/            # Flask, консоль нормализации справочников
+│   └── orchestration/  # DAG Airflow
+├── deploy/             # docker-compose-фрагменты и Dockerfile по сервисам
+├── db/                 # схема и миграции PostgreSQL и ClickHouse
+└── conf/               # конфиги площадок и DAG, секреты в conf/secrets/ (вне git)
 ```
 
 ---
 
 ## Лицензия
 
-Released under the [MIT License](LICENSE).
+[MIT](LICENSE)
